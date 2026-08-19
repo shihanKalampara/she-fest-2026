@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thiruvasantham 1501 - Noorul Huda Madrasa Kombamkallu</title>
     
-    <!-- PWA Meta Tags & Manifest -->
+    <!-- PWA Setup -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f172a">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -45,31 +45,18 @@
         .scroll-container { height: 100%; overflow-y: auto; padding-bottom: 50px; }
 
         .schedule-card { background: #ffffff; border: 1px solid #e2e8f0; border-left: 4px solid #cbd5e1; padding: 14px; margin-bottom: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
-        
-        /* Result Card UI/UX */
-        .result-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); transition: transform 0.2s ease; }
-        .result-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.04); }
-        
+        .result-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
         .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; }
         .program-title { font-size: 15px; font-weight: 700; color: var(--primary); }
-        .category-pill { font-size: 10px; font-weight: 700; color: #7c3aed; background: #f3e8ff; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
-
+        .category-pill { font-size: 10px; font-weight: 700; color: #7c3aed; background: #f3e8ff; padding: 3px 10px; border-radius: 20px; }
         .winners-grid { display: flex; flex-direction: column; gap: 8px; }
-        .winner-row { display: flex; align-items: center; background: #f8fafc; padding: 10px 14px; border-radius: 8px; font-size: 13px; border: 1px solid #f1f5f9; }
-        .medal { font-size: 20px; margin-right: 12px; line-height: 1; }
-        .winner-name { font-weight: 600; color: var(--text-main); flex: 1; }
-
-        /* Badges */
-        .badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; color: white; text-transform: uppercase; display: inline-flex; align-items: center; gap: 4px; }
-        .badge::before { content: ''; width: 6px; height: 6px; background: white; border-radius: 50%; animation: blink 1s infinite alternate; }
-        @keyframes blink { 0% { opacity: 0.3; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1.2); } }
+        .winner-row { background: #f8fafc; padding: 10px; border-radius: 8px; font-size: 13px; border: 1px solid #f1f5f9; }
         
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; color: white; text-transform: uppercase; }
         .badge.Live { background: var(--accent-live); }
         .badge.Upcoming { background: var(--accent-upcoming); }
         .badge.Completed { background: var(--accent-completed); }
-        .badge.Cancelled { background: var(--accent-cancelled); }
-        
-        .result-badge { font-size: 11px; font-weight: 700; color: #059669; background: #ecfdf5; padding: 2px 8px; border-radius: 6px; margin-top: 4px; display: inline-block; }
+        .result-badge { font-size: 11px; font-weight: 700; color: #059669; background: #ecfdf5; padding: 2px 8px; border-radius: 6px; }
     </style>
 </head>
 <body>
@@ -96,7 +83,7 @@
         <button class="tab-btn active" onclick="switchTab('live', this)">Live</button>
         <button class="tab-btn" onclick="switchTab('upcoming', this)">Upcoming</button>
         <button class="tab-btn" onclick="switchTab('completed', this)">Finished</button>
-        <button class="tab-btn" onclick="switchTab('offstage', this)">Offstage Results</button>
+        <button class="tab-btn" onclick="switchTab('offstage', this)">Results</button>
     </div>
 
     <div id="live-pane" class="tab-pane active-pane"><div id="live-list" class="scroll-container"></div></div>
@@ -119,91 +106,43 @@
         let status = item.Status ? item.Status.trim() : 'Upcoming';
         let card = document.createElement("div");
         card.className = "schedule-card";
-        card.innerHTML = `
-            <div>
-                <span style="font-weight: 600; color: #d97706; font-size: 12px;">${item.Time}</span><br>
-                <b>${item['Program Type']}</b><br>
-                <small><b>${item['Student Name']}</b> (${item.Class})</small>
-                ${item.Result ? `<br><span class="result-badge">🏆 ${item.Result}</span>` : ''}
-            </div>
-            <div><span class="badge ${status}">${status}</span></div>
-        `;
+        card.innerHTML = `<div><span style="font-size:12px; font-weight:600;">${item.Time}</span><br><b>${item['Program Type']}</b><br><small>${item['Student Name']}</small></div>
+                          <div><span class="badge ${status}">${status}</span></div>`;
         return card;
     }
 
     function createResultCard(item) {
         let card = document.createElement("div");
         card.className = "result-card";
-        
-        let winnersHtml = '';
-        if (item['1st Place']) {
-            winnersHtml += `<div class="winner-row"><span class="medal">🥇</span><span class="winner-name">${item['1st Place']}</span></div>`;
-        }
-        if (item['2nd Place']) {
-            winnersHtml += `<div class="winner-row"><span class="medal">🥈</span><span class="winner-name">${item['2nd Place']}</span></div>`;
-        }
-        if (item['3rd Place']) {
-            winnersHtml += `<div class="winner-row"><span class="medal">🥉</span><span class="winner-name">${item['3rd Place']}</span></div>`;
-        }
-
-        card.innerHTML = `
-            <div class="result-header">
-                <span class="program-title">${item['Program Name'] || 'Program'}</span>
-                <span class="category-pill">${item.Category || 'General'}</span>
-            </div>
-            <div class="winners-grid">
-                ${winnersHtml}
-            </div>
-        `;
+        card.innerHTML = `<div class="result-header"><b>${item['Program Name']}</b></div>
+                          <div class="winners-grid">
+                            ${item['1st Place'] ? `<div class="winner-row">🥇 ${item['1st Place']}</div>` : ''}
+                            ${item['2nd Place'] ? `<div class="winner-row">🥈 ${item['2nd Place']}</div>` : ''}
+                          </div>`;
         return card;
     }
 
-    // Auto scroll logic
-    setInterval(() => {
-        const activeList = document.querySelector('.active-pane .scroll-container');
-        if (activeList && activeList.scrollHeight > activeList.clientHeight) {
-            activeList.scrollTop = (activeList.scrollTop + 1 >= activeList.scrollHeight - activeList.clientHeight) ? 0 : activeList.scrollTop + 1;
-        }
-    }, 50);
-
     function fetchSchedule() {
         fetch(sheetURL).then(r => r.json()).then(response => {
-            let data = response.schedule || response; 
+            let data = response.schedule || []; 
             let resultsData = response.results || [];
 
-            let lists = { 
-                live: document.getElementById("live-list"), 
-                upcoming: document.getElementById("upcoming-list"), 
-                completed: document.getElementById("completed-list"),
-                offstage: document.getElementById("offstage-list")
-            };
-            
-            Object.values(lists).forEach(l => l.innerHTML = "");
-            let finished = 0;
+            document.getElementById("live-list").innerHTML = "";
+            document.getElementById("upcoming-list").innerHTML = "";
+            document.getElementById("completed-list").innerHTML = "";
+            document.getElementById("offstage-list").innerHTML = "";
 
-            // Populate Schedule
+            let finished = 0;
             data.forEach(item => {
                 let status = item.Status ? item.Status.trim().toLowerCase() : '';
-                if (status === 'completed' || status === 'cancelled') {
-                    finished++;
-                    lists.completed.appendChild(createCard(item));
-                } else if (status === 'live') {
-                    lists.live.appendChild(createCard(item));
-                } else {
-                    lists.upcoming.appendChild(createCard(item));
-                }
+                if (status === 'completed') { finished++; document.getElementById("completed-list").appendChild(createCard(item)); }
+                else if (status === 'live') { document.getElementById("live-list").appendChild(createCard(item)); }
+                else { document.getElementById("upcoming-list").appendChild(createCard(item)); }
             });
 
-            // Populate Offstage Results
-            if (resultsData.length > 0) {
-                resultsData.forEach(item => {
-                    if (item['Program Name']) {
-                        lists.offstage.appendChild(createResultCard(path => path, item)); // wait, fixed helper
-                    }
-                });
-            } else {
-                lists.offstage.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 40px; font-size: 13px;">No offstage results published yet</div>';
-            }
+            resultsData.forEach(item => {
+                document.getElementById("offstage-list").appendChild(createResultCard(item));
+            });
 
             let total = data.length;
             let pct = total > 0 ? Math.round((finished / total) * 100) : 0;
@@ -214,7 +153,7 @@
     }
 
     fetchSchedule();
-    setInterval(fetchSchedule, 10000);
+    setInterval(fetchSchedule, 15000);
 </script>
 </body>
 </html>
