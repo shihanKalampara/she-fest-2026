@@ -19,6 +19,7 @@
             --accent-live: #ef4444;
             --accent-upcoming: #f59e0b;
             --accent-completed: #10b981;
+            --accent-cancelled: #64748b;
             --bg-color: #f8fafc;
             --card-bg: #ffffff;
             --text-main: #334155;
@@ -50,10 +51,10 @@
         .result-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
         .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; }
         
-        /* Category Pill - Size Increased */
+        /* Category Pill - Increased Size */
         .category-pill { font-size: 12px; font-weight: 700; color: #7c3aed; background: #f3e8ff; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        /* Badges & Medals with Faster Animation (0.5s) */
+        /* Badges with Faster Animation (0.5s) */
         .badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; color: white; text-transform: uppercase; display: inline-flex; align-items: center; gap: 4px; }
         .badge::before { content: ''; width: 6px; height: 6px; background: white; border-radius: 50%; animation: blink 0.5s infinite alternate; }
         @keyframes blink { 0% { opacity: 0.2; } 100% { opacity: 1; } }
@@ -61,6 +62,7 @@
         .badge.Live { background: var(--accent-live); }
         .badge.Upcoming { background: var(--accent-upcoming); }
         .badge.Completed { background: var(--accent-completed); }
+        .badge.Cancelled { background: var(--accent-cancelled); }
         
         .medal { font-size: 20px; margin-right: 10px; }
         .winner-row { background: #f8fafc; padding: 10px; border-radius: 8px; font-size: 13px; border: 1px solid #f1f5f9; margin-bottom: 5px; display: flex; align-items: center; }
@@ -158,9 +160,19 @@
             let finished = 0;
             data.forEach(item => {
                 let status = item.Status ? item.Status.trim().toLowerCase() : '';
-                if (status === 'completed') { finished++; document.getElementById("completed-list").appendChild(createCard(item)); }
-                else if (status === 'live') { document.getElementById("live-list").appendChild(createCard(item)); }
-                else { document.getElementById("upcoming-list").appendChild(createCard(item)); }
+                if (status === 'completed') { 
+                    finished++; 
+                    document.getElementById("completed-list").appendChild(createCard(item)); 
+                }
+                else if (status === 'cancelled') { 
+                    document.getElementById("completed-list").appendChild(createCard(item)); 
+                }
+                else if (status === 'live') { 
+                    document.getElementById("live-list").appendChild(createCard(item)); 
+                }
+                else { 
+                    document.getElementById("upcoming-list").appendChild(createCard(item)); 
+                }
             });
             resultsData.forEach(item => { 
                 if (item['Program Name']) {
