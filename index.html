@@ -40,7 +40,7 @@
         .result-card { background: #ffffff; border: 1px solid #e2e8f0; border-left: 4px solid #8b5cf6; padding: 14px; margin-bottom: 10px; border-radius: 10px; }
         .category-tag { display: inline-block; font-size: 10px; font-weight: 700; color: #7c3aed; background: #f3e8ff; padding: 2px 8px; border-radius: 4px; margin-bottom: 6px; text-transform: uppercase; }
         .winners-box { margin-top: 8px; font-size: 12px; border-top: 1px dashed #e2e8f0; padding-top: 6px; }
-        .winner-row { margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
+        .winner-row { margin-bottom: 4px; }
 
         /* Badges */
         .badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; color: white; text-transform: uppercase; display: inline-flex; align-items: center; gap: 4px; }
@@ -115,18 +115,14 @@
         let card = document.createElement("div");
         card.className = "result-card";
         
-        let firstWinner = item['1st Place'] ? `🥇 1st: <b>${item['1st Place']}</b> ${item['1st Class'] ? '(' + item['1st Class'] + ')' : ''}` : '';
-        let secondWinner = item['2nd Place'] ? `🥈 2nd: <b>${item['2nd Place']}</b> ${item['2nd Class'] ? '(' + item['2nd Class'] + ')' : ''}` : '';
-        let thirdWinner = item['3rd Place'] ? `🥉 3rd: <b>${item['3rd Place']}</b> ${item['3rd Class'] ? '(' + item['3rd Class'] + ')' : ''}` : '';
-
         card.innerHTML = `
             <div>
                 <span class="category-tag">${item.Category || 'General'}</span><br>
                 <b style="font-size: 14px; color: var(--primary);">${item['Program Name']}</b>
                 <div class="winners-box">
-                    ${firstWinner ? `<div class="winner-row"><span>${firstWinner}</span></div>` : ''}
-                    ${secondWinner ? `<div class="winner-row"><span>${secondWinner}</span></div>` : ''}
-                    ${thirdWinner ? `<div class="winner-row"><span>${thirdWinner}</span></div>` : ''}
+                    ${item['1st Place'] ? `<div class="winner-row">🥇 1st: <b>${item['1st Place']}</b></div>` : ''}
+                    ${item['2nd Place'] ? `<div class="winner-row">🥈 2nd: <b>${item['2nd Place']}</b></div>` : ''}
+                    ${item['3rd Place'] ? `<div class="winner-row">🥉 3rd: <b>${item['3rd Place']}</b></div>` : ''}
                 </div>
             </div>
         `;
