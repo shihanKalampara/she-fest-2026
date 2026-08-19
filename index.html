@@ -76,7 +76,7 @@
     <div class="progress-box">
         <div class="progress-header">
             <span>Progress</span>
-            <span id="progress-text">0/0</span>
+            <span id="progress-text">0/0 (0%)</span>
         </div>
         <div style="background: #e2e8f0; height: 8px; border-radius: 4px; margin-top: 8px;">
             <div class="progress-bar-fill" id="progressBar"></div>
@@ -199,7 +199,7 @@
             let total = data.length;
             let pct = total > 0 ? Math.round((finished / total) * 100) : 0;
             document.getElementById("progressBar").style.width = pct + "%";
-            document.getElementById("progress-text").innerText = `${finished}/${total}`;
+            document.getElementById("progress-text").innerText = `${finished}/${total} (${pct}%)`;
         });
     }
 
