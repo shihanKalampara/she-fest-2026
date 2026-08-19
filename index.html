@@ -48,7 +48,6 @@
         .result-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
         .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; }
         .program-title { font-size: 15px; font-weight: 700; color: var(--primary); }
-        .category-pill { font-size: 10px; font-weight: 700; color: #7c3aed; background: #f3e8ff; padding: 3px 10px; border-radius: 20px; }
         .winners-grid { display: flex; flex-direction: column; gap: 8px; }
         .winner-row { background: #f8fafc; padding: 10px; border-radius: 8px; font-size: 13px; border: 1px solid #f1f5f9; }
         
@@ -56,7 +55,6 @@
         .badge.Live { background: var(--accent-live); }
         .badge.Upcoming { background: var(--accent-upcoming); }
         .badge.Completed { background: var(--accent-completed); }
-        .result-badge { font-size: 11px; font-weight: 700; color: #059669; background: #ecfdf5; padding: 2px 8px; border-radius: 6px; }
     </style>
 </head>
 <body>
@@ -118,20 +116,26 @@
                           <div class="winners-grid">
                             ${item['1st Place'] ? `<div class="winner-row">🥇 ${item['1st Place']}</div>` : ''}
                             ${item['2nd Place'] ? `<div class="winner-row">🥈 ${item['2nd Place']}</div>` : ''}
+                            ${item['3rd Place'] ? `<div class="winner-row">🥉 ${item['3rd Place']}</div>` : ''}
                           </div>`;
         return card;
     }
+
+    setInterval(() => {
+        const activeList = document.querySelector('.active-pane .scroll-container');
+        if (activeList && activeList.scrollHeight > activeList.clientHeight) {
+            activeList.scrollTop = (activeList.scrollTop + 1 >= activeList.scrollHeight - activeList.clientHeight) ? 0 : activeList.scrollTop + 1;
+        }
+    }, 50);
 
     function fetchSchedule() {
         fetch(sheetURL).then(r => r.json()).then(response => {
             let data = response.schedule || []; 
             let resultsData = response.results || [];
-
             document.getElementById("live-list").innerHTML = "";
             document.getElementById("upcoming-list").innerHTML = "";
             document.getElementById("completed-list").innerHTML = "";
             document.getElementById("offstage-list").innerHTML = "";
-
             let finished = 0;
             data.forEach(item => {
                 let status = item.Status ? item.Status.trim().toLowerCase() : '';
@@ -139,11 +143,7 @@
                 else if (status === 'live') { document.getElementById("live-list").appendChild(createCard(item)); }
                 else { document.getElementById("upcoming-list").appendChild(createCard(item)); }
             });
-
-            resultsData.forEach(item => {
-                document.getElementById("offstage-list").appendChild(createResultCard(item));
-            });
-
+            resultsData.forEach(item => { document.getElementById("offstage-list").appendChild(createResultCard(item)); });
             let total = data.length;
             let pct = total > 0 ? Math.round((finished / total) * 100) : 0;
             document.getElementById("progressBar").style.width = pct + "%";
@@ -151,9 +151,8 @@
             document.getElementById("progress-count-text").innerText = `${finished}/${total}`;
         });
     }
-
     fetchSchedule();
-    setInterval(fetchSchedule, 15000);
+    setInterval(fetchSchedule, 10000);
 </script>
 </body>
 </html>
