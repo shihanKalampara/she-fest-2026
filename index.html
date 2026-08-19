@@ -24,6 +24,7 @@
         .sub-heading { text-align: center; color: var(--text-muted); font-weight: 500; margin-bottom: 20px; text-transform: uppercase; font-size: 11px; letter-spacing: 1.5px; }
 
         .progress-box { background: #f1f5f9; padding: 12px 16px; border-radius: 12px; margin-bottom: 20px; }
+        .progress-header { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 600; color: var(--text-main); }
         .progress-bar-fill { background: linear-gradient(90deg, #10b981, #059669); height: 8px; width: 0%; transition: width 0.6s ease; border-radius: 4px; }
 
         .tab-buttons { display: flex; gap: 4px; margin-bottom: 15px; background: #f1f5f9; padding: 4px; border-radius: 10px; overflow-x: auto; }
@@ -36,7 +37,7 @@
 
         .schedule-card { background: #ffffff; border: 1px solid #e2e8f0; border-left: 4px solid #cbd5e1; padding: 14px; margin-bottom: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
         
-        /* Updated Result Card UI/UX */
+        /* Result Card UI/UX */
         .result-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); transition: transform 0.2s ease; }
         .result-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.04); }
         
@@ -66,14 +67,17 @@
 
 <div class="container">
     <div style="text-align: center; margin-bottom: 15px;">
-        <img src="https://lh3.googleusercontent.com/d/1e-8f5w_srCHu4YcRYqZx5pdR7DNyEB9a" alt="Logo" style="max-width: 300px; height: auto;">
+        <img src="https://lh3.googleusercontent.com/d/1e-8f5w_srCHu4YcRYqZx5pdR7DNyEB9a" alt="Logo" style="max-width: 200px; height: auto;">
     </div>
 
     <h1>She Fest 2026</h1>
     <div class="sub-heading">Noorul Huda Madrasa, Kombamkallu</div>
     
     <div class="progress-box">
-        <div id="progress-text" style="font-size: 12px; font-weight: 600;">0% Completed</div>
+        <div class="progress-header">
+            <span>Progress</span>
+            <span id="progress-text">0/0</span>
+        </div>
         <div style="background: #e2e8f0; height: 8px; border-radius: 4px; margin-top: 8px;">
             <div class="progress-bar-fill" id="progressBar"></div>
         </div>
@@ -192,9 +196,10 @@
                 lists.offstage.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 40px; font-size: 13px;">No offstage results published yet</div>';
             }
 
-            let pct = data.length > 0 ? Math.round((finished / data.length) * 100) : 0;
+            let total = data.length;
+            let pct = total > 0 ? Math.round((finished / total) * 100) : 0;
             document.getElementById("progressBar").style.width = pct + "%";
-            document.getElementById("progress-text").innerText = `${pct}% Completed`;
+            document.getElementById("progress-text").innerText = `${finished}/${total}`;
         });
     }
 
