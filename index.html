@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thiruvasantham 1501 - Noorul Huda Madrasa Kombamkallu</title>
+    
+    <!-- PWA Meta Tags & Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="She Fest">
+    <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1e-8f5w_srCHu4YcRYqZx5pdR7DNyEB9a">
+
     <style>
         :root {
             --primary: #0f172a;
@@ -67,7 +76,7 @@
 
 <div class="container">
     <div style="text-align: center; margin-bottom: 15px;">
-        <img src="https://lh3.googleusercontent.com/d/1e-8f5w_srCHu4YcRYqZx5pdR7DNyEB9a" alt="Logo" style="max-width: 300px; height: auto;">
+        <img src="https://lh3.googleusercontent.com/d/1e-8f5w_srCHu4YcRYqZx5pdR7DNyEB9a" alt="Logo" style="max-width: 200px; height: auto;">
     </div>
 
     <h1>She Fest 2026</h1>
@@ -189,7 +198,7 @@
             if (resultsData.length > 0) {
                 resultsData.forEach(item => {
                     if (item['Program Name']) {
-                        lists.offstage.appendChild(createResultCard(item));
+                        lists.offstage.appendChild(createResultCard(path => path, item)); // wait, fixed helper
                     }
                 });
             } else {
