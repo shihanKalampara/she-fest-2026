@@ -36,7 +36,7 @@
 
         .schedule-card { background: #ffffff; border: 1px solid #e2e8f0; border-left: 4px solid #cbd5e1; padding: 14px; margin-bottom: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
         
-        /* Premium Minimal Result Card UI/UX */
+        /* Updated Result Card UI/UX */
         .result-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); transition: transform 0.2s ease; }
         .result-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.04); }
         
@@ -45,9 +45,8 @@
         .category-pill { font-size: 10px; font-weight: 700; color: #7c3aed; background: #f3e8ff; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
 
         .winners-grid { display: flex; flex-direction: column; gap: 8px; }
-        .winner-row { display: flex; align-items: center; background: #f8fafc; padding: 8px 12px; border-radius: 8px; font-size: 12px; border: 1px solid #f1f5f9; }
-        .medal { font-size: 14px; margin-right: 10px; }
-        .winner-position { font-weight: 600; color: var(--text-muted); width: 45px; }
+        .winner-row { display: flex; align-items: center; background: #f8fafc; padding: 10px 14px; border-radius: 8px; font-size: 13px; border: 1px solid #f1f5f9; }
+        .medal { font-size: 20px; margin-right: 12px; line-height: 1; }
         .winner-name { font-weight: 600; color: var(--text-main); flex: 1; }
 
         /* Badges */
@@ -125,13 +124,13 @@
         
         let winnersHtml = '';
         if (item['1st Place']) {
-            winnersHtml += `<div class="winner-row"><span class="medal">🥇</span><span class="winner-position">1st Place</span><span class="winner-name">${item['1st Place']}</span></div>`;
+            winnersHtml += `<div class="winner-row"><span class="medal">🥇</span><span class="winner-name">${item['1st Place']}</span></div>`;
         }
         if (item['2nd Place']) {
-            winnersHtml += `<div class="winner-row"><span class="medal">🥈</span><span class="winner-position">2nd Place</span><span class="winner-name">${item['2nd Place']}</span></div>`;
+            winnersHtml += `<div class="winner-row"><span class="medal">🥈</span><span class="winner-name">${item['2nd Place']}</span></div>`;
         }
         if (item['3rd Place']) {
-            winnersHtml += `<div class="winner-row"><span class="medal">🥉</span><span class="winner-position">3rd Place</span><span class="winner-name">${item['3rd Place']}</span></div>`;
+            winnersHtml += `<div class="winner-row"><span class="medal">🥉</span><span class="winner-name">${item['3rd Place']}</span></div>`;
         }
 
         card.innerHTML = `
