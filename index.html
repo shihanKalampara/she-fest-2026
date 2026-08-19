@@ -49,6 +49,7 @@
         .schedule-card { background: #ffffff; border: 1px solid #e2e8f0; border-left: 4px solid #cbd5e1; padding: 14px; margin-bottom: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
         .result-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
         .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; }
+        .category-pill { font-size: 10px; font-weight: 700; color: #7c3aed; background: #f3e8ff; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
         
         /* Badges & Medals */
         .badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; color: white; text-transform: uppercase; display: inline-flex; align-items: center; gap: 4px; }
@@ -115,10 +116,15 @@
     function createResultCard(item) {
         let card = document.createElement("div");
         card.className = "result-card";
-        card.innerHTML = `<div class="result-header"><b>${item['Program Name']}</b></div>
-                          ${item['1st Place'] ? `<div class="winner-row"><span class="medal">🥇</span> ${item['1st Place']}</div>` : ''}
-                          ${item['2nd Place'] ? `<div class="winner-row"><span class="medal">🥈</span> ${item['2nd Place']}</div>` : ''}
-                          ${item['3rd Place'] ? `<div class="winner-row"><span class="medal">🥉</span> ${item['3rd Place']}</div>` : ''}`;
+        card.innerHTML = `
+            <div class="result-header">
+                <b>${item['Program Name'] || 'Program'}</b>
+                <span class="category-pill">${item.Category || 'General'}</span>
+            </div>
+            ${item['1st Place'] ? `<div class="winner-row"><span class="medal">🥇</span> ${item['1st Place']}</div>` : ''}
+            ${item['2nd Place'] ? `<div class="winner-row"><span class="medal">🥈</span> ${item['2nd Place']}</div>` : ''}
+            ${item['3rd Place'] ? `<div class="winner-row"><span class="medal">🥉</span> ${item['3rd Place']}</div>` : ''}
+        `;
         return card;
     }
 
@@ -144,7 +150,11 @@
                 else if (status === 'live') { document.getElementById("live-list").appendChild(createCard(item)); }
                 else { document.getElementById("upcoming-list").appendChild(createCard(item)); }
             });
-            resultsData.forEach(item => { document.getElementById("offstage-list").appendChild(createResultCard(item)); });
+            resultsData.forEach(item => { 
+                if (item['Program Name']) {
+                    document.getElementById("offstage-list").appendChild(createResultCard(item)); 
+                }
+            });
             let total = data.length;
             let pct = total > 0 ? Math.round((finished / total) * 100) : 0;
             document.getElementById("progressBar").style.width = pct + "%";
