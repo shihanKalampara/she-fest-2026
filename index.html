@@ -36,11 +36,19 @@
 
         .schedule-card { background: #ffffff; border: 1px solid #e2e8f0; border-left: 4px solid #cbd5e1; padding: 14px; margin-bottom: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
         
-        /* Result Specific Card Style */
-        .result-card { background: #ffffff; border: 1px solid #e2e8f0; border-left: 4px solid #8b5cf6; padding: 14px; margin-bottom: 10px; border-radius: 10px; }
-        .category-tag { display: inline-block; font-size: 10px; font-weight: 700; color: #7c3aed; background: #f3e8ff; padding: 2px 8px; border-radius: 4px; margin-bottom: 6px; text-transform: uppercase; }
-        .winners-box { margin-top: 8px; font-size: 12px; border-top: 1px dashed #e2e8f0; padding-top: 6px; }
-        .winner-row { margin-bottom: 4px; }
+        /* Premium Minimal Result Card UI/UX */
+        .result-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); transition: transform 0.2s ease; }
+        .result-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.04); }
+        
+        .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; }
+        .program-title { font-size: 15px; font-weight: 700; color: var(--primary); }
+        .category-pill { font-size: 10px; font-weight: 700; color: #7c3aed; background: #f3e8ff; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .winners-grid { display: flex; flex-direction: column; gap: 8px; }
+        .winner-row { display: flex; align-items: center; background: #f8fafc; padding: 8px 12px; border-radius: 8px; font-size: 12px; border: 1px solid #f1f5f9; }
+        .medal { font-size: 14px; margin-right: 10px; }
+        .winner-position { font-weight: 600; color: var(--text-muted); width: 45px; }
+        .winner-name { font-weight: 600; color: var(--text-main); flex: 1; }
 
         /* Badges */
         .badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; color: white; text-transform: uppercase; display: inline-flex; align-items: center; gap: 4px; }
@@ -115,15 +123,24 @@
         let card = document.createElement("div");
         card.className = "result-card";
         
+        let winnersHtml = '';
+        if (item['1st Place']) {
+            winnersHtml += `<div class="winner-row"><span class="medal">🥇</span><span class="winner-position">1st Place</span><span class="winner-name">${item['1st Place']}</span></div>`;
+        }
+        if (item['2nd Place']) {
+            winnersHtml += `<div class="winner-row"><span class="medal">🥈</span><span class="winner-position">2nd Place</span><span class="winner-name">${item['2nd Place']}</span></div>`;
+        }
+        if (item['3rd Place']) {
+            winnersHtml += `<div class="winner-row"><span class="medal">🥉</span><span class="winner-position">3rd Place</span><span class="winner-name">${item['3rd Place']}</span></div>`;
+        }
+
         card.innerHTML = `
-            <div>
-                <span class="category-tag">${item.Category || 'General'}</span><br>
-                <b style="font-size: 14px; color: var(--primary);">${item['Program Name']}</b>
-                <div class="winners-box">
-                    ${item['1st Place'] ? `<div class="winner-row">🥇 1st: <b>${item['1st Place']}</b></div>` : ''}
-                    ${item['2nd Place'] ? `<div class="winner-row">🥈 2nd: <b>${item['2nd Place']}</b></div>` : ''}
-                    ${item['3rd Place'] ? `<div class="winner-row">🥉 3rd: <b>${item['3rd Place']}</b></div>` : ''}
-                </div>
+            <div class="result-header">
+                <span class="program-title">${item['Program Name'] || 'Program'}</span>
+                <span class="category-pill">${item.Category || 'General'}</span>
+            </div>
+            <div class="winners-grid">
+                ${winnersHtml}
             </div>
         `;
         return card;
@@ -173,7 +190,7 @@
                     }
                 });
             } else {
-                lists.offstage.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 30px;">No offstage results published yet</div>';
+                lists.offstage.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 40px; font-size: 13px;">No offstage results published yet</div>';
             }
 
             let pct = data.length > 0 ? Math.round((finished / data.length) * 100) : 0;
