@@ -73,7 +73,7 @@
         /* Category Pill */
         .category-pill { font-size: 12px; font-weight: 700; color: #7c3aed; background: #f3e8ff; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        /* Badges with Faster Animation (0.5s) */
+        /* Badges */
         .badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; color: white; text-transform: uppercase; display: inline-flex; align-items: center; gap: 4px; }
         .badge::before { content: ''; width: 6px; height: 6px; background: white; border-radius: 50%; animation: blink 0.5s infinite alternate; }
         @keyframes blink { 0% { opacity: 0.2; } 100% { opacity: 1; } }
@@ -156,7 +156,7 @@
         });
     }
 
-    const sheetURL = "https://script.google.com/macros/s/AKfycbxQmcAC5nKsvwtM0gEoB8FF-hBtEoA3sfI2LZwraolwtGUH2MyKQyqxCDrYNCSYrQH4AQ/exec"; // <-- നിങ്ങളുടെ പുതിയ വെബ് ആപ്പ് ലിങ്ക് ഇവിടെ നൽകുക
+    const sheetURL = "YOUR_NEW_WEB_APP_URL_HERE"; // <-- ഇവിടെ നിങ്ങളുടെ പുതിയ ഗൂഗിൾ ആപ്പ് സ്ക്രിപ്റ്റ് ലിങ്ക് നൽകുക
     let globalScheduleData = [];
     let globalResultsData = [];
     let isRegisterMode = false;
@@ -269,7 +269,7 @@
         return card;
     }
 
-    // Auto scroll logic (Paused if user is searching)
+    // Auto scroll logic
     setInterval(() => {
         const searchVal = document.getElementById("searchInput")?.value;
         if (searchVal) return;
@@ -345,6 +345,9 @@
     }
 
     function fetchData() {
+        let savedMobile = localStorage.getItem("she_fest_user");
+        if (!savedMobile) return;
+
         fetch(sheetURL)
             .then(r => r.json())
             .then(response => {
