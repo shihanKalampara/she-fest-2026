@@ -5,13 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thiruvasantham 1501 - Noorul Huda Madrasa Kombamkallu</title>
     
-    <!-- PWA Setup -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f172a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="She Fest">
-    <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1e-8f5w_srCHu4YcRYqZx5pdR7DNyEB9a">
 
     <style>
         :root {
@@ -27,22 +25,32 @@
         }
 
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg-color); color: var(--text-main); margin: 0; padding: 15px; }
-        .container { max-width: 750px; margin: auto; background: var(--card-bg); padding: 20px; border-radius: 16px; box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        .container { max-width: 750px; margin: auto; background: var(--card-bg); padding: 20px; border-radius: 16px; box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; position: relative; }
         
-        h1 { text-align: center; color: var(--primary); margin: 10px 0 5px 0; font-size: 24px; font-weight: 700; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .settings-btn { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 6px 12px; font-size: 12px; font-weight: 600; border-radius: 8px; cursor: pointer; color: var(--primary); display: flex; align-items: center; gap: 5px; }
+        .settings-btn:hover { background: #e2e8f0; }
+
+        h1 { text-align: center; color: var(--primary); margin: 5px 0; font-size: 24px; font-weight: 700; }
         .sub-heading { text-align: center; color: var(--text-muted); font-weight: 500; margin-bottom: 20px; text-transform: uppercase; font-size: 11px; letter-spacing: 1.5px; }
 
-        /* Search Bar */
-        .search-box { margin-bottom: 15px; }
-        .search-input { width: 100%; padding: 10px 14px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 10px; outline: none; box-sizing: border-box; background: #f8fafc; transition: all 0.3s; }
-        .search-input:focus { border-color: var(--primary); background: #ffffff; box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.05); }
+        /* Auth Container (Login / Register) */
+        #auth-screen { text-align: center; padding: 30px 10px; }
+        .auth-box { max-width: 320px; margin: auto; background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: left; }
+        .auth-box input { width: 100%; padding: 10px; margin: 8px 0 15px 0; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 13px; outline: none; }
+        .auth-btn { width: 100%; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .toggle-text { font-size: 12px; text-align: center; margin-top: 15px; color: #2563eb; cursor: pointer; }
 
-        /* Progress Bar */
+        /* Main App View */
+        #main-app { display: none; }
+
+        .search-box { margin-bottom: 15px; }
+        .search-input { width: 100%; padding: 10px 14px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 10px; outline: none; box-sizing: border-box; background: #f8fafc; }
+        
         .progress-box { background: #f1f5f9; padding: 12px 16px; border-radius: 12px; margin-bottom: 20px; }
         .progress-header { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 600; }
         .progress-bar-fill { background: linear-gradient(90deg, #10b981, #059669); height: 8px; width: 0%; transition: width 0.6s ease; border-radius: 4px; }
 
-        /* Tabs */
         .tab-buttons { display: flex; gap: 4px; margin-bottom: 15px; background: #f1f5f9; padding: 4px; border-radius: 10px; overflow-x: auto; }
         .tab-btn { flex: 1; padding: 8px 10px; font-size: 11px; font-weight: 600; border: none; border-radius: 8px; background: transparent; cursor: pointer; color: var(--text-muted); white-space: nowrap; }
         .tab-btn.active { background: #ffffff; color: var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
@@ -51,15 +59,11 @@
         .tab-pane.active-pane { display: block; }
         .scroll-container { height: 100%; overflow-y: auto; padding-bottom: 50px; }
 
-        /* Cards */
         .schedule-card { background: #ffffff; border: 1px solid #e2e8f0; border-left: 4px solid #cbd5e1; padding: 14px; margin-bottom: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
         .result-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
         .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; }
         
-        /* Category Pill - Increased Size */
-        .category-pill { font-size: 12px; font-weight: 700; color: #7c3aed; background: #f3e8ff; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
-        
-        /* Badges with Faster Animation (0.5s) */
+        .category-pill { font-size: 12px; font-weight: 700; color: #7c3aed; background: #f3e8ff; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; }
         .badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; color: white; text-transform: uppercase; display: inline-flex; align-items: center; gap: 4px; }
         .badge::before { content: ''; width: 6px; height: 6px; background: white; border-radius: 50%; animation: blink 0.5s infinite alternate; }
         @keyframes blink { 0% { opacity: 0.2; } 100% { opacity: 1; } }
@@ -76,51 +80,140 @@
 <body>
 
 <div class="container">
-    <div style="text-align: center; margin-bottom: 15px;"><img src="https://lh3.googleusercontent.com/d/1e-8f5w_srCHu4YcRYqZx5pdR7DNyEB9a" alt="Logo" style="max-width: 200px;"></div>
+    <div class="header-top">
+        <div style="width: 70px;"></div>
+        <img src="https://lh3.googleusercontent.com/d/1e-8f5w_srCHu4YcRYqZx5pdR7DNyEB9a" alt="Logo" style="max-width: 150px; display: block; margin: auto;">
+        <button class="settings-btn" id="logoutBtn" style="display:none;" onclick="logout()">Logout</button>
+    </div>
+    
     <h1>She Fest 2026</h1>
     <div class="sub-heading">Noorul Huda Madrasa, Kombamkallu</div>
-    
-    <!-- Search Bar -->
-    <div class="search-box">
-        <input type="text" id="searchInput" class="search-input" placeholder="Search name, class, program..." onkeyup="filterData()">
-    </div>
 
-    <div class="progress-box">
-        <div class="progress-header">
-            <span id="progress-pct-text">0%</span>
-            <span id="progress-count-text">0/0</span>
+    <!-- AUTHENTICATION SCREEN (Login / Register) -->
+    <div id="auth-screen">
+        <div class="auth-box">
+            <h3 id="form-title" style="margin-top:0; color:var(--primary);">Login</h3>
+            <div id="nameFieldContainer" style="display:none;">
+                <label style="font-size: 11px; font-weight:600;">Your Name</label>
+                <input type="text" id="regName" placeholder="Enter your full name">
+            </div>
+            <label style="font-size: 11px; font-weight:600;">Mobile Number</label>
+            <input type="text" id="authMobile" placeholder="Enter mobile number">
+            
+            <button class="auth-btn" id="authSubmitBtn" onclick="handleAuthAction()">Login</button>
+            <div class="toggle-text" id="toggleAuthText" onclick="toggleAuthMode()">Don't have an account? Register</div>
         </div>
-        <div style="background: #e2e8f0; height: 8px; border-radius: 4px; margin-top: 8px;">
-            <div class="progress-bar-fill" id="progressBar"></div>
+    </div>
+
+    <!-- MAIN APP SCREEN -->
+    <div id="main-app">
+        <div class="search-box">
+            <input type="text" id="searchInput" class="search-input" placeholder="Search name, class, program..." onkeyup="filterData()">
         </div>
-    </div>
 
-    <div class="tab-buttons">
-        <button class="tab-btn active" onclick="switchTab('live', this)">Live</button>
-        <button class="tab-btn" onclick="switchTab('upcoming', this)">Upcoming</button>
-        <button class="tab-btn" onclick="switchTab('completed', this)">Finished</button>
-        <button class="tab-btn" onclick="switchTab('results', this)">Results</button>
-    </div>
+        <div class="progress-box">
+            <div class="progress-header">
+                <span id="progress-pct-text">0%</span>
+                <span id="progress-count-text">0/0</span>
+            </div>
+            <div style="background: #e2e8f0; height: 8px; border-radius: 4px; margin-top: 8px;">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+        </div>
 
-    <div id="live-pane" class="tab-pane active-pane"><div id="live-list" class="scroll-container"></div></div>
-    <div id="upcoming-pane" class="tab-pane"><div id="upcoming-list" class="scroll-container"></div></div>
-    <div id="completed-pane" class="tab-pane"><div id="completed-list" class="scroll-container"></div></div>
-    <div id="results-pane" class="tab-pane"><div id="results-list" class="scroll-container"></div></div>
+        <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab('live', this)">Live</button>
+            <button class="tab-btn" onclick="switchTab('upcoming', this)">Upcoming</button>
+            <button class="tab-btn" onclick="switchTab('completed', this)">Finished</button>
+            <button class="tab-btn" onclick="switchTab('results', this)">Results</button>
+        </div>
+
+        <div id="live-pane" class="tab-pane active-pane"><div id="live-list" class="scroll-container"></div></div>
+        <div id="upcoming-pane" class="tab-pane"><div id="upcoming-list" class="scroll-container"></div></div>
+        <div id="completed-pane" class="tab-pane"><div id="completed-list" class="scroll-container"></div></div>
+        <div id="results-pane" class="tab-pane"><div id="results-list" class="scroll-container"></div></div>
+    </div>
 </div>
 
 <script>
-    // Service Worker Registration for PWA
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js')
-                .then(reg => console.log('SW registered!', reg))
-                .catch(err => console.log('SW registration failed:', err));
+    const sheetURL = "https://script.google.com/macros/s/AKfycbwh0OjbaNuqey6Vmnyzv9AAw3dk1qTX1XwtLmW9Eq_Kpmdydd67eqeq4Qg_eif8uDYx-w/exec"; // <-- നിങ്ങളുടെ വെബ് ആപ്പ് ലിങ്ക് ഇവിടെ നൽകുക
+    let globalScheduleData = [];
+    let globalResultsData = [];
+    let isRegisterMode = false;
+
+    // Check if already logged in
+    window.onload = function() {
+        let savedMobile = localStorage.getItem("she_fest_user");
+        if (savedMobile) {
+            showMainApp();
+        }
+    };
+
+    function toggleAuthMode() {
+        isRegisterMode = !isRegisterMode;
+        if (isRegisterMode) {
+            document.getElementById("form-title").innerText = "Register Account";
+            document.getElementById("nameFieldContainer").style.display = "block";
+            document.getElementById("authSubmitBtn").innerText = "Register";
+            document.getElementById("toggleAuthText").innerText = "Already have an account? Login";
+        } else {
+            document.getElementById("form-title").innerText = "Login";
+            document.getElementById("nameFieldContainer").style.display = "none";
+            document.getElementById("authSubmitBtn").innerText = "Login";
+            document.getElementById("toggleAuthText").innerText = "Don't have an account? Register";
+        }
+    }
+
+    function handleAuthAction() {
+        let mobile = document.getElementById("authMobile").value.trim();
+        let name = document.getElementById("regName").value.trim();
+
+        if (!mobile) {
+            alert("Please enter mobile number!");
+            return;
+        }
+
+        let payload = { action: isRegisterMode ? "register" : "login", mobile: mobile };
+        if (isRegisterMode) {
+            if (!name) { alert("Please enter your name!"); return; }
+            payload.name = name;
+        }
+
+        document.getElementById("authSubmitBtn").innerText = "Processing...";
+
+        fetch(sheetURL, {
+            method: "POST",
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert(data.message || (data.status === "success" ? "Login Successful!" : "Action completed"));
+            if (data.status === "success" && !isRegisterMode) {
+                localStorage.setItem("she_fest_user", mobile);
+                showMainApp();
+            } else if (data.status === "success" && isRegisterMode) {
+                toggleAuthMode(); // Switch back to login after registration
+            }
+            document.getElementById("authSubmitBtn").innerText = isRegisterMode ? "Register" : "Login";
+        })
+        .catch(err => {
+            alert("Error connecting to server!");
+            document.getElementById("authSubmitBtn").innerText = isRegisterMode ? "Register" : "Login";
         });
     }
 
-    const sheetURL = "https://script.google.com/macros/s/AKfycbwh0OjbaNuqey6Vmnyzv9AAw3dk1qTX1XwtLmW9Eq_Kpmdydd67eqeq4Qg_eif8uDYx-w/exec";
-    let globalScheduleData = [];
-    let globalResultsData = [];
+    function showMainApp() {
+        document.getElementById("auth-screen").style.display = "none";
+        document.getElementById("main-app").style.display = "block";
+        document.getElementById("logoutBtn").style.display = "block";
+        fetchData();
+        setInterval(fetchData, 10000);
+    }
+
+    function logout() {
+        localStorage.removeItem("she_fest_user");
+        location.reload();
+    }
 
     function switchTab(t, b) {
         document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active-pane'));
@@ -157,9 +250,8 @@
         return card;
     }
 
-    // Auto scroll logic (Paused if user is searching)
     setInterval(() => {
-        const searchVal = document.getElementById("searchInput").value;
+        const searchVal = document.getElementById("searchInput")?.value;
         if (searchVal) return;
         const activeList = document.querySelector('.active-pane .scroll-container');
         if (activeList && activeList.scrollHeight > activeList.clientHeight) {
@@ -177,11 +269,8 @@
         
         scheduleData.forEach(item => {
             let status = item.Status ? item.Status.trim().toLowerCase() : '';
-            if (status === 'completed') { 
-                finished++; 
-                document.getElementById("completed-list").appendChild(createCard(item)); 
-            }
-            else if (status === 'cancelled') { 
+            if (status === 'completed' || status === 'cancelled') { 
+                if(status === 'completed') finished++;
                 document.getElementById("completed-list").appendChild(createCard(item)); 
             }
             else if (status === 'live') { 
@@ -207,41 +296,30 @@
 
     function filterData() {
         let query = document.getElementById("searchInput").value.toLowerCase().trim();
-        
         if (!query) {
             renderLists(globalScheduleData, globalResultsData);
             return;
         }
-
         let filteredSchedule = globalScheduleData.filter(item => {
-            let prog = (item['Program Type'] || '').toLowerCase();
-            let name = (item['Student Name'] || '').toLowerCase();
-            let cls = (item.Class || '').toLowerCase();
-            return prog.includes(query) || name.includes(query) || cls.includes(query);
+            return (item['Program Type'] || '').toLowerCase().includes(query) || 
+                   (item['Student Name'] || '').toLowerCase().includes(query) || 
+                   (item.Class || '').toLowerCase().includes(query);
         });
-
         let filteredResults = globalResultsData.filter(item => {
-            let progName = (item['Program Name'] || '').toLowerCase();
-            let cat = (item.Category || '').toLowerCase();
-            let first = (item['1st Place'] || '').toLowerCase();
-            let second = (item['2nd Place'] || '').toLowerCase();
-            let third = (item['3rd Place'] || '').toLowerCase();
-            return progName.includes(query) || cat.includes(query) || first.includes(query) || second.includes(query) || third.includes(query);
+            return (item['Program Name'] || '').toLowerCase().includes(query) || 
+                   (item.Category || '').toLowerCase().includes(query) || 
+                   (item['1st Place'] || '').toLowerCase().includes(query);
         });
-
         renderLists(filteredSchedule, filteredResults);
     }
 
-    function fetchSchedule() {
+    function fetchData() {
         fetch(sheetURL).then(r => r.json()).then(response => {
             globalScheduleData = response.schedule || []; 
             globalResultsData = response.results || [];
             filterData();
-        });
+        }).catch(err => console.log(err));
     }
-
-    fetchSchedule();
-    setInterval(fetchSchedule, 10000);
 </script>
 </body>
 </html>
