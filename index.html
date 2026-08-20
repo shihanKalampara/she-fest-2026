@@ -5,11 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thiruvasantham 1501 - Noorul Huda Madrasa Kombamkallu</title>
     
+    <!-- PWA Setup -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f172a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="She Fest">
+    <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1e-8f5w_srCHu4YcRYqZx5pdR7DNyEB9a">
 
     <style>
         :root {
@@ -36,7 +38,7 @@
 
         /* Auth Container */
         #auth-screen { text-align: center; padding: 30px 10px; }
-        .auth-box { max-width: 320px; margin: auto; background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: left; }
+        .auth-box { max-width: 320px; margin: auto; background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
         .auth-box input { width: 100%; padding: 10px; margin: 8px 0 15px 0; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 13px; outline: none; }
         .auth-btn { width: 100%; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
         .toggle-text { font-size: 12px; text-align: center; margin-top: 15px; color: #2563eb; cursor: pointer; }
@@ -44,13 +46,17 @@
         /* Main App View */
         #main-app { display: none; }
 
+        /* Search Bar */
         .search-box { margin-bottom: 15px; }
-        .search-input { width: 100%; padding: 10px 14px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 10px; outline: none; box-sizing: border-box; background: #f8fafc; }
-        
+        .search-input { width: 100%; padding: 10px 14px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 10px; outline: none; box-sizing: border-box; background: #f8fafc; transition: all 0.3s; }
+        .search-input:focus { border-color: var(--primary); background: #ffffff; box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.05); }
+
+        /* Progress Bar */
         .progress-box { background: #f1f5f9; padding: 12px 16px; border-radius: 12px; margin-bottom: 20px; }
         .progress-header { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 600; }
         .progress-bar-fill { background: linear-gradient(90deg, #10b981, #059669); height: 8px; width: 0%; transition: width 0.6s ease; border-radius: 4px; }
 
+        /* Tabs */
         .tab-buttons { display: flex; gap: 4px; margin-bottom: 15px; background: #f1f5f9; padding: 4px; border-radius: 10px; overflow-x: auto; }
         .tab-btn { flex: 1; padding: 8px 10px; font-size: 11px; font-weight: 600; border: none; border-radius: 8px; background: transparent; cursor: pointer; color: var(--text-muted); white-space: nowrap; }
         .tab-btn.active { background: #ffffff; color: var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
@@ -59,11 +65,15 @@
         .tab-pane.active-pane { display: block; }
         .scroll-container { height: 100%; overflow-y: auto; padding-bottom: 50px; }
 
+        /* Cards */
         .schedule-card { background: #ffffff; border: 1px solid #e2e8f0; border-left: 4px solid #cbd5e1; padding: 14px; margin-bottom: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
         .result-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
         .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; }
         
-        .category-pill { font-size: 12px; font-weight: 700; color: #7c3aed; background: #f3e8ff; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; }
+        /* Category Pill */
+        .category-pill { font-size: 12px; font-weight: 700; color: #7c3aed; background: #f3e8ff; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        /* Badges with Faster Animation (0.5s) */
         .badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; color: white; text-transform: uppercase; display: inline-flex; align-items: center; gap: 4px; }
         .badge::before { content: ''; width: 6px; height: 6px; background: white; border-radius: 50%; animation: blink 0.5s infinite alternate; }
         @keyframes blink { 0% { opacity: 0.2; } 100% { opacity: 1; } }
@@ -107,6 +117,7 @@
 
     <!-- MAIN APP SCREEN -->
     <div id="main-app">
+        <!-- Search Bar -->
         <div class="search-box">
             <input type="text" id="searchInput" class="search-input" placeholder="Search name, class, program..." onkeyup="filterData()">
         </div>
@@ -136,7 +147,16 @@
 </div>
 
 <script>
-    const sheetURL = "https://script.google.com/macros/s/AKfycbweCCTbQZKs5Ik5ugjtEV1EmD3aA5t-gESElF44Kb75eE03EYlY6XCWBFz14Anwsl-8yQ/exec"; // <-- പുതിയ വെബ് ആപ്പ് ലിങ്ക് ഇവിടെ നൽകുക
+    // Service Worker Registration for PWA
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('SW registered!', reg))
+                .catch(err => console.log('SW registration failed:', err));
+        });
+    }
+
+    const sheetURL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE"; // <-- നിങ്ങളുടെ പുതിയ വെബ് ആപ്പ് ലിങ്ക് ഇവിടെ നൽകുക
     let globalScheduleData = [];
     let globalResultsData = [];
     let isRegisterMode = false;
@@ -249,6 +269,7 @@
         return card;
     }
 
+    // Auto scroll logic (Paused if user is searching)
     setInterval(() => {
         const searchVal = document.getElementById("searchInput")?.value;
         if (searchVal) return;
@@ -268,8 +289,11 @@
         
         scheduleData.forEach(item => {
             let status = item.Status ? item.Status.trim().toLowerCase() : '';
-            if (status === 'completed' || status === 'cancelled') { 
-                if(status === 'completed') finished++;
+            if (status === 'completed') { 
+                finished++; 
+                document.getElementById("completed-list").appendChild(createCard(item)); 
+            }
+            else if (status === 'cancelled') { 
                 document.getElementById("completed-list").appendChild(createCard(item)); 
             }
             else if (status === 'live') { 
@@ -295,29 +319,40 @@
 
     function filterData() {
         let query = document.getElementById("searchInput").value.toLowerCase().trim();
+        
         if (!query) {
             renderLists(globalScheduleData, globalResultsData);
             return;
         }
+
         let filteredSchedule = globalScheduleData.filter(item => {
-            return (item['Program Type'] || '').toLowerCase().includes(query) || 
-                   (item['Student Name'] || '').toLowerCase().includes(query) || 
-                   (item.Class || '').toLowerCase().includes(query);
+            let prog = (item['Program Type'] || '').toLowerCase();
+            let name = (item['Student Name'] || '').toLowerCase();
+            let cls = (item.Class || '').toLowerCase();
+            return prog.includes(query) || name.includes(query) || cls.includes(query);
         });
+
         let filteredResults = globalResultsData.filter(item => {
-            return (item['Program Name'] || '').toLowerCase().includes(query) || 
-                   (item.Category || '').toLowerCase().includes(query) || 
-                   (item['1st Place'] || '').toLowerCase().includes(query);
+            let progName = (item['Program Name'] || '').toLowerCase();
+            let cat = (item.Category || '').toLowerCase();
+            let first = (item['1st Place'] || '').toLowerCase();
+            let second = (item['2nd Place'] || '').toLowerCase();
+            let third = (item['3rd Place'] || '').toLowerCase();
+            return progName.includes(query) || cat.includes(query) || first.includes(query) || second.includes(query) || third.includes(query);
         });
+
         renderLists(filteredSchedule, filteredResults);
     }
 
     function fetchData() {
-        fetch(sheetURL).then(r => r.json()).then(response => {
-            globalScheduleData = response.schedule || []; 
-            globalResultsData = response.results || [];
-            filterData();
-        }).catch(err => console.log("Fetch Error:", err));
+        fetch(sheetURL)
+            .then(r => r.json())
+            .then(response => {
+                globalScheduleData = response.schedule || []; 
+                globalResultsData = response.results || [];
+                filterData();
+            })
+            .catch(err => console.log("Fetch Error:", err));
     }
 </script>
 </body>
