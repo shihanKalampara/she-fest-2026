@@ -99,13 +99,13 @@
         <button class="tab-btn active" onclick="switchTab('live', this)">Live</button>
         <button class="tab-btn" onclick="switchTab('upcoming', this)">Upcoming</button>
         <button class="tab-btn" onclick="switchTab('completed', this)">Finished</button>
-        <button class="tab-btn" onclick="switchTab('offstage', this)">Results</button>
+        <button class="tab-btn" onclick="switchTab('results', this)">Results</button>
     </div>
 
     <div id="live-pane" class="tab-pane active-pane"><div id="live-list" class="scroll-container"></div></div>
     <div id="upcoming-pane" class="tab-pane"><div id="upcoming-list" class="scroll-container"></div></div>
     <div id="completed-pane" class="tab-pane"><div id="completed-list" class="scroll-container"></div></div>
-    <div id="offstage-pane" class="tab-pane"><div id="offstage-list" class="scroll-container"></div></div>
+    <div id="results-pane" class="tab-pane"><div id="results-list" class="scroll-container"></div></div>
 </div>
 
 <script>
@@ -157,10 +157,10 @@
         return card;
     }
 
-    // Auto scroll logic (Paused if user is searching or scrolling manually)
+    // Auto scroll logic (Paused if user is searching)
     setInterval(() => {
         const searchVal = document.getElementById("searchInput").value;
-        if (searchVal) return; // Don't auto scroll while searching
+        if (searchVal) return;
         const activeList = document.querySelector('.active-pane .scroll-container');
         if (activeList && activeList.scrollHeight > activeList.clientHeight) {
             activeList.scrollTop = (activeList.scrollTop + 1 >= activeList.scrollHeight - activeList.clientHeight) ? 0 : activeList.scrollTop + 1;
@@ -171,7 +171,7 @@
         document.getElementById("live-list").innerHTML = "";
         document.getElementById("upcoming-list").innerHTML = "";
         document.getElementById("completed-list").innerHTML = "";
-        document.getElementById("offstage-list").innerHTML = "";
+        document.getElementById("results-list").innerHTML = "";
         
         let finished = 0;
         
@@ -194,7 +194,7 @@
 
         resultsData.forEach(item => { 
             if (item['Program Name']) {
-                document.getElementById("offstage-list").appendChild(createResultCard(item)); 
+                document.getElementById("results-list").appendChild(createResultCard(item)); 
             }
         });
 
@@ -236,7 +236,7 @@
         fetch(sheetURL).then(r => r.json()).then(response => {
             globalScheduleData = response.schedule || []; 
             globalResultsData = response.results || [];
-            filterData(); // This will render data considering any active search query
+            filterData();
         });
     }
 
