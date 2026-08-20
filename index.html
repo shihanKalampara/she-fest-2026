@@ -32,6 +32,11 @@
         h1 { text-align: center; color: var(--primary); margin: 10px 0 5px 0; font-size: 24px; font-weight: 700; }
         .sub-heading { text-align: center; color: var(--text-muted); font-weight: 500; margin-bottom: 20px; text-transform: uppercase; font-size: 11px; letter-spacing: 1.5px; }
 
+        /* Search Bar */
+        .search-box { margin-bottom: 15px; }
+        .search-input { width: 100%; padding: 10px 14px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 10px; outline: none; box-sizing: border-box; background: #f8fafc; transition: all 0.3s; }
+        .search-input:focus { border-color: var(--primary); background: #ffffff; box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.05); }
+
         /* Progress Bar */
         .progress-box { background: #f1f5f9; padding: 12px 16px; border-radius: 12px; margin-bottom: 20px; }
         .progress-header { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 600; }
@@ -75,6 +80,11 @@
     <h1>She Fest 2026</h1>
     <div class="sub-heading">Noorul Huda Madrasa, Kombamkallu</div>
     
+    <!-- Search Bar -->
+    <div class="search-box">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search name, class, program..." onkeyup="filterData()">
+    </div>
+
     <div class="progress-box">
         <div class="progress-header">
             <span id="progress-pct-text">0%</span>
@@ -109,6 +119,8 @@
     }
 
     const sheetURL = "https://script.google.com/macros/s/AKfycbwh0OjbaNuqey6Vmnyzv9AAw3dk1qTX1XwtLmW9Eq_Kpmdydd67eqeq4Qg_eif8uDYx-w/exec";
+    let globalScheduleData = [];
+    let globalResultsData = [];
 
     function switchTab(t, b) {
         document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active-pane'));
@@ -145,51 +157,89 @@
         return card;
     }
 
-    // Auto scroll logic
+    // Auto scroll logic (Paused if user is searching or scrolling manually)
     setInterval(() => {
+        const searchVal = document.getElementById("searchInput").value;
+        if (searchVal) return; // Don't auto scroll while searching
         const activeList = document.querySelector('.active-pane .scroll-container');
         if (activeList && activeList.scrollHeight > activeList.clientHeight) {
             activeList.scrollTop = (activeList.scrollTop + 1 >= activeList.scrollHeight - activeList.clientHeight) ? 0 : activeList.scrollTop + 1;
         }
     }, 50);
 
+    function renderLists(scheduleData, resultsData) {
+        document.getElementById("live-list").innerHTML = "";
+        document.getElementById("upcoming-list").innerHTML = "";
+        document.getElementById("completed-list").innerHTML = "";
+        document.getElementById("offstage-list").innerHTML = "";
+        
+        let finished = 0;
+        
+        scheduleData.forEach(item => {
+            let status = item.Status ? item.Status.trim().toLowerCase() : '';
+            if (status === 'completed') { 
+                finished++; 
+                document.getElementById("completed-list").appendChild(createCard(item)); 
+            }
+            else if (status === 'cancelled') { 
+                document.getElementById("completed-list").appendChild(createCard(item)); 
+            }
+            else if (status === 'live') { 
+                document.getElementById("live-list").appendChild(createCard(item)); 
+            }
+            else { 
+                document.getElementById("upcoming-list").appendChild(createCard(item)); 
+            }
+        });
+
+        resultsData.forEach(item => { 
+            if (item['Program Name']) {
+                document.getElementById("offstage-list").appendChild(createResultCard(item)); 
+            }
+        });
+
+        let total = globalScheduleData.length;
+        let pct = total > 0 ? Math.round((finished / total) * 100) : 0;
+        document.getElementById("progressBar").style.width = pct + "%";
+        document.getElementById("progress-pct-text").innerText = pct + "%";
+        document.getElementById("progress-count-text").innerText = `${finished}/${total}`;
+    }
+
+    function filterData() {
+        let query = document.getElementById("searchInput").value.toLowerCase().trim();
+        
+        if (!query) {
+            renderLists(globalScheduleData, globalResultsData);
+            return;
+        }
+
+        let filteredSchedule = globalScheduleData.filter(item => {
+            let prog = (item['Program Type'] || '').toLowerCase();
+            let name = (item['Student Name'] || '').toLowerCase();
+            let cls = (item.Class || '').toLowerCase();
+            return prog.includes(query) || name.includes(query) || cls.includes(query);
+        });
+
+        let filteredResults = globalResultsData.filter(item => {
+            let progName = (item['Program Name'] || '').toLowerCase();
+            let cat = (item.Category || '').toLowerCase();
+            let first = (item['1st Place'] || '').toLowerCase();
+            let second = (item['2nd Place'] || '').toLowerCase();
+            let third = (item['3rd Place'] || '').toLowerCase();
+            return progName.includes(query) || cat.includes(query) || first.includes(query) || second.includes(query) || third.includes(query);
+        });
+
+        renderLists(filteredSchedule, filteredResults);
+    }
+
     function fetchSchedule() {
         fetch(sheetURL).then(r => r.json()).then(response => {
-            let data = response.schedule || []; 
-            let resultsData = response.results || [];
-            document.getElementById("live-list").innerHTML = "";
-            document.getElementById("upcoming-list").innerHTML = "";
-            document.getElementById("completed-list").innerHTML = "";
-            document.getElementById("offstage-list").innerHTML = "";
-            let finished = 0;
-            data.forEach(item => {
-                let status = item.Status ? item.Status.trim().toLowerCase() : '';
-                if (status === 'completed') { 
-                    finished++; 
-                    document.getElementById("completed-list").appendChild(createCard(item)); 
-                }
-                else if (status === 'cancelled') { 
-                    document.getElementById("completed-list").appendChild(createCard(item)); 
-                }
-                else if (status === 'live') { 
-                    document.getElementById("live-list").appendChild(createCard(item)); 
-                }
-                else { 
-                    document.getElementById("upcoming-list").appendChild(createCard(item)); 
-                }
-            });
-            resultsData.forEach(item => { 
-                if (item['Program Name']) {
-                    document.getElementById("offstage-list").appendChild(createResultCard(item)); 
-                }
-            });
-            let total = data.length;
-            let pct = total > 0 ? Math.round((finished / total) * 100) : 0;
-            document.getElementById("progressBar").style.width = pct + "%";
-            document.getElementById("progress-pct-text").innerText = pct + "%";
-            document.getElementById("progress-count-text").innerText = `${finished}/${total}`;
+            globalScheduleData = response.schedule || []; 
+            globalResultsData = response.results || [];
+            filterData(); // This will render data considering any active search query
         });
     }
+
     fetchSchedule();
     setInterval(fetchSchedule, 10000);
 </script>
