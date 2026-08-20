@@ -121,7 +121,7 @@
         let status = item.Status ? item.Status.trim() : 'Upcoming';
         let card = document.createElement("div");
         card.className = "schedule-card";
-        card.innerHTML = `<div><span style="font-size:12px; font-weight:600;">${item.Time}</span><br><b>${item['Program Type']}</b><br><small>${item['Student Name']}</small></div>
+        card.innerHTML = `<div><span style="font-size:12px; font-weight:600;">${item.Time}</span><br><b>${item['Program Type']}</b><br><small>${item['Student Name']} (${item.Class || ''})</small></div>
                           <div><span class="badge ${status}">${status}</span></div>`;
         return card;
     }
