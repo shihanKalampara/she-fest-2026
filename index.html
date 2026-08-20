@@ -119,9 +119,13 @@
 
     function createCard(item) {
         let status = item.Status ? item.Status.trim() : 'Upcoming';
+        let studentText = item['Student Name'] || '';
+        let classText = item.Class ? item.Class.trim() : '';
+        let displaySubText = classText ? `${studentText} (${classText})` : studentText;
+
         let card = document.createElement("div");
         card.className = "schedule-card";
-        card.innerHTML = `<div><span style="font-size:12px; font-weight:600;">${item.Time}</span><br><b>${item['Program Type']}</b><br><small>${item['Student Name']} (${item.Class || ''})</small></div>
+        card.innerHTML = `<div><span style="font-size:12px; font-weight:600;">${item.Time}</span><br><b>${item['Program Type']}</b><br><small>${displaySubText}</small></div>
                           <div><span class="badge ${status}">${status}</span></div>`;
         return card;
     }
