@@ -183,8 +183,9 @@
             <button class="tab-btn active" onclick="switchTab('live', this)">Live</button>
             <button class="tab-btn" onclick="switchTab('upcoming', this)">Upcoming</button>
             <button class="tab-btn" onclick="switchTab('completed', this)">Finished</button>
-            <button class="tab-btn" onclick="switchTab('favorites', this)">⭐</button>
             <button class="tab-btn" onclick="switchTab('results', this)">Results</button>
+            <button class="tab-btn" onclick="switchTab('favorites', this)">⭐</button>
+
         </div>
 
         <div id="live-pane" class="tab-pane active-pane"><div id="live-list" class="scroll-container"></div></div>
@@ -490,21 +491,25 @@
             let status = item.Status ? item.Status.trim().toLowerCase() : '';
             let progType = item['Program Type'] || '';
 
-            // Render in respective status tabs
+            // Finished programs count calculation
             if (status === 'completed' || status === 'finished') { 
                 finished++; 
-                document.getElementById("completed-list").appendChild(createCard(item)); 
-            } else if (status === 'cancelled') { 
-                document.getElementById("completed-list").appendChild(createCard(item)); 
-            } else if (status === 'live') { 
-                document.getElementById("live-list").appendChild(createCard(item)); 
-            } else { 
-                document.getElementById("upcoming-list").appendChild(createCard(item)); 
             }
 
-            // Also render in favorites tab if favorited
+            // Check if this specific item is in favorites
             if (favorites.includes(progType)) {
                 document.getElementById("favorites-list").appendChild(createCard(item));
+            } else {
+                // Otherwise put it in its respective status tab
+                if (status === 'completed' || status === 'finished') { 
+                    document.getElementById("completed-list").appendChild(createCard(item)); 
+                } else if (status === 'cancelled') { 
+                    document.getElementById("completed-list").appendChild(createCard(item)); 
+                } else if (status === 'live') { 
+                    document.getElementById("live-list").appendChild(createCard(item)); 
+                } else { 
+                    document.getElementById("upcoming-list").appendChild(createCard(item)); 
+                }
             }
         });
 
