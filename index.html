@@ -36,10 +36,10 @@
         .settings-btn { background: transparent; color: var(--primary); border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 22px; font-weight: bold; }
         .settings-btn:hover { background: #f1f5f9; }
         
-        .dropdown-menu { display: none; position: absolute; right: 0; top: 48px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); width: 170px; z-index: 100; overflow: hidden; }
-        .dropdown-menu button { width: 100%; padding: 12px 14px; background: transparent; border: none; text-align: left; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f1f5f9; }
+        .dropdown-menu { display: none; position: absolute; right: 0; top: 48px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); width: 190px; z-index: 100; overflow: hidden; }
+        .dropdown-menu button { width: 100%; padding: 12px 14px; background: transparent; border: none; text-align: left; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f1f5f9; }
         .dropdown-menu button:hover { background: #f8fafc; }
-        .dropdown-menu button.logout-opt { color: #ef4444; border-bottom: none; }
+        .dropdown-menu button.logout-opt { color: #ef4444; border-bottom: none; justify-content: flex-start; gap: 8px; }
         .dropdown-menu button.logout-opt:hover { background: #fef2f2; }
 
         h1 { text-align: center; color: var(--primary); margin: 10px 0 5px 0; font-size: 24px; font-weight: 700; }
@@ -50,7 +50,7 @@
         .auth-box { max-width: 320px; margin: auto; background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
         .auth-box input { width: 100%; padding: 10px; margin: 8px 0 15px 0; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 13px; outline: none; }
         .auth-btn { width: 100%; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-        .toggle-text { font-size: 12px; text-align: center; margin-top: 15px; color: #2563eb; cursor: pointer; }
+        .toggle-text { font-size: 12px; text-align: center; margin-top: 15px; color: var(--token-blue, #2563eb); cursor: pointer; }
 
         #main-app { display: none; }
 
@@ -104,6 +104,7 @@
         <div class="settings-container" id="settingsContainer">
             <button class="settings-btn" onclick="toggleDropdown()">⋮</button>
             <div class="dropdown-menu" id="dropdownMenu">
+                <button onclick="toggleAutoScroll()" id="autoScrollToggleBtn">🔁 Auto Scroll: ON</button>
                 <button onclick="resetMobile()">🔄 Reset Mobile</button>
                 <button class="logout-opt" onclick="logout()">🚪 Logout</button>
             </div>
@@ -171,12 +172,14 @@
     let globalScheduleData = [];
     let globalResultsData = [];
     let isRegisterMode = false;
+    let isAutoScrollEnabled = localStorage.getItem("she_fest_autoscroll") !== "false"; // Default true
 
     window.onload = function() {
         let savedMobile = localStorage.getItem("she_fest_user");
         if (savedMobile) {
             showMainApp();
         }
+        updateAutoScrollUI();
     };
 
     function toggleDropdown() {
@@ -190,6 +193,19 @@
             if (menu && menu.style.display === "block") {
                 menu.style.display = "none";
             }
+        }
+    }
+
+    function toggleAutoScroll() {
+        isAutoScrollEnabled = !isAutoScrollEnabled;
+        localStorage.setItem("she_fest_autoscroll", isAutoScrollEnabled);
+        updateAutoScrollUI();
+    }
+
+    function updateAutoScrollUI() {
+        let btn = document.getElementById("autoScrollToggleBtn");
+        if (btn) {
+            btn.innerHTML = isAutoScrollEnabled ? "🔁 Auto Scroll: ON" : "⏸️ Auto Scroll: OFF";
         }
     }
 
@@ -345,6 +361,7 @@
     }
 
     setInterval(() => {
+        if (!isAutoScrollEnabled) return; // ഓട്ടോ സ്ക്രോൾ ഓഫ് ആണെങ്കിൽ ഇത് പ്രവർത്തിക്കില്ല
         const searchVal = document.getElementById("searchInput").value;
         if (searchVal) return;
         const activeList = document.querySelector('.active-pane .scroll-container');
