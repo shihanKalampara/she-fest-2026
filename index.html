@@ -80,16 +80,15 @@
         .tab-pane.active-pane { display: block; }
         .scroll-container { height: 100%; overflow-y: auto; padding-bottom: 50px; }
 
-        /* Schedule Card Styles with Heart Favorite Button */
-        .schedule-card { background: var(--card-bg); border: 1px solid var(--border-color); border-left: 4px solid #cbd5e1; padding: 14px; margin-bottom: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; position: relative; transition: all 0.2s; }
-        .schedule-card.favorited { border-left-color: #ef4444; background: rgba(239, 68, 68, 0.03); }
+        /* Schedule Card Styles with Click-to-Favorite & Color Highlight */
+        .schedule-card { background: var(--card-bg); border: 1px solid var(--border-color); border-left: 4px solid #cbd5e1; padding: 14px; margin-bottom: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; position: relative; transition: all 0.3s ease; cursor: pointer; }
+        .schedule-card:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
+        
+        /* When favorited, highlight background and border subtly */
+        .schedule-card.favorited { border-left-color: #ef4444; background: rgba(239, 68, 68, 0.05); border-color: rgba(239, 68, 68, 0.3); }
         
         .card-content { flex: 1; padding-right: 10px; }
         .card-right { display: flex; align-items: center; gap: 10px; }
-
-        /* Heart Favorite Button */
-        .fav-btn { background: var(--bg-color); border: 1px solid var(--border-color); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: transform 0.2s, background 0.2s; }
-        .fav-btn:hover { transform: scale(1.1); background: var(--border-color); }
         
         .result-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
         .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
@@ -164,7 +163,7 @@
             <button class="tab-btn active" onclick="switchTab('live', this)">Live</button>
             <button class="tab-btn" onclick="switchTab('upcoming', this)">Upcoming</button>
             <button class="tab-btn" onclick="switchTab('completed', this)">Finished</button>
-            <button class="tab-btn" onclick="switchTab('favorites', this)">❤️ Saved</button>
+            <button class="tab-btn" onclick="switchTab('favorites', this)">⭐ Saved</button>
             <button class="tab-btn" onclick="switchTab('results', this)">Results</button>
         </div>
 
@@ -256,8 +255,7 @@
         }
     }
 
-    function toggleFavorite(progName, event) {
-        event.stopPropagation();
+    function toggleFavorite(progName) {
         if (favorites.includes(progName)) {
             favorites = favorites.filter(item => item !== progName);
         } else {
@@ -334,7 +332,6 @@
         .then(data => {
             if (data.status === "success") {
                 localStorage.setItem("she_fest_user", mobile);
-                // ഡാറ്റയിൽ നിന്ന് വരുന്നതോ യൂസർ നൽകിയതോ ആയ പേര് സേവ് ചെയ്യുക
                 let finalName = data.name || (isRegisterMode && name ? name : "User");
                 localStorage.setItem("she_fest_name", finalName);
                 showMainApp();
@@ -420,6 +417,8 @@
 
         let card = document.createElement("div");
         card.className = `schedule-card ${isFav ? 'favorited' : ''}`;
+        card.onclick = () => toggleFavorite(progType);
+        
         card.innerHTML = `
             <div class="card-content">
                 <span style="font-size:12px; font-weight:600;">${item.Time}</span><br>
@@ -427,9 +426,6 @@
                 <small>${displaySubText}</small>
             </div>
             <div class="card-right">
-                <button class="fav-btn" onclick="toggleFavorite('${progType}', event)" title="Save to Favorites">
-                    ${isFav ? '❤️' : '🤍'}
-                </button>
                 <span class="badge ${status}">${status}</span>
             </div>`;
         return card;
@@ -539,7 +535,6 @@
                 globalScheduleData = response.schedule || []; 
                 globalResultsData = response.results || [];
                 
-                // ലോഗിൻ ചെയ്ത യൂസറുടെ പേര് റെസ്പോൺസിൽ നിന്ന് അപ്ഡേറ്റ് ചെയ്യാൻ ശ്രമിക്കുക
                 if (response.users) {
                     let currentUser = response.users.find(u => String(u.Mobile) === String(savedMobile));
                     if (currentUser && currentUser.Name) {
