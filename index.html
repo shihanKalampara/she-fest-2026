@@ -27,10 +27,17 @@
         }
 
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg-color); color: var(--text-main); margin: 0; padding: 15px; }
-        .container { max-width: 750px; margin: auto; background: var(--card-bg); padding: 20px; border-radius: 16px; box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        .container { max-width: 750px; margin: auto; background: var(--card-bg); padding: 20px; border-radius: 16px; box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; position: relative; }
         
-        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .settings-btn { background: #fee2e2; border: 1px solid #fca5a5; padding: 6px 12px; font-size: 12px; font-weight: 600; border-radius: 8px; cursor: pointer; color: #991b1b; }
+        /* Header Top & Settings Dropdown Menu */
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; position: relative; }
+        .settings-container { position: relative; display: none; }
+        .settings-btn { background: #f1f5f9; border: 1px solid #cbd5e1; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; transition: background 0.2s; }
+        .settings-btn:hover { background: #e2e8f0; }
+        
+        .dropdown-menu { display: none; position: absolute; right: 0; top: 45px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 140px; z-index: 100; overflow: hidden; }
+        .dropdown-menu button { width: 100%; padding: 10px 14px; background: transparent; border: none; text-align: left; font-size: 13px; font-weight: 600; color: #ef4444; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .dropdown-menu button:hover { background: #fef2f2; }
 
         h1 { text-align: center; color: var(--primary); margin: 10px 0 5px 0; font-size: 24px; font-weight: 700; }
         .sub-heading { text-align: center; color: var(--text-muted); font-weight: 500; margin-bottom: 20px; text-transform: uppercase; font-size: 11px; letter-spacing: 1.5px; }
@@ -87,9 +94,16 @@
 
 <div class="container">
     <div class="header-top">
-        <div style="width: 60px;"></div>
+        <div style="width: 36px;"></div>
         <img src="https://lh3.googleusercontent.com/d/1e-8f5w_srCHu4YcRYqZx5pdR7DNyEB9a" alt="Logo" style="max-width: 150px; display: block; margin: auto;">
-        <button class="settings-btn" id="logoutBtn" style="display:none;" onclick="logout()">Logout</button>
+        
+        <!-- Settings Icon & Dropdown -->
+        <div class="settings-container" id="settingsContainer">
+            <div class="settings-btn" onclick="toggleDropdown()">⚙️</div>
+            <div class="dropdown-menu" id="dropdownMenu">
+                <button onclick="logout()">🚪 Logout</button>
+            </div>
+        </div>
     </div>
     
     <h1>She Fest 2026</h1>
@@ -162,6 +176,22 @@
         }
     };
 
+    // Toggle Settings Dropdown Menu
+    function toggleDropdown() {
+        let menu = document.getElementById("dropdownMenu");
+        menu.style.display = menu.style.display === "block" ? "none" : "block";
+    }
+
+    // Close dropdown when clicking outside
+    window.onclick = function(event) {
+        if (!event.target.matches('.settings-btn')) {
+            let menu = document.getElementById("dropdownMenu");
+            if (menu && menu.style.display === "block") {
+                menu.style.display = "none";
+            }
+        }
+    }
+
     function toggleAuthMode() {
         isRegisterMode = !isRegisterMode;
         if (isRegisterMode) {
@@ -186,7 +216,6 @@
             return;
         }
 
-        // 10 ഡിജിറ്റ് പരിശോധന (Mobile number validation)
         let mobileRegex = /^\d{10}$/;
         if (!mobileRegex.test(mobile)) {
             alert("Please enter a valid 10-digit mobile number!");
@@ -230,7 +259,7 @@
     function showMainApp() {
         document.getElementById("auth-screen").style.display = "none";
         document.getElementById("main-app").style.display = "block";
-        document.getElementById("logoutBtn").style.display = "block";
+        document.getElementById("settingsContainer").style.display = "block";
         fetchSchedule();
         setInterval(fetchSchedule, 10000);
     }
