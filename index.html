@@ -81,10 +81,7 @@
         .scroll-container { height: 100%; overflow-y: auto; padding-bottom: 50px; }
 
         /* Schedule Card Styles */
-        .schedule-card { background: var(--card-bg); border: 1px solid var(--border-color); border-left: 4px solid #cbd5e1; padding: 14px; margin-bottom: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; position: relative; transition: all 0.3s ease; cursor: pointer; }
-        .schedule-card:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
-        
-        .schedule-card.favorited { border-left-color: #ef4444; background: rgba(239, 68, 68, 0.05); border-color: rgba(239, 68, 68, 0.3); }
+        .schedule-card { background: var(--card-bg); border: 1px solid var(--border-color); border-left: 4px solid #cbd5e1; padding: 14px; margin-bottom: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; position: relative; transition: all 0.3s ease; }
         
         .card-content { flex: 1; padding-right: 10px; }
         .card-right { display: flex; align-items: center; gap: 10px; }
@@ -184,14 +181,11 @@
             <button class="tab-btn" onclick="switchTab('upcoming', this)">Upcoming</button>
             <button class="tab-btn" onclick="switchTab('completed', this)">Finished</button>
             <button class="tab-btn" onclick="switchTab('results', this)">Results</button>
-            <button class="tab-btn" onclick="switchTab('favorites', this)">⭐</button>
-
         </div>
 
         <div id="live-pane" class="tab-pane active-pane"><div id="live-list" class="scroll-container"></div></div>
         <div id="upcoming-pane" class="tab-pane"><div id="upcoming-list" class="scroll-container"></div></div>
         <div id="completed-pane" class="tab-pane"><div id="completed-list" class="scroll-container"></div></div>
-        <div id="favorites-pane" class="tab-pane"><div id="favorites-list" class="scroll-container"></div></div>
         <div id="results-pane" class="tab-pane"><div id="results-list" class="scroll-container"></div></div>
     </div>
 </div>
@@ -209,7 +203,6 @@
     let isRegisterMode = false;
     let isAutoScrollEnabled = localStorage.getItem("she_fest_autoscroll") !== "false";
     let isDarkModeEnabled = localStorage.getItem("she_fest_darkmode") === "true";
-    let favorites = JSON.parse(localStorage.getItem("she_fest_favorites") || "[]");
     let previousLivePrograms = [];
 
     window.onload = function() {
@@ -274,16 +267,6 @@
         if (btn) {
             btn.innerHTML = isDarkModeEnabled ? "☀️ Dark Mode: ON" : "🌙 Dark Mode: OFF";
         }
-    }
-
-    function toggleFavorite(progName) {
-        if (favorites.includes(progName)) {
-            favorites = favorites.filter(item => item !== progName);
-        } else {
-            favorites.push(progName);
-        }
-        localStorage.setItem("she_fest_favorites", JSON.stringify(favorites));
-        renderLists(globalScheduleData, globalResultsData);
     }
 
     function requestNotificationPermission() {
@@ -434,12 +417,10 @@
         let classText = item.Class ? item.Class.trim() : '';
         let displaySubText = classText ? `${studentText} (${classText})` : studentText;
         let progType = item['Program Type'] || '';
-        let isFav = favorites.includes(progType);
         let isLive = status.toLowerCase() === 'live';
 
         let card = document.createElement("div");
-        card.className = `schedule-card ${isFav ? 'favorited' : ''}`;
-        card.onclick = () => toggleFavorite(progType);
+        card.className = "schedule-card";
         
         card.innerHTML = `
             <div class="card-content">
@@ -482,34 +463,25 @@
         document.getElementById("live-list").innerHTML = "";
         document.getElementById("upcoming-list").innerHTML = "";
         document.getElementById("completed-list").innerHTML = "";
-        document.getElementById("favorites-list").innerHTML = "";
         document.getElementById("results-list").innerHTML = "";
         
         let finished = 0;
         
         scheduleData.forEach(item => {
             let status = item.Status ? item.Status.trim().toLowerCase() : '';
-            let progType = item['Program Type'] || '';
 
-            // Finished programs count calculation
             if (status === 'completed' || status === 'finished') { 
                 finished++; 
             }
 
-            // Check if this specific item is in favorites
-            if (favorites.includes(progType)) {
-                document.getElementById("favorites-list").appendChild(createCard(item));
-            } else {
-                // Otherwise put it in its respective status tab
-                if (status === 'completed' || status === 'finished') { 
-                    document.getElementById("completed-list").appendChild(createCard(item)); 
-                } else if (status === 'cancelled') { 
-                    document.getElementById("completed-list").appendChild(createCard(item)); 
-                } else if (status === 'live') { 
-                    document.getElementById("live-list").appendChild(createCard(item)); 
-                } else { 
-                    document.getElementById("upcoming-list").appendChild(createCard(item)); 
-                }
+            if (status === 'completed' || status === 'finished') { 
+                document.getElementById("completed-list").appendChild(createCard(item)); 
+            } else if (status === 'cancelled') { 
+                document.getElementById("completed-list").appendChild(createCard(item)); 
+            } else if (status === 'live') { 
+                document.getElementById("live-list").appendChild(createCard(item)); 
+            } else { 
+                document.getElementById("upcoming-list").appendChild(createCard(item)); 
             }
         });
 
