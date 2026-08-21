@@ -545,7 +545,6 @@
                 globalScheduleData = response.schedule || []; 
                 globalResultsData = response.results || [];
                 
-                .response.users?.find(u => String(u.Mobile) === String(savedMobile))
                 if (response.users) {
                     let currentUser = response.users.find(u => String(u.Mobile) === String(savedMobile));
                     if (currentUser && currentUser.Name) {
