@@ -80,14 +80,14 @@
         .tab-pane.active-pane { display: block; }
         .scroll-container { height: 100%; overflow-y: auto; padding-bottom: 50px; }
 
-        /* Schedule Card Styles with Modern Favorite Button */
+        /* Schedule Card Styles with Heart Favorite Button */
         .schedule-card { background: var(--card-bg); border: 1px solid var(--border-color); border-left: 4px solid #cbd5e1; padding: 14px; margin-bottom: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; position: relative; transition: all 0.2s; }
-        .schedule-card.favorited { border-left-color: #f59e0b; background: rgba(245, 158, 11, 0.03); }
+        .schedule-card.favorited { border-left-color: #ef4444; background: rgba(239, 68, 68, 0.03); }
         
         .card-content { flex: 1; padding-right: 10px; }
         .card-right { display: flex; align-items: center; gap: 10px; }
 
-        /* Stylish Favorite Button */
+        /* Heart Favorite Button */
         .fav-btn { background: var(--bg-color); border: 1px solid var(--border-color); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: transform 0.2s, background 0.2s; }
         .fav-btn:hover { transform: scale(1.1); background: var(--border-color); }
         
@@ -164,7 +164,7 @@
             <button class="tab-btn active" onclick="switchTab('live', this)">Live</button>
             <button class="tab-btn" onclick="switchTab('upcoming', this)">Upcoming</button>
             <button class="tab-btn" onclick="switchTab('completed', this)">Finished</button>
-            <button class="tab-btn" onclick="switchTab('favorites', this)">⭐ Saved</button>
+            <button class="tab-btn" onclick="switchTab('favorites', this)">❤️ Saved</button>
             <button class="tab-btn" onclick="switchTab('results', this)">Results</button>
         </div>
 
@@ -424,7 +424,7 @@
             </div>
             <div class="card-right">
                 <button class="fav-btn" onclick="toggleFavorite('${progType}', event)" title="Save to Favorites">
-                    ${isFav ? '⭐' : '☆'}
+                    ${isFav ? '❤️' : '🤍'}
                 </button>
                 <span class="badge ${status}">${status}</span>
             </div>`;
@@ -441,7 +441,7 @@
             </div>
             ${item['1st Place'] ? `<div class="winner-row"><span class="medal">🥇</span> ${item['1st Place']}</div>` : ''}
             ${item['2nd Place'] ? `<div class="winner-row"><span class="medal">🥈</span> ${item['2nd Place']}</div>` : ''}
-            ${item['3rd Place'] ? `<div class="winner-row"><span class="medal` + `">🥉</span> ${item['3rd Place']}</div>` : ''}
+            ${item['3rd Place'] ? `<div class="winner-row"><span class="medal">🥉</span> ${item['3rd Place']}</div>` : ''}
         `;
         return card;
     }
@@ -492,7 +492,7 @@
         });
 
         let total = globalScheduleData.length;
-        let pct = total > 0 ? Math.round((finished / total) . 100) : 0;
+        let pct = total > 0 ? Math.round((finished / total) * 100) : 0;
         document.getElementById("progressBar").style.width = pct + "%";
         document.getElementById("progress-pct-text").innerText = pct + "%";
         document.getElementById("progress-count-text").innerText = `${finished}/${total}`;
