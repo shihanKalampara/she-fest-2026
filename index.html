@@ -203,8 +203,10 @@
         let savedName = localStorage.getItem("she_fest_name");
         if (savedMobile) {
             showMainApp();
-            if (savedName) {
+            if (savedName && savedName !== "undefined" && savedName !== "null") {
                 document.getElementById("userProfileName").innerText = "👤 " + savedName;
+            } else {
+                document.getElementById("userProfileName").innerText = "👤 User";
             }
         }
     };
@@ -332,7 +334,9 @@
         .then(data => {
             if (data.status === "success") {
                 localStorage.setItem("she_fest_user", mobile);
-                localStorage.setItem("she_fest_name", isRegisterMode && name ? name : "User");
+                // ഡാറ്റയിൽ നിന്ന് വരുന്നതോ യൂസർ നൽകിയതോ ആയ പേര് സേവ് ചെയ്യുക
+                let finalName = data.name || (isRegisterMode && name ? name : "User");
+                localStorage.setItem("she_fest_name", finalName);
                 showMainApp();
             } else if (data.status === "invalid_mobile") {
                 alert("Invalid mobile number format.");
@@ -534,6 +538,16 @@
             .then(response => {
                 globalScheduleData = response.schedule || []; 
                 globalResultsData = response.results || [];
+                
+                // ലോഗിൻ ചെയ്ത യൂസറുടെ പേര് റെസ്പോൺസിൽ നിന്ന് അപ്ഡേറ്റ് ചെയ്യാൻ ശ്രമിക്കുക
+                if (response.users) {
+                    let currentUser = response.users.find(u => String(u.Mobile) === String(savedMobile));
+                    if (currentUser && currentUser.Name) {
+                        localStorage.setItem("she_fest_name", currentUser.Name);
+                        document.getElementById("userProfileName").innerText = "👤 " + currentUser.Name;
+                    }
+                }
+
                 checkLiveAlerts(globalScheduleData);
                 filterData();
             })
