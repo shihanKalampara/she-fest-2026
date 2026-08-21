@@ -80,7 +80,7 @@
         .tab-pane.active-pane { display: block; }
         .scroll-container { height: 100%; overflow-y: auto; padding-bottom: 50px; }
 
-        /* Schedule Card Styles with Click-to-Favorite & Color Highlight */
+        /* Schedule Card Styles */
         .schedule-card { background: var(--card-bg); border: 1px solid var(--border-color); border-left: 4px solid #cbd5e1; padding: 14px; margin-bottom: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; position: relative; transition: all 0.3s ease; cursor: pointer; }
         .schedule-card:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
         
@@ -183,7 +183,7 @@
             <button class="tab-btn active" onclick="switchTab('live', this)">Live</button>
             <button class="tab-btn" onclick="switchTab('upcoming', this)">Upcoming</button>
             <button class="tab-btn" onclick="switchTab('completed', this)">Finished</button>
-            <button class="tab-btn" onclick="switchTab('favorites', this)">⭐ Saved</button>
+            <button class="tab-btn" onclick="switchTab('favorites', this)">⭐</button>
             <button class="tab-btn" onclick="switchTab('results', this)">Results</button>
         </div>
 
@@ -490,10 +490,7 @@
             let status = item.Status ? item.Status.trim().toLowerCase() : '';
             let progType = item['Program Type'] || '';
 
-            if (favorites.includes(progType)) {
-                document.getElementById("favorites-list").appendChild(createCard(item));
-            }
-
+            // Render in respective status tabs
             if (status === 'completed' || status === 'finished') { 
                 finished++; 
                 document.getElementById("completed-list").appendChild(createCard(item)); 
@@ -503,6 +500,11 @@
                 document.getElementById("live-list").appendChild(createCard(item)); 
             } else { 
                 document.getElementById("upcoming-list").appendChild(createCard(item)); 
+            }
+
+            // Also render in favorites tab if favorited
+            if (favorites.includes(progType)) {
+                document.getElementById("favorites-list").appendChild(createCard(item));
             }
         });
 
