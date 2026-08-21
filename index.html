@@ -29,12 +29,12 @@
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg-color); color: var(--text-main); margin: 0; padding: 15px; }
         .container { max-width: 750px; margin: auto; background: var(--card-bg); padding: 20px; border-radius: 16px; box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; position: relative; }
         
-        /* Header Top & Settings Dropdown Menu */
+        /* Header Top & Three Dots Dropdown Menu */
         .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; position: relative; }
         .settings-container { position: relative; display: none; }
         
-        .settings-btn { background: #0f172a; color: #ffffff; border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        .settings-btn:hover { background: #334155; }
+        .settings-btn { background: transparent; color: var(--primary); border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 22px; font-weight: bold; }
+        .settings-btn:hover { background: #f1f5f9; }
         
         .dropdown-menu { display: none; position: absolute; right: 0; top: 48px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); width: 170px; z-index: 100; overflow: hidden; }
         .dropdown-menu button { width: 100%; padding: 12px 14px; background: transparent; border: none; text-align: left; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f1f5f9; }
@@ -100,9 +100,9 @@
         <div style="width: 40px;"></div>
         <img src="https://lh3.googleusercontent.com/d/1e-8f5w_srCHu4YcRYqZx5pdR7DNyEB9a" alt="Logo" style="max-width: 150px; display: block; margin: auto;">
         
-        <!-- Settings Icon & Dropdown -->
+        <!-- Three Dots Icon & Dropdown -->
         <div class="settings-container" id="settingsContainer">
-            <button class="settings-btn" onclick="toggleDropdown()">⚙️</button>
+            <button class="settings-btn" onclick="toggleDropdown()">⋮</button>
             <div class="dropdown-menu" id="dropdownMenu">
                 <button onclick="resetMobile()">🔄 Reset Mobile</button>
                 <button class="logout-opt" onclick="logout()">🚪 Logout</button>
@@ -257,7 +257,6 @@
         });
     }
 
-    // Reset Mobile / Password Functionality
     function resetMobile() {
         let currentMobile = localStorage.getItem("she_fest_user");
         let newMobile = prompt("Enter your new 10-digit mobile number:");
