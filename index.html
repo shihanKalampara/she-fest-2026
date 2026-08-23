@@ -3,112 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fest App - Shefest & Hefest</title>
+    <title>Fest Portal</title>
     <style>
         :root {
-            --primary-color: #4f46e5;
-            --secondary-color: #ec4899;
-            --bg-color: #f3f4f6;
+            --bg-main: #f8fafc;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
             --card-bg: #ffffff;
-            --text-color: #1f2937;
+            --border-color: #e2e8f0;
         }
+
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-color); padding: 15px; }
-        .container { max-width: 600px; margin: 0 auto; background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h2 { text-align: center; margin-bottom: 20px; color: var(--primary-color); }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 16px; }
-        button { width: 100%; padding: 12px; background: var(--primary-color); color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        button:hover { opacity: 0.9; }
-        .secondary-btn { background: #6b7280; }
+        body { background-color: var(--bg-main); color: var(--text-dark); padding: 12px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        
+        .main-container { width: 100%; max-width: 480px; background: var(--card-bg); border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); overflow: hidden; display: flex; flex-direction: column; }
+
+        /* Header Styling */
+        .app-header { background: linear-gradient(135deg, var(--primary), #8b5cf6); color: white; padding: 20px; text-align: center; }
+        .app-header h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+        .app-header p { font-size: 13px; opacity: 0.9; }
+
+        /* Auth Screen */
+        .auth-box { padding: 24px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; }
+        .form-group input, .form-group textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 15px; outline: none; transition: border-color 0.2s; }
+        .form-group input:focus, .form-group textarea:focus { border-color: var(--primary); }
+        
+        .btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        .btn:hover { background: var(--primary-hover); }
+        .btn-text { background: transparent; color: var(--primary); margin-top: 10px; }
+        .btn-text:hover { background: #f1f5f9; color: var(--primary-hover); }
+
+        /* App Tabs Navigation */
+        .nav-bar { display: flex; background: #f1f5f9; border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .nav-item { flex: 1; padding: 12px 8px; text-align: center; font-size: 12px; font-weight: 600; color: var(--text-muted); background: none; border: none; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+        .nav-item.active { color: var(--primary); background: white; border-bottom: 2px solid var(--primary); }
+
+        /* Tab Contents */
+        .tab-body { padding: 16px; flex: 1; overflow-y: auto; max-height: 400px; }
         .hidden { display: none !important; }
-        .nav-tabs { display: flex; justify-content: space-around; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; }
-        .nav-tab { background: none; border: none; font-size: 15px; font-weight: bold; cursor: pointer; color: #4b5563; width: auto; padding: 5px 10px; margin: 0; }
-        .nav-tab.active { color: var(--primary-color); border-bottom: 3px solid var(--primary-color); }
-        .card { background: #f9fafb; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid var(--primary-color); }
-        .quiz-option { display: block; background: #e5e7eb; padding: 10px; border-radius: 6px; margin: 8px 0; cursor: pointer; text-align: left; }
-        .quiz-option:hover { background: #d1d5db; }
-        #loading { text-align: center; font-weight: bold; color: #6b7280; margin: 20px 0; }
+
+        /* Cards Style */
+        .item-card { background: white; border: 1px solid var(--border-color); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .item-card .time { font-size: 11px; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 4px; }
+        .item-card .title { font-size: 15px; font-weight: 600; color: var(--text-dark); margin-bottom: 2px; }
+        .item-card .meta { font-size: 13px; color: var(--text-muted); }
+
+        /* Quiz Options */
+        .quiz-opt { display: block; width: 100%; text-align: left; padding: 12px 14px; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; margin-top: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: 0.2s; }
+        .quiz-opt:hover { background: #e0e7ff; border-color: var(--primary); color: var(--primary); }
+
+        .loading-text { text-align: center; color: var(--text-muted); font-size: 14px; padding: 20px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <!-- AUTH SECTION (Login / Register) -->
-    <div id="authSection">
-        <h2 id="authTitle">ലോഗിൻ ചെയ്യുക</h2>
+<div class="main-container">
+    <div class="app-header">
+        <h1 id="headerTitle">Fest Portal</h1>
+        <p id="headerSubtitle">ലോഗിൻ ചെയ്ത് വിവരങ്ങൾ അറിയൂ</p>
+    </div>
+
+    <!-- AUTH SECTION -->
+    <div id="authSection" class="auth-box">
         <div class="form-group">
             <label>പേര് (Name)</label>
             <input type="text" id="nameInput" placeholder="നിങ്ങളുടെ പേര് നൽകുക">
         </div>
         <div class="form-group">
             <label>മൊബൈൽ നമ്പർ (Mobile Number)</label>
-            <input type="tel" id="mobileInput" placeholder="10 അക്ക മൊബൈൽ നമ്പർ">
+            <input type="tel" id="mobileInput" placeholder="10 അക്ക നമ്പർ">
         </div>
-        <button id="authBtn" onclick="handleAuth()">ലോഗിൻ</button>
-        <button class="secondary-btn" onclick="toggleAuthMode()" style="margin-top: 10px;">അക്കൗണ്ട് ഇല്ലെങ്കിൽ രജിസ്റ്റർ ചെയ്യാം</button>
+        <button class="btn" id="authBtn" onclick="handleAuth()">ലോഗിൻ ചെയ്യുക</button>
+        <button class="btn btn-text" onclick="toggleAuthMode()" id="switchAuthBtn">അക്കൗണ്ട് ഇല്ലേ? രജിസ്റ്റർ ചെയ്യാം</button>
     </div>
 
-    <!-- MAIN APP SECTION -->
-    <div id="appSection" class="hidden">
-        <div class="nav-tabs">
-            <button class="nav-tab active" onclick="switchTab('shefest')">Shefest</button>
-            <button class="nav-tab" onclick="switchTab('hefest')">Hefest</button>
-            <button class="nav-tab" onclick="switchTab('results')">Results</button>
-            <button class="nav-tab" onclick="switchTab('quiz')">Quiz</button>
-            <button class="nav-tab" onclick="switchTab('feedback')">Feedback</button>
+    <!-- DASHBOARD SECTION -->
+    <div id="appSection" class="hidden" style="display: flex; flex-direction: column; flex: 1;">
+        <div class="nav-bar">
+            <button class="nav-item active" onclick="switchTab('shefest')">Shefest</button>
+            <button class="nav-item" onclick="switchTab('hefest')">Hefest</button>
+            <button class="nav-item" onclick="switchTab('results')">Results</button>
+            <button class="nav-item" onclick="switchTab('quiz')">Quiz</button>
+            <button class="nav-item" onclick="switchTab('feedback')">Feedback</button>
         </div>
 
-        <div id="loading">ലോഡ് ചെയ്യുന്നു... ഡാറ്റ കാത്തിരിക്കുക...</div>
+        <div class="tab-body">
+            <div id="loadingDiv" class="loading-text">ഡാറ്റ ലോഡ് ചെയ്യുന്നു...</div>
 
-        <!-- She Fest Tab -->
-        <div id="shefestTab" class="tab-content">
-            <h2>Shefest Schedule</h2>
-            <div id="shefestList"></div>
-        </div>
+            <!-- Shefest Tab -->
+            <div id="shefestTab" class="tab-pane">
+                <div id="shefestList"></div>
+            </div>
 
-        <!-- He Fest Tab -->
-        <div id="hefestTab" class="tab-content hidden">
-            <h2>Hefest Schedule</h2>
-            <div id="hefestList"></div>
-        </div>
+            <!-- Hefest Tab -->
+            <div id="hefestTab" class="tab-pane hidden">
+                <div id="hefestList"></div>
+            </div>
 
-        <!-- Results Tab -->
-        <div id="resultsTab" class="tab-content hidden">
-            <h2>Fest Results</h2>
-            <div id="resultsList"></div>
-        </div>
+            <!-- Results Tab -->
+            <div id="resultsTab" class="tab-pane hidden">
+                <div id="resultsList"></div>
+            </div>
 
-        <!-- Quiz Tab -->
-        <div id="quizTab" class="tab-content hidden">
-            <h2>Live Quiz</h2>
-            <div id="quizContainer">
-                <p id="quizStatusMsg">ക്വിസ് ഇതുവരെ ആരംഭിച്ചിട്ടില്ല. കാത്തിരിക്കുക...</p>
-                <div id="questionBox" class="hidden">
-                    <p id="qText" style="font-weight: bold; margin-bottom: 15px;"></p>
-                    <button class="quiz-option" id="optA" onclick="submitAnswer('A')"></button>
-                    <button class="quiz-option" id="optB" onclick="submitAnswer('B')"></button>
-                    <button class="quiz-option" id="optC" onclick="submitAnswer('C')"></button>
-                    <button class="quiz-option" id="optD" onclick="submitAnswer('D')"></button>
+            <!-- Quiz Tab -->
+            <div id="quizTab" class="tab-pane hidden">
+                <div id="quizContainer">
+                    <p id="quizStatusMsg" class="loading-text">ക്വിസ് ഇതുവരെ ആരംഭിച്ചിട്ടില്ല...</p>
+                    <div id="questionBox" class="hidden">
+                        <p id="qText" style="font-weight: 600; font-size: 15px; margin-bottom: 12px;"></p>
+                        <button class="quiz-opt" id="optA" onclick="submitAnswer('A')"></button>
+                        <button class="quiz-opt" id="optB" onclick="submitAnswer('B')"></button>
+                        <button class="quiz-opt" id="optC" onclick="submitAnswer('C')"></button>
+                        <button class="quiz-opt" id="optD" onclick="submitAnswer('D')"></button>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Feedback Tab -->
-        <div id="feedbackTab" class="tab-content hidden">
-            <h2>ഫീഡ്‌ബാക്ക് നൽകുക</h2>
-            <div class="form-group">
-                <textarea id="feedbackText" rows="4" placeholder="നിങ്ങളുടെ അഭിപ്രായങ്ങൾ ഇവിടെ എഴുതുക..."></textarea>
+            <!-- Feedback Tab -->
+            <div id="feedbackTab" class="tab-pane hidden">
+                <div class="form-group">
+                    <label>നിങ്ങളുടെ അഭിപ്രായങ്ങൾ</label>
+                    <textarea id="feedbackText" rows="4" placeholder="ഫീഡ്‌ബാക്ക് ഇവിടെ എഴുതുക..."></textarea>
+                </div>
+                <button class="btn" onclick="sendFeedback()">ഫീഡ്‌ബാക്ക് അയക്കുക</button>
             </div>
-            <button onclick="sendFeedback()">ഫീഡ്‌ബാക്ക് അയക്കുക</button>
         </div>
     </div>
 </div>
 
 <script>
     // ** ഇവിടെ നിങ്ങളുടെ ഗൂഗിൾ ആപ്പ്സ് സ്ക്രിപ്റ്റിന്റെ വെബ് ആപ്പ് ലിങ്ക് നൽകുക **
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbybS1JgP0W0CaFI7BR4wI1OoSO6zv86cBr0OwqerI9cOZmpEh1ngIcnYExyRBTe7JUYEw/exec";
+    const WEB_APP_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
 
     let isRegisterMode = false;
     let currentUser = null;
@@ -118,8 +147,8 @@
 
     function toggleAuthMode() {
         isRegisterMode = !isRegisterMode;
-        document.getElementById('authTitle').innerText = isRegisterMode ? "പുതിയ രജിസ്ട്രേഷൻ" : "ലോഗിൻ ചെയ്യുക";
-        document.getElementById('authBtn').innerText = isRegisterMode ? "രജിസ്റ്റർ ചെയ്യുക" : "ലോഗിൻ";
+        document.getElementById('authBtn').innerText = isRegisterMode ? "രജിസ്റ്റർ ചെയ്യുക" : "ലോഗിൻ ചെയ്യുക";
+        document.getElementById('switchAuthBtn').innerText = isRegisterMode ? "പഴയ അക്കൗണ്ട് ഉണ്ടോ? ലോഗിൻ ചെയ്യാം" : "അക്കൗണ്ട് ഇല്ലേ? രജിസ്റ്റർ ചെയ്യാം";
     }
 
     function handleAuth() {
@@ -127,12 +156,12 @@
         const mobile = document.getElementById('mobileInput').value.trim();
 
         if (!mobile || (isRegisterMode && !name)) {
-            alert("എല്ലാ വിവരങ്ങളും കൃത്യമായി നൽകുക!");
+            alert("ദയവായി വിവരങ്ങൾ നൽകുക!");
             return;
         }
 
         const action = isRegisterMode ? "register" : "login";
-        
+
         fetch(WEB_APP_URL, {
             method: "POST",
             body: JSON.stringify({ action: action, name: name, mobile: mobile })
@@ -144,19 +173,21 @@
                 currentMobile = mobile;
                 document.getElementById('authSection').classList.add('hidden');
                 document.getElementById('appSection').classList.remove('hidden');
+                document.getElementById('headerTitle').innerText = "സ്വാഗതം, " + currentUser;
+                document.getElementById('headerSubtitle').innerText = "ഫെസ്റ്റ് പോർട്ടൽ ഡാഷ്‌ബോർഡ്";
                 fetchAllData();
-                setInterval(fetchQuizData, 5000); // Check quiz every 5 seconds
+                setInterval(fetchQuizData, 5000);
             } else if (data.status === "exists") {
-                alert("ഈ നമ്പർ ഇതിനകം രജിസ്റ്റർ ചെയ്തിട്ടുണ്ട്. ലോഗിൻ ചെയ്യുക.");
+                alert("ഈ നമ്പർ ഇതിനകം രജിസ്റ്റർ ചെയ്തിട്ടുണ്ട്.");
             } else if (data.status === "not_found") {
                 alert("ഈ നമ്പർ കണ്ടെത്താനായില്ല. ദയവായി രജിസ്റ്റർ ചെയ്യുക.");
             } else if (data.status === "blocked") {
-                alert("നിങ്ങളുടെ അക്കൗണ്ട് ബ്ലോക്ക് ചെയ്തിരിക്കുന്നു.");
+                alert("ഈ അക്കൗണ്ട് ബ്ലോക്ക് ചെയ്തിരിക്കുന്നു.");
             } else {
-                alert("എന്തോ കുഴപ്പം സംഭവിച്ചു. വീണ്ടും ശ്രമിക്കുക.");
+                alert("എന്തോ പ്രശ്നം സംഭവിച്ചു. വീണ്ടും ശ്രമിക്കുക.");
             }
         })
-        .catch(err => alert("ചെക്ക് ചെയ്യാൻ കഴിഞ്ഞില്ല: " + err));
+        .catch(err => alert("എറർ: " + err));
     }
 
     function fetchAllData() {
@@ -164,49 +195,47 @@
         .then(res => res.json())
         .then(data => {
             appData = data;
-            document.getElementById('loading').classList.add('hidden');
-            renderShefest();
-            renderHefest();
+            document.getElementById('loadingDiv').classList.add('hidden');
+            renderList('shefestList', appData.schedule);
+            renderList('hefestList', appData.boysSchedule);
             renderResults();
         })
         .catch(err => console.error(err));
     }
 
-    function renderShefest() {
-        const container = document.getElementById('shefestList');
-        container.innerHTML = appData.schedule.map(item => `
-            <div class="card">
-                <p><b>സമയം:</b> ${item.Time || ''}</p>
-                <p><b>വിഷയം/ഇനം:</b> ${item['Program Type'] || ''}</p>
-                <p><b>പേര്:</b> ${item['Student Name'] || ''} (ക്ലാസ്: ${item.Class || ''})</p>
+    function renderList(elementId, listData) {
+        const container = document.getElementById(elementId);
+        if (!listData || listData.length === 0) {
+            container.innerHTML = '<p class="loading-text">ഡാറ്റ ലഭ്യമല്ല</p>';
+            return;
+        }
+        container.innerHTML = listData.map(item => `
+            <div class="item-card">
+                <div class="time">${item.Time || 'സമയം വ്യക്തമാക്കിയിട്ടില്ല'}</div>
+                <div class="title">${item['Program Type'] || ''}</div>
+                <div class="meta">പേര്: <b>${item['Student Name'] || '-'}</b> (ക്ലാസ്: ${item.Class || '-'})</div>
             </div>
-        `).join('') || '<p>ഡാറ്റ ലഭ്യമല്ല</p>';
-    }
-
-    function renderHefest() {
-        const container = document.getElementById('hefestList');
-        container.innerHTML = appData.boysSchedule.map(item => `
-            <div class="card">
-                <p><b>സമയം:</b> ${item.Time || ''}</p>
-                <p><b>വിഷയം/ഇനം:</b> ${item['Program Type'] || ''}</p>
-                <p><b>പേര്:</b> ${item['Student Name'] || ''} (ക്ലാസ്: ${item.Class || ''})</p>
-            </div>
-        `).join('') || '<p>ഡാറ്റ ലഭ്യമല്ല</p>';
+        `).join('');
     }
 
     function renderResults() {
         const container = document.getElementById('resultsList');
+        if (!appData.results || appData.results.length === 0) {
+            container.innerHTML = '<p class="loading-text">റിസൾട്ട് ലഭ്യമല്ല</p>';
+            return;
+        }
         container.innerHTML = appData.results.map(item => `
-            <div class="card">
-                <p><b>ഇനം:</b> ${item['Program Type'] || ''}</p>
-                <p><b>വിജയി:</b> ${item['Student Name'] || ''} (ക്ലാസ്: ${item.Class || ''})</p>
+            <div class="item-card">
+                <div class="time">${item['Program Type'] || ''}</div>
+                <div class="title">വിജയി: ${item['Student Name'] || ''}</div>
+                <div class="meta">ക്ലാസ്: ${item.Class || ''}</div>
             </div>
-        `).join('') || '<p>റിസൾട്ട് ലഭ്യമല്ല</p>';
+        `).join('');
     }
 
     function switchTab(tabName) {
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-        document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
         
         document.getElementById(tabName + 'Tab').classList.remove('hidden');
         event.target.classList.add('active');
@@ -254,7 +283,7 @@
         .then(res => res.json())
         .then(data => {
             if (data.status === "success") {
-                alert(isCorrect ? "ശരിയുത്തരം! 🎉" : "തെറ്റുത്തരം! ❌");
+                alert(isCorrect ? "ശരിയുത്തരം! 🎉 (+10 Points)" : "തെറ്റുത്തരം! ❌");
             }
         });
     }
@@ -262,7 +291,7 @@
     function sendFeedback() {
         const feedback = document.getElementById('feedbackText').value.trim();
         if (!feedback) {
-            alert("ദയവായി ഫീഡ്‌ബാക്ക് എഴുതുക!");
+            alert("ഫീഡ്‌ബാക്ക് എഴുതുക!");
             return;
         }
 
