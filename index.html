@@ -41,6 +41,8 @@
         .container { max-width: 750px; margin: auto; background: var(--card-bg); padding: 20px; border-radius: 16px; box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05); border: 1px solid var(--border-color); position: relative; }
         
         .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .app-logo { width: 75px; height: 75px; object-fit: contain; display: block; margin: auto; border-radius: 50%; }
+        
         .settings-container { position: relative; display: none; }
         .settings-btn { background: transparent; color: var(--text-main); border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 22px; font-weight: bold; }
         .settings-btn:hover { background: rgba(0,0,0,0.05); }
@@ -97,7 +99,6 @@
         .medal { font-size: 20px; margin-right: 10px; }
         .winner-row { background: var(--bg-color); padding: 10px; border-radius: 8px; font-size: 13px; border: 1px solid var(--border-color); margin-bottom: 5px; display: flex; align-items: center; }
         
-        /* Feedback Form Style */
         .feedback-box textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-main); border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; outline: none; }
     </style>
 </head>
@@ -106,8 +107,7 @@
 <div class="container">
     <div class="header-top">
         <div style="width: 40px;"></div>
-        <!-- പുതിയ ലോഗോ -->
-        <img src="https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV" alt="Logo" style="max-width: 90px; display: block; margin: auto; border-radius: 50%;">
+        <img src="https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV" alt="Logo" class="app-logo">
         
         <div class="settings-container" id="settingsContainer">
             <button class="settings-btn" onclick="toggleDropdown()">⋮</button>
@@ -178,16 +178,13 @@
 </div>
 
 <script>
-    // Background Notification / Service Worker Setup
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js').then(reg => {
-                console.log('Service Worker Registered');
-            }).catch(err => console.log('SW failed:', err));
+            navigator.serviceWorker.register('sw.js').catch(err => console.log('SW failed:', err));
         });
     }
 
-    const sheetURL = "https://script.google.com/macros/s/AKfycbwrQMmCEFoGI9rQlWxV-sfX0I6mvtCUcJCSanary60Em_XGKDX9IZApHxfFTy8cQbBS1w/exec"; // നിങ്ങളുടെ Google Apps Script URL ഇവിടെ നൽകുക
+    const sheetURL = "YOUR_APPS_SCRIPT_WEB_APP_URL_HERE"; // നിങ്ങളുടെ Google Apps Script URL ഇവിടെ നൽകുക
     let globalSheFestData = [];
     let globalHeFestData = [];
     let globalResultsData = [];
@@ -266,7 +263,6 @@
         }
     }
 
-    // ആപ്പ് ക്ലോസ് ചെയ്തിരുന്നാലും നോട്ടിഫിക്കേഷൻ ലഭിക്കാൻ (Background Push Simulation via SW / Periodic check)
     function checkLiveAlerts(dataArray) {
         if (!("Notification" in window) || Notification.permission !== "granted") return;
 
@@ -276,7 +272,7 @@
             let studentName = item['Student Name'] || '';
 
             if (status === 'live' && !previousLivePrograms.includes(progName)) {
-                if (ServiceWorkerRegistration && navigator.serviceWorker.controller) {
+                if (navigator.serviceWorker && navigator.serviceWorker.controller) {
                     navigator.serviceWorker.ready.then(reg => {
                         reg.showNotification("🔴 Live Now: " + progName, {
                             body: `${studentName} - Stage is live now!`,
@@ -470,7 +466,6 @@
         return card;
     }
 
-    // ഓട്ടോ സ്ക്രോളിംഗ്
     setInterval(() => {
         if (!isAutoScrollEnabled) return;
         const searchVal = document.getElementById("searchInput").value;
