@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thiruvasantham 1501 - Noorul Huda Madrasa Kombamkallu</title>
     
-    <!-- PWA Setup -->
+    <!-- PWA Setup & Custom Logo Icon -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f172a">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="She Fest">
-    <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1e-8f5w_srCHu4YcRYqZx5pdR7DNyEB9a">
+    <meta name="apple-mobile-web-app-title" content="Fest App">
+    <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV">
+    <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV">
 
     <style>
         :root {
@@ -37,11 +38,10 @@
         }
 
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg-color); color: var(--text-main); margin: 0; padding: 15px; transition: background 0.3s, color 0.3s; }
-        .container { max-width: 750px; margin: auto; background: var(--card-bg); padding: 20px; border-radius: 16px; box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05); border: 1px solid var(--border-color); position: relative; transition: background 0.3s, border 0.3s; }
+        .container { max-width: 750px; margin: auto; background: var(--card-bg); padding: 20px; border-radius: 16px; box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05); border: 1px solid var(--border-color); position: relative; }
         
-        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; position: relative; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .settings-container { position: relative; display: none; }
-        
         .settings-btn { background: transparent; color: var(--text-main); border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 22px; font-weight: bold; }
         .settings-btn:hover { background: rgba(0,0,0,0.05); }
         
@@ -50,12 +50,11 @@
         .dropdown-menu button { width: 100%; padding: 12px 14px; background: transparent; color: var(--text-main); border: none; text-align: left; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); }
         .dropdown-menu button:hover { background: var(--bg-color); }
         .dropdown-menu button.logout-opt { color: #ef4444; border-bottom: none; justify-content: flex-start; gap: 8px; }
-        .dropdown-menu button.logout-opt:hover { background: #fef2f2; }
 
         h1 { text-align: center; color: var(--text-main); margin: 10px 0 5px 0; font-size: 24px; font-weight: 700; }
         .sub-heading { text-align: center; color: var(--text-muted); font-weight: 500; margin-bottom: 20px; text-transform: uppercase; font-size: 11px; letter-spacing: 1.5px; }
 
-        /* Auth Screen Styling */
+        /* Auth Screen */
         #auth-screen { text-align: center; padding: 30px 10px; }
         .auth-box { max-width: 320px; margin: auto; background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
         .auth-box input { width: 100%; padding: 10px; margin: 8px 0 15px 0; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-main); border-radius: 8px; box-sizing: border-box; font-size: 13px; outline: none; }
@@ -63,10 +62,8 @@
         .toggle-text { font-size: 12px; text-align: center; margin-top: 15px; color: #2563eb; cursor: pointer; }
 
         #main-app { display: none; }
-
         .search-box { margin-bottom: 15px; }
-        .search-input { width: 100%; padding: 10px 14px; font-size: 13px; border: 1px solid var(--border-color); border-radius: 10px; outline: none; box-sizing: border-box; background: var(--bg-color); color: var(--text-main); transition: all 0.3s; }
-        .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.05); }
+        .search-input { width: 100%; padding: 10px 14px; font-size: 13px; border: 1px solid var(--border-color); border-radius: 10px; outline: none; box-sizing: border-box; background: var(--bg-color); color: var(--text-main); }
 
         .progress-box { background: var(--bg-color); border: 1px solid var(--border-color); padding: 12px 16px; border-radius: 12px; margin-bottom: 20px; }
         .progress-header { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 600; }
@@ -80,46 +77,28 @@
         .tab-pane.active-pane { display: block; }
         .scroll-container { height: 100%; overflow-y: auto; padding-bottom: 50px; }
 
-        /* Schedule Card Styles */
-        .schedule-card { background: var(--card-bg); border: 1px solid var(--border-color); border-left: 4px solid #cbd5e1; padding: 14px; margin-bottom: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; position: relative; transition: all 0.3s ease; }
-        
+        .schedule-card { background: var(--card-bg); border: 1px solid var(--border-color); border-left: 4px solid #cbd5e1; padding: 14px; margin-bottom: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
         .card-content { flex: 1; padding-right: 10px; }
         .card-right { display: flex; align-items: center; gap: 10px; }
         
         .result-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
         .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
+        .category-pill { font-size: 12px; font-weight: 700; color: #7c3aed; background: #f3e8ff; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; }
         
-        .category-pill { font-size: 12px; font-weight: 700; color: #7c3aed; background: #f3e8ff; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
-        
-        .badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; color: white; text-transform: uppercase; display: inline-flex; align-items: center; gap: 4px; }
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; color: white; text-transform: uppercase; }
         .badge.Upcoming { background: var(--accent-upcoming); }
-        .badge.Completed { background: var(--accent-completed); }
+        .badge.Completed, .badge.Finished { background: var(--accent-completed); }
         .badge.Cancelled { background: var(--accent-cancelled); }
-        
-        /* Blinking Live Badge & Pulse Dot Animation */
-        .badge.Live { 
-            background: var(--accent-live); 
-            animation: pulseLive 1.2s infinite; 
-        }
+        .badge.Live { background: var(--accent-live); animation: pulseLive 1.2s infinite; }
 
-        .live-dot {
-            width: 8px;
-            height: 8px;
-            background-color: #ef4444;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 5px;
-            animation: pulseLive 1.2s infinite;
-        }
-
-        @keyframes pulseLive {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.3; transform: scale(0.85); }
-            100% { opacity: 1; transform: scale(1); }
-        }
+        .live-dot { width: 8px; height: 8px; background-color: #ef4444; border-radius: 50%; display: inline-block; margin-right: 5px; animation: pulseLive 1.2s infinite; }
+        @keyframes pulseLive { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(0.85); } 100% { opacity: 1; transform: scale(1); } }
         
         .medal { font-size: 20px; margin-right: 10px; }
         .winner-row { background: var(--bg-color); padding: 10px; border-radius: 8px; font-size: 13px; border: 1px solid var(--border-color); margin-bottom: 5px; display: flex; align-items: center; }
+        
+        /* Feedback Form Style */
+        .feedback-box textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-main); border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; outline: none; }
     </style>
 </head>
 <body>
@@ -127,7 +106,8 @@
 <div class="container">
     <div class="header-top">
         <div style="width: 40px;"></div>
-        <img src="https://lh3.googleusercontent.com/d/1e-8f5w_srCHu4YcRYqZx5pdR7DNyEB9a" alt="Logo" style="max-width: 150px; display: block; margin: auto;">
+        <!-- പുതിയ ലോഗോ -->
+        <img src="https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV" alt="Logo" style="max-width: 90px; display: block; margin: auto; border-radius: 50%;">
         
         <div class="settings-container" id="settingsContainer">
             <button class="settings-btn" onclick="toggleDropdown()">⋮</button>
@@ -141,7 +121,7 @@
         </div>
     </div>
     
-    <h1>She Fest 2026</h1>
+    <h1>Fest Live & Results</h1>
     <div class="sub-heading">Noorul Huda Madrasa, Kombamkallu</div>
 
     <!-- AUTHENTICATION SCREEN -->
@@ -177,32 +157,43 @@
         </div>
 
         <div class="tab-buttons">
-            <button class="tab-btn active" onclick="switchTab('live', this)">Live</button>
-            <button class="tab-btn" onclick="switchTab('upcoming', this)">Upcoming</button>
-            <button class="tab-btn" onclick="switchTab('completed', this)">Finished</button>
+            <button class="tab-btn active" onclick="switchTab('she-fest', this)">She Fest</button>
+            <button class="tab-btn" onclick="switchTab('he-fest', this)">He Fest</button>
             <button class="tab-btn" onclick="switchTab('results', this)">Results</button>
+            <button class="tab-btn" onclick="switchTab('feedback', this)">Feedback</button>
         </div>
 
-        <div id="live-pane" class="tab-pane active-pane"><div id="live-list" class="scroll-container"></div></div>
-        <div id="upcoming-pane" class="tab-pane"><div id="upcoming-list" class="scroll-container"></div></div>
-        <div id="completed-pane" class="tab-pane"><div id="completed-list" class="scroll-container"></div></div>
+        <div id="she-fest-pane" class="tab-pane active-pane"><div id="she-fest-list" class="scroll-container"></div></div>
+        <div id="he-fest-pane" class="tab-pane"><div id="he-fest-list" class="scroll-container"></div></div>
         <div id="results-pane" class="tab-pane"><div id="results-list" class="scroll-container"></div></div>
+        <div id="feedback-pane" class="tab-pane">
+            <div class="scroll-container feedback-box">
+                <h3>Send Feedback / രക്ഷകർത്താക്കളുടെ ഫീഡ്‌ബാക്ക്</h3>
+                <p style="font-size: 12px; color: var(--text-muted);">പ്രോഗ്രാമിനെക്കുറിച്ചുള്ള നിങ്ങളുടെ അഭിപ്രായങ്ങളും നിർദ്ദേശങ്ങളും ഇവിടെ അയക്കാം:</p>
+                <textarea id="feedbackText" placeholder="Write your feedback here..."></textarea>
+                <button class="auth-btn" onclick="sendFeedback()">Submit Feedback</button>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
+    // Background Notification / Service Worker Setup
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js').catch(err => console.log('SW failed:', err));
+            navigator.serviceWorker.register('sw.js').then(reg => {
+                console.log('Service Worker Registered');
+            }).catch(err => console.log('SW failed:', err));
         });
     }
 
-    const sheetURL = "https://script.google.com/macros/s/AKfycbwrQMmCEFoGI9rQlWxV-sfX0I6mvtCUcJCSanary60Em_XGKDX9IZApHxfFTy8cQbBS1w/exec";
-    let globalScheduleData = [];
+    const sheetURL = "YOUR_APPS_SCRIPT_WEB_APP_URL_HERE"; // നിങ്ങളുടെ Google Apps Script URL ഇവിടെ നൽകുക
+    let globalSheFestData = [];
+    let globalHeFestData = [];
     let globalResultsData = [];
     let isRegisterMode = false;
-    let isAutoScrollEnabled = localStorage.getItem("she_fest_autoscroll") !== "false";
-    let isDarkModeEnabled = localStorage.getItem("she_fest_darkmode") === "true";
+    let isAutoScrollEnabled = localStorage.getItem("fest_autoscroll") !== "false";
+    let isDarkModeEnabled = localStorage.getItem("fest_darkmode") === "true";
     let previousLivePrograms = [];
 
     window.onload = function() {
@@ -212,8 +203,8 @@
         updateDarkModeUI();
         updateAutoScrollUI();
 
-        let savedMobile = localStorage.getItem("she_fest_user");
-        let savedName = localStorage.getItem("she_fest_name");
+        let savedMobile = localStorage.getItem("fest_user");
+        let savedName = localStorage.getItem("fest_name");
         if (savedMobile) {
             showMainApp();
             if (savedName && savedName !== "undefined" && savedName !== "null") {
@@ -240,7 +231,7 @@
 
     function toggleAutoScroll() {
         isAutoScrollEnabled = !isAutoScrollEnabled;
-        localStorage.setItem("she_fest_autoscroll", isAutoScrollEnabled);
+        localStorage.setItem("fest_autoscroll", isAutoScrollEnabled);
         updateAutoScrollUI();
     }
 
@@ -253,7 +244,7 @@
 
     function toggleDarkMode() {
         isDarkModeEnabled = !isDarkModeEnabled;
-        localStorage.setItem("she_fest_darkmode", isDarkModeEnabled);
+        localStorage.setItem("fest_darkmode", isDarkModeEnabled);
         if (isDarkModeEnabled) {
             document.documentElement.setAttribute('data-theme', 'dark');
         } else {
@@ -275,23 +266,33 @@
         }
     }
 
-    function checkLiveAlerts(scheduleData) {
+    // ആപ്പ് ക്ലോസ് ചെയ്തിരുന്നാലും നോട്ടിഫിക്കേഷൻ ലഭിക്കാൻ (Background Push Simulation via SW / Periodic check)
+    function checkLiveAlerts(dataArray) {
         if (!("Notification" in window) || Notification.permission !== "granted") return;
 
-        scheduleData.forEach(item => {
+        dataArray.forEach(item => {
             let status = item.Status ? item.Status.trim().toLowerCase() : '';
             let progName = item['Program Type'] || 'Program';
             let studentName = item['Student Name'] || '';
 
             if (status === 'live' && !previousLivePrograms.includes(progName)) {
-                new Notification("🔴 Live Now: " + progName, {
-                    body: `${studentName} - Stage is live now!`,
-                    icon: "https://lh3.googleusercontent.com/d/1e-8f5w_srCHu4YcRYqZx5pdR7DNyEB9a"
-                });
+                if (ServiceWorkerRegistration && navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.ready.then(reg => {
+                        reg.showNotification("🔴 Live Now: " + progName, {
+                            body: `${studentName} - Stage is live now!`,
+                            icon: "https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV"
+                        });
+                    });
+                } else {
+                    new Notification("🔴 Live Now: " + progName, {
+                        body: `${studentName} - Stage is live now!`,
+                        icon: "https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV"
+                    });
+                }
             }
         });
 
-        previousLivePrograms = scheduleData
+        previousLivePrograms = dataArray
             .filter(item => (item.Status || '').trim().toLowerCase() === 'live')
             .map(item => item['Program Type']);
     }
@@ -335,18 +336,14 @@
         .then(res => res.json())
         .then(data => {
             if (data.status === "success") {
-                localStorage.setItem("she_fest_user", mobile);
+                localStorage.setItem("fest_user", mobile);
                 let finalName = data.name || (isRegisterMode && name ? name : "User");
-                localStorage.setItem("she_fest_name", finalName);
+                localStorage.setItem("fest_name", finalName);
                 showMainApp();
-            } else if (data.status === "invalid_mobile") {
-                alert("Invalid mobile number format.");
-            } else if (data.status === "exists") {
-                alert("Mobile number already registered! Please login.");
             } else if (data.status === "blocked") {
                 alert("Your account access has been blocked by admin.");
             } else {
-                alert("Mobile number not registered. Please register first.");
+                alert("Mobile number not found or not registered. Please register first.");
             }
             document.getElementById("authSubmitBtn").innerText = isRegisterMode ? "Register" : "Login";
         })
@@ -357,7 +354,7 @@
     }
 
     function resetMobile() {
-        let currentMobile = localStorage.getItem("she_fest_user");
+        let currentMobile = localStorage.getItem("fest_user");
         let newMobile = prompt("Enter your new 10-digit mobile number:");
         if (!newMobile) return;
         newMobile = newMobile.trim();
@@ -376,8 +373,6 @@
             if (data.status === "success") {
                 alert("Mobile number updated successfully! Please login again.");
                 logout();
-            } else if (data.status === "exists") {
-                alert("This mobile number is already registered!");
             } else {
                 alert("Error updating mobile number.");
             }
@@ -385,12 +380,38 @@
         .catch(err => alert("Error connecting to server!"));
     }
 
+    function sendFeedback() {
+        let feedback = document.getElementById("feedbackText").value.trim();
+        let mobile = localStorage.getItem("fest_user");
+        let name = localStorage.getItem("fest_name");
+
+        if (!feedback) {
+            alert("Please write something in feedback!");
+            return;
+        }
+
+        fetch(sheetURL, {
+            method: "POST",
+            body: JSON.stringify({ action: "feedback", mobile: mobile, name: name, feedback: feedback })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === "success") {
+                alert("Thank you! Your feedback has been sent successfully.");
+                document.getElementById("feedbackText").value = "";
+            } else {
+                alert("Error sending feedback.");
+            }
+        })
+        .catch(err => alert("Connection error!"));
+    }
+
     function showMainApp() {
         document.getElementById("auth-screen").style.display = "none";
         document.getElementById("main-app").style.display = "block";
         document.getElementById("settingsContainer").style.display = "block";
         
-        let savedName = localStorage.getItem("she_fest_name") || "User";
+        let savedName = localStorage.getItem("fest_name") || "User";
         document.getElementById("userProfileName").innerText = "👤 " + savedName;
 
         requestNotificationPermission();
@@ -399,8 +420,8 @@
     }
 
     function logout() {
-        localStorage.removeItem("she_fest_user");
-        localStorage.removeItem("she_fest_name");
+        localStorage.removeItem("fest_user");
+        localStorage.removeItem("fest_name");
         location.reload();
     }
 
@@ -424,7 +445,7 @@
         
         card.innerHTML = `
             <div class="card-content">
-                <span style="font-size:12px; font-weight:600;">${item.Time}</span><br>
+                <span style="font-size:12px; font-weight:600;">${item.Time || ''}</span><br>
                 <b>${isLive ? '<span class="live-dot"></span>' : ''}${progType}</b><br>
                 <small>${displaySubText}</small>
             </div>
@@ -449,6 +470,7 @@
         return card;
     }
 
+    // ഓട്ടോ സ്ക്രോളിംഗ്
     setInterval(() => {
         if (!isAutoScrollEnabled) return;
         const searchVal = document.getElementById("searchInput").value;
@@ -459,30 +481,23 @@
         }
     }, 50);
 
-    function renderLists(scheduleData, resultsData) {
-        document.getElementById("live-list").innerHTML = "";
-        document.getElementById("upcoming-list").innerHTML = "";
-        document.getElementById("completed-list").innerHTML = "";
+    function renderLists(sheData, heData, resultsData) {
+        document.getElementById("she-fest-list").innerHTML = "";
+        document.getElementById("he-fest-list").innerHTML = "";
         document.getElementById("results-list").innerHTML = "";
         
         let finished = 0;
         
-        scheduleData.forEach(item => {
-            let status = item.Status ? item.Status.trim().toLowerCase() : '';
+        sheData.forEach(item => {
+            let status = (item.Status || '').trim().toLowerCase();
+            if (status === 'completed' || status === 'finished') finished++;
+            document.getElementById("she-fest-list").appendChild(createCard(item));
+        });
 
-            if (status === 'completed' || status === 'finished') { 
-                finished++; 
-            }
-
-            if (status === 'completed' || status === 'finished') { 
-                document.getElementById("completed-list").appendChild(createCard(item)); 
-            } else if (status === 'cancelled') { 
-                document.getElementById("completed-list").appendChild(createCard(item)); 
-            } else if (status === 'live') { 
-                document.getElementById("live-list").appendChild(createCard(item)); 
-            } else { 
-                document.getElementById("upcoming-list").appendChild(createCard(item)); 
-            }
+        heData.forEach(item => {
+            let status = (item.Status || '').trim().toLowerCase();
+            if (status === 'completed' || status === 'finished') finished++;
+            document.getElementById("he-fest-list").appendChild(createCard(item));
         });
 
         resultsData.forEach(item => { 
@@ -491,7 +506,7 @@
             }
         });
 
-        let total = globalScheduleData.length;
+        let total = sheData.length + heData.length;
         let pct = total > 0 ? Math.round((finished / total) * 100) : 0;
         document.getElementById("progressBar").style.width = pct + "%";
         document.getElementById("progress-pct-text").innerText = pct + "%";
@@ -502,48 +517,37 @@
         let query = document.getElementById("searchInput").value.toLowerCase().trim();
         
         if (!query) {
-            renderLists(globalScheduleData, globalResultsData);
+            renderLists(globalSheFestData, globalHeFestData, globalResultsData);
             return;
         }
 
-        let filteredSchedule = globalScheduleData.filter(item => {
-            let prog = (item['Program Type'] || '').toLowerCase();
-            let name = (item['Student Name'] || '').toLowerCase();
-            let cls = (item.Class || '').toLowerCase();
-            return prog.includes(query) || name.includes(query) || cls.includes(query);
+        let filteredShe = globalSheFestData.filter(item => {
+            return (item['Program Type'] || '').toLowerCase().includes(query) || (item['Student Name'] || '').toLowerCase().includes(query) || (item.Class || '').toLowerCase().includes(query);
+        });
+
+        let filteredHe = globalHeFestData.filter(item => {
+            return (item['Program Type'] || '').toLowerCase().includes(query) || (item['Student Name'] || '').toLowerCase().includes(query) || (item.Class || '').toLowerCase().includes(query);
         });
 
         let filteredResults = globalResultsData.filter(item => {
-            let progName = (item['Program Name'] || '').toLowerCase();
-            let cat = (item.Category || '').toLowerCase();
-            let first = (item['1st Place'] || '').toLowerCase();
-            let second = (item['2nd Place'] || '').toLowerCase();
-            let third = (item['3rd Place'] || '').toLowerCase();
-            return progName.includes(query) || cat.includes(query) || first.includes(query) || second.includes(query) || third.includes(query);
+            return (item['Program Name'] || '').toLowerCase().includes(query) || (item.Category || '').toLowerCase().includes(query);
         });
 
-        renderLists(filteredSchedule, filteredResults);
+        renderLists(filteredShe, filteredHe, filteredResults);
     }
 
     function fetchSchedule() {
-        let savedMobile = localStorage.getItem("she_fest_user");
+        let savedMobile = localStorage.getItem("fest_user");
         if (!savedMobile) return;
 
         fetch(sheetURL)
             .then(r => r.json())
             .then(response => {
-                globalScheduleData = response.schedule || []; 
+                globalSheFestData = response.schedule || []; 
+                globalHeFestData = response.boysSchedule || [];
                 globalResultsData = response.results || [];
                 
-                if (response.users) {
-                    let currentUser = response.users.find(u => String(u.Mobile) === String(savedMobile));
-                    if (currentUser && currentUser.Name) {
-                        localStorage.setItem("she_fest_name", currentUser.Name);
-                        document.getElementById("userProfileName").innerText = "👤 " + currentUser.Name;
-                    }
-                }
-
-                checkLiveAlerts(globalScheduleData);
+                checkLiveAlerts([...globalSheFestData, ...globalHeFestData]);
                 filterData();
             })
             .catch(err => console.log("Fetch error:", err));
