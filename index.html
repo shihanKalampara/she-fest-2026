@@ -1,318 +1,728 @@
 <!DOCTYPE html>
-<html lang="ml">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fest Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Thiruvasantham 1501 - Noorul Huda Madrasa Kombamkallu</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Fest App">
+    <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV">
+    <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV">
+
     <style>
         :root {
-            --bg-main: #f8fafc;
-            --primary: #6366f1;
-            --primary-hover: #4f46e5;
-            --text-dark: #1e293b;
-            --text-muted: #64748b;
+            --primary: #0f172a;
+            --accent-live: #ef4444;
+            --accent-upcoming: #f59e0b;
+            --accent-completed: #10b981;
+            --accent-cancelled: #64748b;
+            --bg-color: #f8fafc;
             --card-bg: #ffffff;
+            --text-main: #334155;
+            --text-muted: #64748b;
             --border-color: #e2e8f0;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--bg-main); color: var(--text-dark); padding: 12px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        
-        .main-container { width: 100%; max-width: 480px; background: var(--card-bg); border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); overflow: hidden; display: flex; flex-direction: column; }
+        [data-theme="dark"] {
+            --primary: #38bdf8;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+        }
 
-        /* Header Styling */
-        .app-header { background: linear-gradient(135deg, var(--primary), #8b5cf6); color: white; padding: 20px; text-align: center; }
-        .app-header h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
-        .app-header p { font-size: 13px; opacity: 0.9; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg-color); color: var(--text-main); margin: 0; padding: 15px; transition: background 0.3s, color 0.3s; }
+        .container { max-width: 750px; margin: auto; background: var(--card-bg); padding: 20px; border-radius: 16px; box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05); border: 1px solid var(--border-color); position: relative; }
+        
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; position: relative; min-height: 50px; }
+        .logo-container { flex: 1; display: flex; justify-content: center; }
+        .app-logo { width: 75px; height: 75px; object-fit: contain; border-radius: 50%; display: block; }
+        
+        .settings-container { position: absolute; right: 0; display: none; }
+        .settings-btn { background: transparent; color: var(--text-main); border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 22px; font-weight: bold; }
+        .settings-btn:hover { background: rgba(0,0,0,0.05); }
+        
+        .dropdown-menu { display: none; position: absolute; right: 0; top: 48px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); width: 220px; z-index: 100; overflow: hidden; }
+        .user-profile-info { padding: 12px 14px; background: var(--bg-color); border-bottom: 1px solid var(--border-color); font-size: 13px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+        .dropdown-menu button { width: 100%; padding: 12px 14px; background: transparent; color: var(--text-main); border: none; text-align: left; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); }
+        .dropdown-menu button:hover { background: var(--bg-color); }
+        .dropdown-menu button.logout-opt { color: #ef4444; border-bottom: none; justify-content: flex-start; gap: 8px; }
+
+        h1 { text-align: center; color: var(--text-main); margin: 10px 0 5px 0; font-size: 24px; font-weight: 700; }
+        .sub-heading { text-align: center; color: var(--text-muted); font-weight: 500; margin-bottom: 20px; text-transform: uppercase; font-size: 11px; letter-spacing: 1.5px; }
 
         /* Auth Screen */
-        .auth-box { padding: 24px; }
-        .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; }
-        .form-group input, .form-group textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 15px; outline: none; transition: border-color 0.2s; }
-        .form-group input:focus, .form-group textarea:focus { border-color: var(--primary); }
+        #auth-screen { text-align: center; padding: 30px 10px; }
+        .auth-box { max-width: 320px; margin: auto; background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .auth-box input { width: 100%; padding: 10px; margin: 8px 0 15px 0; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-main); border-radius: 8px; box-sizing: border-box; font-size: 13px; outline: none; }
+        .auth-btn { width: 100%; padding: 10px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .toggle-text { font-size: 12px; text-align: center; margin-top: 15px; color: #2563eb; cursor: pointer; }
+
+        #main-app { display: none; }
+        .search-box { margin-bottom: 15px; }
+        .search-input { width: 100%; padding: 10px 14px; font-size: 13px; border: 1px solid var(--border-color); border-radius: 10px; outline: none; box-sizing: border-box; background: var(--bg-color); color: var(--text-main); }
+
+        .progress-box { background: var(--bg-color); border: 1px solid var(--border-color); padding: 12px 16px; border-radius: 12px; margin-bottom: 20px; }
+        .progress-header { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 600; }
+        .progress-bar-fill { background: linear-gradient(90deg, #10b981, #059669); height: 8px; width: 0%; transition: width 0.6s ease; border-radius: 4px; }
+
+        .tab-buttons { display: flex; gap: 4px; margin-bottom: 15px; background: var(--bg-color); border: 1px solid var(--border-color); padding: 4px; border-radius: 10px; overflow-x: auto; }
+        .tab-btn { flex: 1; padding: 8px 10px; font-size: 11px; font-weight: 600; border: none; border-radius: 8px; background: transparent; cursor: pointer; color: var(--text-muted); white-space: nowrap; }
+        .tab-btn.active { background: var(--card-bg); color: var(--text-main); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+
+        .tab-pane { display: none; height: 400px; overflow-y: hidden; }
+        .tab-pane.active-pane { display: block; }
+        .scroll-container { height: 100%; overflow-y: auto; padding-bottom: 50px; }
+
+        .schedule-card { background: var(--card-bg); border: 1px solid var(--border-color); border-left: 4px solid #cbd5e1; padding: 14px; margin-bottom: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .card-content { flex: 1; padding-right: 10px; }
+        .card-right { display: flex; align-items: center; gap: 10px; }
         
-        .btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
-        .btn:hover { background: var(--primary-hover); }
-        .btn-text { background: transparent; color: var(--primary); margin-top: 10px; }
-        .btn-text:hover { background: #f1f5f9; color: var(--primary-hover); }
+        .result-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+        .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
+        .category-pill { font-size: 12px; font-weight: 700; color: #7c3aed; background: #f3e8ff; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; }
+        
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; color: white; text-transform: uppercase; }
+        .badge.Upcoming { background: var(--accent-upcoming); }
+        .badge.Completed, .badge.Finished { background: var(--accent-completed); }
+        .badge.Cancelled { background: var(--accent-cancelled); }
+        .badge.Live { background: var(--accent-live); animation: pulseLive 1.2s infinite; }
 
-        /* App Tabs Navigation */
-        .nav-bar { display: flex; background: #f1f5f9; border-bottom: 1px solid var(--border-color); overflow-x: auto; }
-        .nav-item { flex: 1; padding: 12px 8px; text-align: center; font-size: 12px; font-weight: 600; color: var(--text-muted); background: none; border: none; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
-        .nav-item.active { color: var(--primary); background: white; border-bottom: 2px solid var(--primary); }
+        .live-dot { width: 8px; height: 8px; background-color: #ef4444; border-radius: 50%; display: inline-block; margin-right: 5px; animation: pulseLive 1.2s infinite; }
+        @keyframes pulseLive { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(0.85); } 100% { opacity: 1; transform: scale(1); } }
+        
+        .medal { font-size: 20px; margin-right: 10px; }
+        .winner-row { background: var(--bg-color); padding: 10px; border-radius: 8px; font-size: 13px; border: 1px solid var(--border-color); margin-bottom: 5px; display: flex; align-items: center; }
+        
+        .feedback-box textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-main); border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; outline: none; }
 
-        /* Tab Contents */
-        .tab-body { padding: 16px; flex: 1; overflow-y: auto; max-height: 400px; }
-        .hidden { display: none !important; }
+        /* Floating Quiz Icon on Bottom-Right */
+        .quiz-floating-btn {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 60px;
+            height: 60px;
+            background: #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 999;
+            border: 2px solid var(--primary);
+            animation: bounceQuiz 2s infinite;
+        }
+        .quiz-floating-btn img {
+            width: 38px;
+            height: 38px;
+            object-fit: contain;
+        }
+        @keyframes bounceQuiz {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-6px); }
+            60% { transform: translateY(-3px); }
+        }
 
-        /* Cards Style */
-        .item-card { background: white; border: 1px solid var(--border-color); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
-        .item-card .time { font-size: 11px; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 4px; }
-        .item-card .title { font-size: 15px; font-weight: 600; color: var(--text-dark); margin-bottom: 2px; }
-        .item-card .meta { font-size: 13px; color: var(--text-muted); }
-
-        /* Quiz Options */
-        .quiz-opt { display: block; width: 100%; text-align: left; padding: 12px 14px; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; margin-top: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: 0.2s; }
-        .quiz-opt:hover { background: #e0e7ff; border-color: var(--primary); color: var(--primary); }
-
-        .loading-text { text-align: center; color: var(--text-muted); font-size: 14px; padding: 20px; }
+        /* Quiz Modal Overlay */
+        #quizModal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+        .quiz-modal-content {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 450px;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .close-quiz {
+            position: absolute;
+            top: 15px;
+            right: 18px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+        .quiz-option-btn {
+            width: 100%;
+            padding: 12px 14px;
+            margin: 8px 0;
+            background: var(--bg-color);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            text-align: left;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .quiz-option-btn:hover {
+            border-color: #2563eb;
+            background: rgba(37, 99, 235, 0.05);
+        }
     </style>
 </head>
 <body>
 
-<div class="main-container">
-    <div class="app-header">
-        <h1 id="headerTitle">Fest Portal</h1>
-        <p id="headerSubtitle">ലോഗിൻ ചെയ്ത് വിവരങ്ങൾ അറിയൂ</p>
+<div class="container">
+    <div class="header-top">
+        <div class="logo-container">
+            <img src="https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV" alt="Logo" class="app-logo">
+        </div>
+        
+        <div class="settings-container" id="settingsContainer">
+            <button class="settings-btn" onclick="toggleDropdown()">⋮</button>
+            <div class="dropdown-menu" id="dropdownMenu">
+                <div class="user-profile-info" id="userProfileName">👤 Loading...</div>
+                <button onclick="toggleAutoScroll()" id="autoScrollToggleBtn">🔁 Auto Scroll: OFF</button>
+                <button onclick="toggleDarkMode()" id="darkModeToggleBtn">🌙 Dark Mode: OFF</button>
+                <button onclick="resetMobile()">🔄 Reset Mobile</button>
+                <button class="logout-opt" onclick="logout()">🚪 Logout</button>
+            </div>
+        </div>
+    </div>
+    
+    <h1>Fest Live & Results</h1>
+    <div class="sub-heading">Noorul Huda Madrasa, Kombamkallu</div>
+
+    <!-- AUTHENTICATION SCREEN -->
+    <div id="auth-screen">
+        <div class="auth-box">
+            <h3 id="form-title" style="margin-top:0; color:var(--text-main);">Login</h3>
+            <div id="nameFieldContainer" style="display:none;">
+                <label style="font-size: 11px; font-weight:600;">Your Name</label>
+                <input type="text" id="regName" placeholder="Enter your full name">
+            </div>
+            <label style="font-size: 11px; font-weight:600;">Mobile Number (10 Digits)</label>
+            <input type="text" id="authMobile" maxlength="10" placeholder="Enter 10-digit mobile number">
+            
+            <button class="auth-btn" id="authSubmitBtn" onclick="handleAuthAction()">Login</button>
+            <div class="toggle-text" id="toggleAuthText" onclick="toggleAuthMode()">Don't have an account? Register</div>
+        </div>
     </div>
 
-    <!-- AUTH SECTION -->
-    <div id="authSection" class="auth-box">
-        <div class="form-group">
-            <label>പേര് (Name)</label>
-            <input type="text" id="nameInput" placeholder="നിങ്ങളുടെ പേര് നൽകുക">
+    <!-- MAIN APP SCREEN -->
+    <div id="main-app">
+        <div class="search-box">
+            <input type="text" id="searchInput" class="search-input" placeholder="Search name, class, program..." onkeyup="filterData()">
         </div>
-        <div class="form-group">
-            <label>മൊബൈൽ നമ്പർ (Mobile Number)</label>
-            <input type="tel" id="mobileInput" placeholder="10 അക്ക നമ്പർ">
+
+        <div class="progress-box">
+            <div class="progress-header">
+                <span id="progress-pct-text">0%</span>
+                <span id="progress-count-text">0/0</span>
+            </div>
+            <div style="background: var(--border-color); height: 8px; border-radius: 4px; margin-top: 8px;">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
         </div>
-        <button class="btn" id="authBtn" onclick="handleAuth()">ലോഗിൻ ചെയ്യുക</button>
-        <button class="btn btn-text" onclick="toggleAuthMode()" id="switchAuthBtn">അക്കൗണ്ട് ഇല്ലേ? രജിസ്റ്റർ ചെയ്യാം</button>
+
+        <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab('she-fest', this)">She Fest</button>
+            <button class="tab-btn" onclick="switchTab('he-fest', this)">He Fest</button>
+            <button class="tab-btn" onclick="switchTab('results', this)">Results</button>
+            <button class="tab-btn" onclick="switchTab('feedback', this)">Feedback</button>
+        </div>
+
+        <div id="she-fest-pane" class="tab-pane active-pane"><div id="she-fest-list" class="scroll-container"></div></div>
+        <div id="he-fest-pane" class="tab-pane"><div id="he-fest-list" class="scroll-container"></div></div>
+        <div id="results-pane" class="tab-pane"><div id="results-list" class="scroll-container"></div></div>
+        <div id="feedback-pane" class="tab-pane">
+            <div class="scroll-container feedback-box">
+                <h3>Send Feedback / രക്ഷകർത്താക്കളുടെ ഫീഡ്‌ബാക്ക്</h3>
+                <p style="font-size: 12px; color: var(--text-muted);">പ്രോഗ്രാമിനെക്കുറിച്ചുള്ള നിങ്ങളുടെ അഭിപ്രായങ്ങളും നിർദ്ദേശങ്ങളും ഇവിടെ അയക്കാം:</p>
+                <textarea id="feedbackText" placeholder="Write your feedback here..."></textarea>
+                <button class="auth-btn" onclick="sendFeedback()">Submit Feedback</button>
+            </div>
+        </div>
     </div>
+</div>
 
-    <!-- DASHBOARD SECTION -->
-    <div id="appSection" class="hidden" style="display: flex; flex-direction: column; flex: 1;">
-        <div class="nav-bar">
-            <button class="nav-item active" onclick="switchTab('shefest')">Shefest</button>
-            <button class="nav-item" onclick="switchTab('hefest')">Hefest</button>
-            <button class="nav-item" onclick="switchTab('results')">Results</button>
-            <button class="nav-item" onclick="switchTab('quiz')">Quiz</button>
-            <button class="nav-item" onclick="switchTab('feedback')">Feedback</button>
-        </div>
+<!-- FLOATING QUIZ ICON (Bottom Right) -->
+<div class="quiz-floating-btn" id="quizFloatingBtn" onclick="openQuizModal()" title="Live Quiz">
+    <img src="https://lh3.googleusercontent.com/d/1aPSQQlvW1m6RlVSAdeCYlDfDCrcavQe6" alt="Quiz Icon">
+</div>
 
-        <div class="tab-body">
-            <div id="loadingDiv" class="loading-text">ഡാറ്റ ലോഡ് ചെയ്യുന്നു...</div>
-
-            <!-- Shefest Tab -->
-            <div id="shefestTab" class="tab-pane">
-                <div id="shefestList"></div>
-            </div>
-
-            <!-- Hefest Tab -->
-            <div id="hefestTab" class="tab-pane hidden">
-                <div id="hefestList"></div>
-            </div>
-
-            <!-- Results Tab -->
-            <div id="resultsTab" class="tab-pane hidden">
-                <div id="resultsList"></div>
-            </div>
-
-            <!-- Quiz Tab -->
-            <div id="quizTab" class="tab-pane hidden">
-                <div id="quizContainer">
-                    <p id="quizStatusMsg" class="loading-text">ക്വിസ് ഇതുവരെ ആരംഭിച്ചിട്ടില്ല...</p>
-                    <div id="questionBox" class="hidden">
-                        <p id="qText" style="font-weight: 600; font-size: 15px; margin-bottom: 12px;"></p>
-                        <button class="quiz-opt" id="optA" onclick="submitAnswer('A')"></button>
-                        <button class="quiz-opt" id="optB" onclick="submitAnswer('B')"></button>
-                        <button class="quiz-opt" id="optC" onclick="submitAnswer('C')"></button>
-                        <button class="quiz-opt" id="optD" onclick="submitAnswer('D')"></button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Feedback Tab -->
-            <div id="feedbackTab" class="tab-pane hidden">
-                <div class="form-group">
-                    <label>നിങ്ങളുടെ അഭിപ്രായങ്ങൾ</label>
-                    <textarea id="feedbackText" rows="4" placeholder="ഫീഡ്‌ബാക്ക് ഇവിടെ എഴുതുക..."></textarea>
-                </div>
-                <button class="btn" onclick="sendFeedback()">ഫീഡ്‌ബാക്ക് അയക്കുക</button>
+<!-- QUIZ MODAL -->
+<div id="quizModal">
+    <div class="quiz-modal-content">
+        <span class="close-quiz" onclick="closeQuizModal()">&times;</span>
+        <div id="quizContainer">
+            <h3 style="margin-top:0; text-align:center; color:var(--primary);">Live Quiz</h3>
+            <div id="quizBody" style="text-align: center; padding: 20px 0;">
+                <p style="color: var(--text-muted);">Loading quiz status...</p>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // ** ഇവിടെ നിങ്ങളുടെ ഗൂഗിൾ ആപ്പ്സ് സ്ക്രിപ്റ്റിന്റെ വെബ് ആപ്പ് ലിങ്ക് നൽകുക **
-    const WEB_APP_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').catch(err => console.log('SW failed:', err));
+        });
+    }
 
+    const sheetURL = "https://script.google.com/macros/s/AKfycbybS1JgP0W0CaFI7BR4wI1OoSO6zv86cBr0OwqerI9cOZmpEh1ngIcnYExyRBTe7JUYEw/exec"; // നിങ്ങളുടെ ഗൂഗിൾ ആപ്സ് സ്ക്രിപ്റ്റ് വെബ് ആപ്പ് ലിങ്ക് ഇവിടെ നൽകുക
+    let globalSheFestData = [];
+    let globalHeFestData = [];
+    let globalResultsData = [];
     let isRegisterMode = false;
-    let currentUser = null;
-    let currentMobile = null;
-    let appData = { schedule: [], boysSchedule: [], results: [] };
-    let currentQuizData = null;
+    
+    let isAutoScrollEnabled = localStorage.getItem("fest_autoscroll") === "true";
+    let isDarkModeEnabled = localStorage.getItem("fest_darkmode") === "true";
+    let previousLivePrograms = [];
+    
+    // Quiz Variables
+    let quizInterval = null;
+    let currentQuizState = { status: "WAITING", currentQ: 1 };
+    let userScore = 0;
+
+    window.onload = function() {
+        if (isDarkModeEnabled) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+        updateDarkModeUI();
+        updateAutoScrollUI();
+
+        let savedMobile = localStorage.getItem("fest_user");
+        let savedName = localStorage.getItem("fest_name");
+        if (savedMobile) {
+            showMainApp();
+            if (savedName && savedName !== "undefined" && savedName !== "null") {
+                document.getElementById("userProfileName").innerText = "👤 " + savedName;
+            } else {
+                document.getElementById("userProfileName").innerText = "👤 User";
+            }
+        }
+    };
+
+    function toggleDropdown() {
+        let menu = document.getElementById("dropdownMenu");
+        menu.style.display = menu.style.display === "block" ? "none" : "block";
+    }
+
+    window.onclick = function(event) {
+        if (!event.target.matches('.settings-btn') && !event.target.closest('.settings-btn')) {
+            let menu = document.getElementById("dropdownMenu");
+            if (menu && menu.style.display === "block") {
+                menu.style.display = "none";
+            }
+        }
+    }
+
+    function toggleAutoScroll() {
+        isAutoScrollEnabled = !isAutoScrollEnabled;
+        localStorage.setItem("fest_autoscroll", isAutoScrollEnabled);
+        updateAutoScrollUI();
+    }
+
+    function updateAutoScrollUI() {
+        let btn = document.getElementById("autoScrollToggleBtn");
+        if (btn) {
+            btn.innerHTML = isAutoScrollEnabled ? "🔁 Auto Scroll: ON" : "⏸️ Auto Scroll: OFF";
+        }
+    }
+
+    function toggleDarkMode() {
+        isDarkModeEnabled = !isDarkModeEnabled;
+        localStorage.setItem("fest_darkmode", isDarkModeEnabled);
+        if (isDarkModeEnabled) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+            document.documentElement.removeAttribute('data-theme');
+        }
+        updateDarkModeUI();
+    }
+
+    function updateDarkModeUI() {
+        let btn = document.getElementById("darkModeToggleBtn");
+        if (btn) {
+            btn.innerHTML = isDarkModeEnabled ? "☀️ Dark Mode: ON" : "🌙 Dark Mode: OFF";
+        }
+    }
+
+    function requestNotificationPermission() {
+        if ("Notification" in window && Notification.permission !== "granted") {
+            Notification.requestPermission();
+        }
+    }
+
+    function checkLiveAlerts(dataArray) {
+        if (!("Notification" in window) || Notification.permission !== "granted") return;
+
+        dataArray.forEach(item => {
+            let status = item.Status ? item.Status.trim().toLowerCase() : '';
+            let progName = item['Program Type'] || 'Program';
+            let studentName = item['Student Name'] || '';
+
+            if (status === 'live' && !previousLivePrograms.includes(progName)) {
+                if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.ready.then(reg => {
+                        reg.showNotification("🔴 Live Now: " + progName, {
+                            body: `${studentName} - Stage is live now!`,
+                            icon: "https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV"
+                        });
+                    });
+                } else {
+                    new Notification("🔴 Live Now: " + progName, {
+                        body: `${studentName} - Stage is live now!`,
+                        icon: "https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV"
+                    });
+                }
+            }
+        });
+
+        previousLivePrograms = dataArray
+            .filter(item => (item.Status || '').trim().toLowerCase() === 'live')
+            .map(item => item['Program Type']);
+    }
 
     function toggleAuthMode() {
         isRegisterMode = !isRegisterMode;
-        document.getElementById('authBtn').innerText = isRegisterMode ? "രജിസ്റ്റർ ചെയ്യുക" : "ലോഗിൻ ചെയ്യുക";
-        document.getElementById('switchAuthBtn').innerText = isRegisterMode ? "പഴയ അക്കൗണ്ട് ഉണ്ടോ? ലോഗിൻ ചെയ്യാം" : "അക്കൗണ്ട് ഇല്ലേ? രജിസ്റ്റർ ചെയ്യാം";
+        if (isRegisterMode) {
+            document.getElementById("form-title").innerText = "Register Account";
+            document.getElementById("nameFieldContainer").style.display = "block";
+            document.getElementById("authSubmitBtn").innerText = "Register";
+            document.getElementById("toggleAuthText").innerText = "Already have an account? Login";
+        } else {
+            document.getElementById("form-title").innerText = "Login";
+            document.getElementById("nameFieldContainer").style.display = "none";
+            document.getElementById("authSubmitBtn").innerText = "Login";
+            document.getElementById("toggleAuthText").innerText = "Don't have an account? Register";
+        }
     }
 
-    function handleAuth() {
-        const name = document.getElementById('nameInput').value.trim();
-        const mobile = document.getElementById('mobileInput').value.trim();
+    function handleAuthAction() {
+        let mobile = document.getElementById("authMobile").value.trim();
+        let name = document.getElementById("regName").value.trim();
 
-        if (!mobile || (isRegisterMode && !name)) {
-            alert("ദയവായി വിവരങ്ങൾ നൽകുക!");
+        if (!mobile || !/^\d{10}$/.test(mobile)) {
+            alert("Please enter a valid 10-digit mobile number!");
             return;
         }
 
-        const action = isRegisterMode ? "register" : "login";
+        let payload = { action: isRegisterMode ? "register" : "login", mobile: mobile };
+        if (isRegisterMode) {
+            if (!name) { alert("Please enter your name!"); return; }
+            payload.name = name;
+        }
 
-        fetch(WEB_APP_URL, {
+        document.getElementById("authSubmitBtn").innerText = "Processing...";
+
+        fetch(sheetURL, {
             method: "POST",
-            body: JSON.stringify({ action: action, name: name, mobile: mobile })
+            body: JSON.stringify(payload)
         })
         .then(res => res.json())
         .then(data => {
             if (data.status === "success") {
-                currentUser = data.name || name;
-                currentMobile = mobile;
-                document.getElementById('authSection').classList.add('hidden');
-                document.getElementById('appSection').classList.remove('hidden');
-                document.getElementById('headerTitle').innerText = "സ്വാഗതം, " + currentUser;
-                document.getElementById('headerSubtitle').innerText = "ഫെസ്റ്റ് പോർട്ടൽ ഡാഷ്‌ബോർഡ്";
-                fetchAllData();
-                setInterval(fetchQuizData, 5000);
-            } else if (data.status === "exists") {
-                alert("ഈ നമ്പർ ഇതിനകം രജിസ്റ്റർ ചെയ്തിട്ടുണ്ട്.");
-            } else if (data.status === "not_found") {
-                alert("ഈ നമ്പർ കണ്ടെത്താനായില്ല. ദയവായി രജിസ്റ്റർ ചെയ്യുക.");
+                localStorage.setItem("fest_user", mobile);
+                let finalName = data.name || (isRegisterMode && name ? name : "User");
+                localStorage.setItem("fest_name", finalName);
+                showMainApp();
             } else if (data.status === "blocked") {
-                alert("ഈ അക്കൗണ്ട് ബ്ലോക്ക് ചെയ്തിരിക്കുന്നു.");
+                alert("Your account access has been blocked by admin.");
             } else {
-                alert("എന്തോ പ്രശ്നം സംഭവിച്ചു. വീണ്ടും ശ്രമിക്കുക.");
+                alert("Mobile number not found or not registered. Please register first.");
             }
+            document.getElementById("authSubmitBtn").innerText = isRegisterMode ? "Register" : "Login";
         })
-        .catch(err => alert("എറർ: " + err));
-    }
-
-    function fetchAllData() {
-        fetch(WEB_APP_URL)
-        .then(res => res.json())
-        .then(data => {
-            appData = data;
-            document.getElementById('loadingDiv').classList.add('hidden');
-            renderList('shefestList', appData.schedule);
-            renderList('hefestList', appData.boysSchedule);
-            renderResults();
-        })
-        .catch(err => console.error(err));
-    }
-
-    function renderList(elementId, listData) {
-        const container = document.getElementById(elementId);
-        if (!listData || listData.length === 0) {
-            container.innerHTML = '<p class="loading-text">ഡാറ്റ ലഭ്യമല്ല</p>';
-            return;
-        }
-        container.innerHTML = listData.map(item => `
-            <div class="item-card">
-                <div class="time">${item.Time || 'സമയം വ്യക്തമാക്കിയിട്ടില്ല'}</div>
-                <div class="title">${item['Program Type'] || ''}</div>
-                <div class="meta">പേര്: <b>${item['Student Name'] || '-'}</b> (ക്ലാസ്: ${item.Class || '-'})</div>
-            </div>
-        `).join('');
-    }
-
-    function renderResults() {
-        const container = document.getElementById('resultsList');
-        if (!appData.results || appData.results.length === 0) {
-            container.innerHTML = '<p class="loading-text">റിസൾട്ട് ലഭ്യമല്ല</p>';
-            return;
-        }
-        container.innerHTML = appData.results.map(item => `
-            <div class="item-card">
-                <div class="time">${item['Program Type'] || ''}</div>
-                <div class="title">വിജയി: ${item['Student Name'] || ''}</div>
-                <div class="meta">ക്ലാസ്: ${item.Class || ''}</div>
-            </div>
-        `).join('');
-    }
-
-    function switchTab(tabName) {
-        document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
-        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-        
-        document.getElementById(tabName + 'Tab').classList.remove('hidden');
-        event.target.classList.add('active');
-    }
-
-    function fetchQuizData() {
-        fetch(WEB_APP_URL + "?action=getQuiz")
-        .then(res => res.json())
-        .then(data => {
-            const statusMsg = document.getElementById('quizStatusMsg');
-            const qBox = document.getElementById('questionBox');
-            
-            if (data.status === "STARTED" && data.question) {
-                currentQuizData = data.question;
-                statusMsg.classList.add('hidden');
-                qBox.classList.remove('hidden');
-                
-                document.getElementById('qText').innerText = data.question.QuestionText;
-                document.getElementById('optA').innerText = "A) " + data.question.OptionA;
-                document.getElementById('optB').innerText = "B) " + data.question.OptionB;
-                document.getElementById('optC').innerText = "C) " + data.question.OptionC;
-                document.getElementById('optD').innerText = "D) " + data.question.OptionD;
-            } else {
-                statusMsg.classList.remove('hidden');
-                statusMsg.innerText = data.status === "WAITING" ? "ക്വിസ് ആരംഭിക്കാൻ കാത്തിരിക്കുന്നു..." : "ക്വിസ് അവസാനിച്ചു!";
-                qBox.classList.add('hidden');
-            }
+        .catch(err => {
+            alert("Error connecting to server!");
+            document.getElementById("authSubmitBtn").innerText = isRegisterMode ? "Register" : "Login";
         });
     }
 
-    function submitAnswer(selectedOpt) {
-        if (!currentQuizData) return;
-        const isCorrect = (selectedOpt === currentQuizData.CorrectAnswer);
-        
-        fetch(WEB_APP_URL, {
+    function resetMobile() {
+        let currentMobile = localStorage.getItem("fest_user");
+        let newMobile = prompt("Enter your new 10-digit mobile number:");
+        if (!newMobile) return;
+        newMobile = newMobile.trim();
+
+        if (!/^\d{10}$/.test(newMobile)) {
+            alert("Please enter a valid 10-digit mobile number!");
+            return;
+        }
+
+        fetch(sheetURL, {
             method: "POST",
-            body: JSON.stringify({
-                action: "submitQuiz",
-                mobile: currentMobile,
-                name: currentUser,
-                qId: currentQuizData.QuestionID,
-                isCorrect: isCorrect
-            })
+            body: JSON.stringify({ action: "reset", mobile: currentMobile, newMobile: newMobile })
         })
         .then(res => res.json())
         .then(data => {
             if (data.status === "success") {
-                alert(isCorrect ? "ശരിയുത്തരം! 🎉 (+10 Points)" : "തെറ്റുത്തരം! ❌");
+                alert("Mobile number updated successfully! Please login again.");
+                logout();
+            } else {
+                alert("Error updating mobile number.");
             }
-        });
+        })
+        .catch(err => alert("Error connecting to server!"));
     }
 
     function sendFeedback() {
-        const feedback = document.getElementById('feedbackText').value.trim();
+        let feedback = document.getElementById("feedbackText").value.trim();
+        let mobile = localStorage.getItem("fest_user");
+        let name = localStorage.getItem("fest_name");
+
         if (!feedback) {
-            alert("ഫീഡ്‌ബാക്ക് എഴുതുക!");
+            alert("Please write something in feedback!");
             return;
         }
 
-        fetch(WEB_APP_URL, {
+        fetch(sheetURL, {
             method: "POST",
-            body: JSON.stringify({
-                action: "feedback",
-                mobile: currentMobile,
-                name: currentUser,
-                feedback: feedback
-            })
+            body: JSON.stringify({ action: "feedback", mobile: mobile, name: name, feedback: feedback })
         })
         .then(res => res.json())
         .then(data => {
-            if (data.status === "success") {
-                alert("ഫീഡ്‌ബാക്ക് വിജയകരമായി അയച്ചു! നന്ദി.");
-                document.getElementById('feedbackText').value = "";
+            if(data.status === "success") {
+                alert("Thank you! Your feedback has been sent successfully.");
+                document.getElementById("feedbackText").value = "";
+            } else {
+                alert("Error sending feedback.");
+            }
+        })
+        .catch(err => alert("Connection error!"));
+    }
+
+    function showMainApp() {
+        document.getElementById("auth-screen").style.display = "none";
+        document.getElementById("main-app").style.display = "block";
+        document.getElementById("settingsContainer").style.display = "block";
+        document.getElementById("quizFloatingBtn").style.display = "flex"; // Show Quiz Icon
+        
+        let savedName = localStorage.getItem("fest_name") || "User";
+        document.getElementById("userProfileName").innerText = "👤 " + savedName;
+
+        requestNotificationPermission();
+        fetchSchedule();
+        setInterval(fetchSchedule, 10000);
+    }
+
+    function logout() {
+        localStorage.removeItem("fest_user");
+        localStorage.removeItem("fest_name");
+        location.reload();
+    }
+
+    function switchTab(t, b) {
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active-pane'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(t + '-pane').classList.add('active-pane');
+        b.classList.add('active');
+    }
+
+    function createCard(item) {
+        let status = item.Status ? item.Status.trim() : 'Upcoming';
+        let studentText = item['Student Name'] || '';
+        let classText = item.Class ? item.Class.trim() : '';
+        let displaySubText = classText ? `${studentText} (${classText})` : studentText;
+        let progType = item['Program Type'] || '';
+        let isLive = status.toLowerCase() === 'live';
+
+        let card = document.createElement("div");
+        card.className = "schedule-card";
+        
+        card.innerHTML = `
+            <div class="card-content">
+                <span style="font-size:12px; font-weight:600;">${item.Time || ''}</span><br>
+                <b>${isLive ? '<span class="live-dot"></span>' : ''}${progType}</b><br>
+                <small>${displaySubText}</small>
+            </div>
+            <div class="card-right">
+                <span class="badge ${status}">${status}</span>
+            </div>`;
+        return card;
+    }
+
+    function createResultCard(item) {
+        let card = document.createElement("div");
+        card.className = "result-card";
+        card.innerHTML = `
+            <div class="result-header">
+                <b>${item['Program Name'] || 'Program'}</b>
+                <span class="category-pill">${item.Category || 'General'}</span>
+            </div>
+            ${item['1st Place'] ? `<div class="winner-row"><span class="medal">🥇</span> ${item['1st Place']}</div>` : ''}
+            ${item['2nd Place'] ? `<div class="winner-row"><span class="medal">🥈</span> ${item['2nd Place']}</div>` : ''}
+            ${item['3rd Place'] ? `<div class="winner-row"><span class="medal">🥉</span> ${item['3rd Place']}</div>` : ''}
+        `;
+        return card;
+    }
+
+    setInterval(() => {
+        if (!isAutoScrollEnabled) return;
+        const searchVal = document.getElementById("searchInput").value;
+        if (searchVal) return;
+        const activeList = document.querySelector('.active-pane .scroll-container');
+        if (activeList && activeList.scrollHeight > activeList.clientHeight) {
+            activeList.scrollTop = (activeList.scrollTop + 1 >= activeList.scrollHeight - activeList.clientHeight) ? 0 : activeList.scrollTop + 1;
+        }
+    }, 50);
+
+    function renderLists(sheData, heData, resultsData) {
+        document.getElementById("she-fest-list").innerHTML = "";
+        document.getElementById("he-fest-list").innerHTML = "";
+        document.getElementById("results-list").innerHTML = "";
+        
+        let finished = 0;
+        
+        sheData.forEach(item => {
+            let status = (item.Status || '').trim().toLowerCase();
+            if (status === 'completed' || status === 'finished') finished++;
+            document.getElementById("she-fest-list").appendChild(createCard(item));
+        });
+
+        heData.forEach(item => {
+            let status = (item.Status || '').trim().toLowerCase();
+            if (status === 'completed' || status === 'finished') finished++;
+            document.getElementById("he-fest-list").appendChild(createCard(item));
+        });
+
+        resultsData.forEach(item => { 
+            if (item['Program Name']) {
+                document.getElementById("results-list").appendChild(createResultCard(item)); 
             }
         });
+
+        let total = sheData.length + heData.length;
+        let pct = total > 0 ? Math.round((finished / total) * 100) : 0;
+        document.getElementById("progressBar").style.width = pct + "%";
+        document.getElementById("progress-pct-text").innerText = pct + "%";
+        document.getElementById("progress-count-text").innerText = `${finished}/${total}`;
+    }
+
+    function filterData() {
+        let query = document.getElementById("searchInput").value.toLowerCase().trim();
+        
+        if (!query) {
+            renderLists(globalSheFestData, globalHeFestData, globalResultsData);
+            return;
+        }
+
+        let filteredShe = globalSheFestData.filter(item => {
+            return (item['Program Type'] || '').toLowerCase().includes(query) || (item['Student Name'] || '').toLowerCase().includes(query) || (item.Class || '').toLowerCase().includes(query);
+        });
+
+        let filteredHe = globalHeFestData.filter(item => {
+            return (item['Program Type'] || '').toLowerCase().includes(query) || (item['Student Name'] || '').toLowerCase().includes(query) || (item.Class || '').toLowerCase().includes(query);
+        });
+
+        let filteredResults = globalResultsData.filter(item => {
+            return (item['Program Name'] || '').toLowerCase().includes(query) || (item.Category || '').toLowerCase().includes(query);
+        });
+
+        renderLists(filteredShe, filteredHe, filteredResults);
+    }
+
+    function fetchSchedule() {
+        let savedMobile = localStorage.getItem("fest_user");
+        if (!savedMobile) return;
+
+        fetch(sheetURL)
+            .then(r => r.json())
+            .then(response => {
+                globalSheFestData = response.schedule || []; 
+                globalHeFestData = response.boysSchedule || [];
+                globalResultsData = response.results || [];
+                
+                checkLiveAlerts([...globalSheFestData, ...globalHeFestData]);
+                filterData();
+            })
+            .catch(err => console.log("Fetch error:", err));
+    }
+
+    // --- QUIZ LOGIC FUNCTIONS ---
+    function openQuizModal() {
+        document.getElementById("quizModal").style.display = "flex";
+        fetchQuizData();
+        quizInterval = setInterval(fetchQuizData, 5000); // Live poll every 5s
+    }
+
+    function closeQuizModal() {
+        document.getElementById("quizModal").style.display = "none";
+        if (quizInterval) clearInterval(quizInterval);
+    }
+
+    function fetchQuizData() {
+        fetch(sheetURL + "?action=getQuiz")
+            .then(r => r.json())
+            .then(res => {
+                let quizBody = document.getElementById("quizBody");
+                if (res.status === "WAITING") {
+                    quizBody.innerHTML = `
+                        <div style="padding: 20px;">
+                            <h4 style="color: var(--accent-upcoming);">⏳ Quiz has not started yet!</h4>
+                            <p style="font-size: 13px; color: var(--text-muted);">Please wait. The admin will start the quiz shortly.</p>
+                        </div>`;
+                } else if (res.status === "STARTED" && res.question) {
+                    let q = res.question;
+                    quizBody.innerHTML = `
+                        <div style="text-align: left;">
+                            <span style="font-size: 11px; font-weight: 700; color: #7c3aed; background: #f3e8ff; padding: 3px 10px; border-radius: 20px;">Question ${q.QuestionID}</span>
+                            <p style="font-size: 15px; font-weight: 600; margin: 12px 0 15px 0;">${q.QuestionText}</p>
+                            <button class="quiz-option-btn" onclick="submitQuizAnswer('${q.QuestionID}', '${q.OptionA}', '${q.CorrectAnswer}')">A) ${q.OptionA}</button>
+                            <button class="quiz-option-btn" onclick="submitQuizAnswer('${q.QuestionID}', '${q.OptionB}', '${q.CorrectAnswer}')">B) ${q.OptionB}</button>
+                            <button class="quiz-option-btn" onclick="submitQuizAnswer('${q.QuestionID}', '${q.OptionC}', '${q.CorrectAnswer}')">C) ${q.OptionC}</button>
+                            <button class="quiz-option-btn" onclick="submitQuizAnswer('${q.QuestionID}', '${q.OptionD}', '${q.CorrectAnswer}')">D) ${q.OptionD}</button>
+                        </div>`;
+                } else if (res.status === "ENDED") {
+                    quizBody.innerHTML = `
+                        <div style="padding: 20px;">
+                            <h4 style="color: var(--accent-completed);">🎉 Quiz Ended!</h4>
+                            <p style="font-size: 13px; color: var(--text-muted);">Thank you for participating. Check results soon!</p>
+                        </div>`;
+                }
+            })
+            .catch(err => {
+                console.log("Quiz fetch error:", err);
+            });
+    }
+
+    function submitQuizAnswer(qId, selectedOpt, correctOpt) {
+        let isCorrect = selectedOpt.trim().toLowerCase() === correctOpt.trim().toLowerCase();
+        let mobile = localStorage.getItem("fest_user");
+        let name = localStorage.getItem("fest_name");
+
+        if (isCorrect) {
+            alert("Correct Answer! 🎉");
+        } else {
+            alert(`Wrong Answer. Correct answer was: ${correctOpt}`);
+        }
+
+        fetch(sheetURL, {
+            method: "POST",
+            body: JSON.stringify({ action: "submitQuiz", mobile: mobile, name: name, qId: qId, isCorrect: isCorrect })
+        })
+        .then(res => res.json())
+        .then(data => {
+            closeQuizModal();
+        })
+        .catch(err => console.log("Score update error:", err));
     }
 </script>
-
 </body>
 </html>
