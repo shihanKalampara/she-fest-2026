@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 2-ാമത്തെ പ്രശ്നം പരിഹരിക്കാൻ മൊബൈൽ വ്യൂ സൂം സെറ്റിംഗ്സ് ശരിയാക്കി -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Thiruvasantham 1501 - Noorul Huda Madrasa Kombamkallu</title>
     
     <!-- PWA Setup & Custom Logo Icon -->
@@ -40,10 +41,12 @@
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg-color); color: var(--text-main); margin: 0; padding: 15px; transition: background 0.3s, color 0.3s; }
         .container { max-width: 750px; margin: auto; background: var(--card-bg); padding: 20px; border-radius: 16px; box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05); border: 1px solid var(--border-color); position: relative; }
         
-        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .app-logo { width: 75px; height: 75px; object-fit: contain; display: block; margin: auto; border-radius: 50%; }
+        /* 1-ാമത്തെ പ്രശ്നം പരിഹരിക്കാൻ ഹെഡർ ഫ്ലെക്സ് ലേഔട്ട് ക്രമീകരിച്ചു */
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; position: relative; min-height: 50px; }
+        .logo-container { flex: 1; display: flex; justify-content: center; }
+        .app-logo { width: 75px; height: 75px; object-fit: contain; border-radius: 50%; display: block; }
         
-        .settings-container { position: relative; display: none; }
+        .settings-container { position: absolute; right: 0; display: none; }
         .settings-btn { background: transparent; color: var(--text-main); border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 22px; font-weight: bold; }
         .settings-btn:hover { background: rgba(0,0,0,0.05); }
         
@@ -106,14 +109,16 @@
 
 <div class="container">
     <div class="header-top">
-        <div style="width: 40px;"></div>
-        <img src="https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV" alt="Logo" class="app-logo">
+        <!-- 1-ാമത്തെ പ്രശ്നം പരിഹരിക്കാൻ ലോഗോ കൃത്യം സെന്ററിൽ വരുത്തി -->
+        <div class="logo-container">
+            <img src="https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV" alt="Logo" class="app-logo">
+        </div>
         
         <div class="settings-container" id="settingsContainer">
             <button class="settings-btn" onclick="toggleDropdown()">⋮</button>
             <div class="dropdown-menu" id="dropdownMenu">
                 <div class="user-profile-info" id="userProfileName">👤 Loading...</div>
-                <button onclick="toggleAutoScroll()" id="autoScrollToggleBtn">🔁 Auto Scroll: ON</button>
+                <button onclick="toggleAutoScroll()" id="autoScrollToggleBtn">🔁 Auto Scroll: OFF</button>
                 <button onclick="toggleDarkMode()" id="darkModeToggleBtn">🌙 Dark Mode: OFF</button>
                 <button onclick="resetMobile()">🔄 Reset Mobile</button>
                 <button class="logout-opt" onclick="logout()">🚪 Logout</button>
@@ -184,12 +189,14 @@
         });
     }
 
-    const sheetURL = "https://script.google.com/macros/s/AKfycbwrQMmCEFoGI9rQlWxV-sfX0I6mvtCUcJCSanary60Em_XGKDX9IZApHxfFTy8cQbBS1w/exec"; // നിങ്ങളുടെ Google Apps Script URL ഇവിടെ നൽകുക
+    const sheetURL = "YOUR_APPS_SCRIPT_WEB_APP_URL_HERE"; // നിങ്ങളുടെ ഗൂഗിൾ ആപ്സ് സ്ക്രിപ്റ്റ് വെബ് ആപ്പ് ലിങ്ക് ഇവിടെ നൽകുക
     let globalSheFestData = [];
     let globalHeFestData = [];
     let globalResultsData = [];
     let isRegisterMode = false;
-    let isAutoScrollEnabled = localStorage.getItem("fest_autoscroll") !== "false";
+    
+    // 3-ാമത്തെ പ്രശ്നം പരിഹരിക്കാൻ ഓട്ടോ സ്ക്രോൾ ഡിഫോൾട്ട് ആയി OFF ആക്കി (ON ആക്കിയാൽ മാത്രം വർക്ക് ചെയ്യും)
+    let isAutoScrollEnabled = localStorage.getItem("fest_autoscroll") === "true";
     let isDarkModeEnabled = localStorage.getItem("fest_darkmode") === "true";
     let previousLivePrograms = [];
 
@@ -466,6 +473,7 @@
         return card;
     }
 
+    // 3-ാമത്തെ പ്രശ്നത്തിനുള്ള പരിഹാരം: isAutoScrollEnabled പരിശോധിച്ച ശേഷം മാത്രം സ്ക്രോൾ ചെയ്യുക
     setInterval(() => {
         if (!isAutoScrollEnabled) return;
         const searchVal = document.getElementById("searchInput").value;
