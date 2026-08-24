@@ -842,17 +842,17 @@
                 scoreBadge.innerText = "Score: " + (data.score || 0);
                 let rankList = data.rankList || [];
                 
-                // Tie-breaker: Sort by Score (Descending) then by Timestamp (Ascending / Fastest first)
+                // Tie-breaker: Score descending, Timestamp ascending (faster first)
                 rankList.sort((a, b) => {
                     if (b.score !== a.score) {
-                        return b.score - a.score; // Higher score first
+                        return b.score - a.score;
                     }
-                    return (a.timestamp || 0) - (b.timestamp || 0); // Earlier timestamp (faster) first
+                    return (a.timestamp || 0) - (b.timestamp || 0);
                 });
 
                 let rankHtml = `
                     <div style="padding: 10px 0; text-align: left;">
-                        <h3 style="text-align: center; color: var(--text-main); margin-bottom: 15px;">🏆 Quiz Rank List (Speed Tie-Breaker)</h3>
+                        <h3 style="text-align: center; color: var(--text-main); margin-bottom: 15px;">🏆 Quiz Rank List</h3>
                 `;
                 if (rankList.length === 0) {
                     rankHtml += `<p style="text-align:center; color:var(--text-muted);">Rank list not available.</p>`;
@@ -921,7 +921,7 @@
                 mobile: mobile, 
                 name: name, 
                 answers: answers,
-                timestamp: Date.now() // Capturing exact speed/time for tie-breaker
+                timestamp: Date.now() // Speed tie-breaker timestamp
             })
         })
         .then(res => res.json())
