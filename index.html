@@ -101,7 +101,7 @@
         
         .feedback-box textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-main); border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; outline: none; }
 
-        /* Floating Quiz Icon on Bottom-Right */
+        /* Floating Quiz Icon */
         .quiz-floating-btn {
             position: fixed;
             bottom: 25px;
@@ -130,7 +130,7 @@
             60% { transform: translateY(-3px); }
         }
 
-        /* Quiz Modal Overlay */
+        /* Quiz Modal */
         #quizModal {
             display: none;
             position: fixed;
@@ -297,7 +297,7 @@
         });
     }
 
-    const sheetURL = "https://script.google.com/macros/s/AKfycbybS1JgP0W0CaFI7BR4wI1OoSO6zv86cBr0OwqerI9cOZmpEh1ngIcnYExyRBTe7JUYEw/exec";
+    const sheetURL = "https://script.google.com/macros/s/AKfycbybS1JgP0W0CaFI7BR4wI1OoSO6zv86cBr0OwqerI9cOZmpEh1ngIcnYExyRBTe7JUYEw/exec"; // നിങ്ങളുടെ ഗൂഗിൾ ആപ്പ് സ്ക്രിപ്റ്റ് വെബ് ആപ്പ് URL ഇവിടെ നൽകുക
     let globalSheFestData = [];
     let globalHeFestData = [];
     let globalResultsData = [];
@@ -664,7 +664,7 @@
             .catch(err => console.log("Fetch error:", err));
     }
 
-    // --- QUIZ LOGIC FUNCTIONS ---
+    // --- QUIZ LOGIC ---
     function openQuizModal() {
         document.getElementById("quizModal").style.display = "flex";
         fetchQuizData();
@@ -713,7 +713,7 @@
                               <button class="quiz-option-btn" onclick="submitQuizAnswer('${q.QuestionID}', 'A', '${q.CorrectAnswer}')">A) ${q.OptionA}</button>
                               <button class="quiz-option-btn" onclick="submitQuizAnswer('${q.QuestionID}', 'B', '${q.CorrectAnswer}')">B) ${q.OptionB}</button>
                               <button class="quiz-option-btn" onclick="submitQuizAnswer('${q.QuestionID}', 'C', '${q.CorrectAnswer}')">C) ${q.OptionC}</button>
-                              <button class="quiz-option-btn" onclick="submitQuizAnswer('${q.QuestionID}', 'D', '${q.CorrectAnswer}')">D) ${q.OptionD}</button>
+                              <button class="query-option-btn quiz-option-btn" onclick="submitQuizAnswer('${q.QuestionID}', 'D', '${q.CorrectAnswer}')">D) ${q.OptionD}</button>
                           </div>`;
                     }
                 } else if (res.status === "ENDED") {
