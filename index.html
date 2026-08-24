@@ -419,20 +419,19 @@
 
         dataArray.forEach(item => {
             let status = (item.Status || item.status || item.STATE || '').trim().toLowerCase();
-            let progName = item['Program Type'] || item.programType || 'Program';
-            let studentName = item['Student Name'] || item.studentName || '';
+            let progName = item['Program Type'] || item.programType || '';
 
             if (status === 'live' && !previousLivePrograms.includes(progName)) {
                 if (navigator.serviceWorker && navigator.serviceWorker.controller) {
                     navigator.serviceWorker.ready.then(reg => {
                         reg.showNotification("🔴 Live Now: " + progName, {
-                            body: `${studentName} - Stage is live now!`,
+                            body: `Stage is live now!`,
                             icon: "https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV"
                         });
                     });
                 } else {
                     new Notification("🔴 Live Now: " + progName, {
-                        body: `${studentName} - Stage is live now!`,
+                        body: `Stage is live now!`,
                         icon: "https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV"
                     });
                 }
@@ -593,10 +592,10 @@
             status = "Upcoming";
         }
 
-        let studentText = item['Student Name'] || item.studentName || '';
-        let classText = item.Class ? String(item.Class).trim() : '';
+        let studentText = item['Student Name'] || item.studentName || item.Name || '';
+        let classText = item.Class || item.class || '';
         let displaySubText = classText ? `${studentText} (${classText})` : studentText;
-        let progType = item['Program Type'] || item.programType || '';
+        let progType = item['Program Type'] || item.programType || item['Program Name'] || '';
         let isLive = status.toLowerCase() === 'live';
 
         let card = document.createElement("div");
@@ -615,16 +614,22 @@
     }
 
     function createResultCard(item) {
+        let progName = item['Program Name'] || item['Program Type'] || item.programName || 'Program';
+        let category = item.Category || item.category || 'General';
+        let first = item['1st Place'] || item['First'] || '';
+        let second = item['2nd Place'] || item['Second'] || '';
+        let third = item['3rd Place'] || item['Third'] || '';
+
         let card = document.createElement("div");
         card.className = "result-card";
         card.innerHTML = `
             <div class="result-header">
-                <b>${item['Program Name'] || 'Program'}</b>
-                <span class="category-pill">${item.Category || 'General'}</span>
+                <b>${progName}</b>
+                <span class="category-pill">${category}</span>
             </div>
-            ${item['1st Place'] ? `<div class="winner-row"><span class="medal">🥇</span> ${item['1st Place']}</div>` : ''}
-            ${item['2nd Place'] ? `<div class="winner-row"><span class="medal">🥈</span> ${item['2nd Place']}</div>` : ''}
-            ${item['3rd Place'] ? `<div class="winner-row"><span class="medal">🥉</span> ${item['3rd Place']}</div>` : ''}
+            ${first ? `<div class="winner-row"><span class="medal">🥇</span> ${first}</div>` : ''}
+            ${second ? `<div class="winner-row"><span class="medal">🥈</span> ${second}</div>` : ''}
+            ${third ? `<div class="winner-row"><span class="medal">🥉</span> ${third}</div>` : ''}
         `;
         return card;
     }
@@ -677,7 +682,8 @@
         });
 
         resultsData.forEach(item => { 
-            if (item['Program Name']) {
+            let pName = item['Program Name'] || item['Program Type'] || item.programName;
+            if (pName) {
                 document.getElementById("results-list").appendChild(createResultCard(item)); 
             }
         });
@@ -698,15 +704,18 @@
         }
 
         let filteredShe = globalSheFestData.filter(item => {
-            return (item['Program Type'] || '').toLowerCase().includes(query) || (item['Student Name'] || '').toLowerCase().includes(query) || (item.Class || '').toLowerCase().includes(query);
+            let textToSearch = Object.values(item).join(" ").toLowerCase();
+            return textToSearch.includes(query);
         });
 
         let filteredHe = globalHeFestData.filter(item => {
-            return (item['Program Type'] || '').toLowerCase().includes(query) || (item['Student Name'] || '').toLowerCase().includes(query) || (item.Class || '').toLowerCase().includes(query);
+            let textToSearch = Object.values(item).join(" ").toLowerCase();
+            return textToSearch.includes(query);
         });
 
         let filteredResults = globalResultsData.filter(item => {
-            return (item['Program Name'] || '').toLowerCase().includes(query) || (item.Category || '').toLowerCase().includes(query);
+            let textToSearch = Object.values(item).join(" ").toLowerCase();
+            return textToSearch.includes(query);
         });
 
         renderLists(filteredShe, filteredHe, filteredResults);
@@ -761,7 +770,7 @@
                     } else {
                         let optionsHtml = "";
                         if (data.options && Array.isArray(data.options)) {
-                            data.options.forEach((opt, index) => {
+                            data.options.forEach((opt) => {
                                 if (opt && String(opt).trim() !== "") {
                                     optionsHtml += `<button class="quiz-option-btn" onclick="submitQuizAnswer('${escapeQuotes(opt)}')">${opt}</button>`;
                                 }
