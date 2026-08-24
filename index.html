@@ -308,7 +308,6 @@
     let previousLivePrograms = [];
     let quizInterval = null;
 
-    // Toast Notification Function
     function showToast(message, type = "error") {
         let oldToast = document.getElementById("appToastNotification");
         if (oldToast) oldToast.remove();
@@ -419,9 +418,9 @@
         if (!("Notification" in window) || Notification.permission !== "granted") return;
 
         dataArray.forEach(item => {
-            let status = item.Status ? item.Status.trim().toLowerCase() : '';
-            let progName = item['Program Type'] || 'Program';
-            let studentName = item['Student Name'] || '';
+            let status = (item.Status || item.status || item.STATE || '').trim().toLowerCase();
+            let progName = item['Program Type'] || item.programType || 'Program';
+            let studentName = item['Student Name'] || item.studentName || '';
 
             if (status === 'live' && !previousLivePrograms.includes(progName)) {
                 if (navigator.serviceWorker && navigator.serviceWorker.controller) {
@@ -441,8 +440,8 @@
         });
 
         previousLivePrograms = dataArray
-            .filter(item => (item.Status || '').trim().toLowerCase() === 'live')
-            .map(item => item['Program Type']);
+            .filter(item => (item.Status || item.status || item.STATE || '').trim().toLowerCase() === 'live')
+            .map(item => item['Program Type'] || item.programType);
     }
 
     function toggleAuthMode() {
@@ -587,11 +586,17 @@
     }
 
     function createCard(item) {
-        let status = item.Status ? item.Status.trim() : 'Upcoming';
-        let studentText = item['Student Name'] || '';
-        let classText = item.Class ? item.Class.trim() : '';
+        let rawStatus = item.Status || item.status || item.STATE || 'Upcoming';
+        let status = String(rawStatus).trim();
+        
+        if (!status || status === "") {
+            status = "Upcoming";
+        }
+
+        let studentText = item['Student Name'] || item.studentName || '';
+        let classText = item.Class ? String(item.Class).trim() : '';
         let displaySubText = classText ? `${studentText} (${classText})` : studentText;
-        let progType = item['Program Type'] || '';
+        let progType = item['Program Type'] || item.programType || '';
         let isLive = status.toLowerCase() === 'live';
 
         let card = document.createElement("div");
@@ -599,7 +604,7 @@
         
         card.innerHTML = `
             <div class="card-content">
-                <span style="font-size:12px; font-weight:600;">${item.Time || ''}</span><br>
+                <span style="font-size:12px; font-weight:600;">${item.Time || item.time || ''}</span><br>
                 <b>${isLive ? '<span class="live-dot"></span>' : ''}${progType}</b><br>
                 <small>${displaySubText}</small>
             </div>
@@ -634,6 +639,24 @@
         }
     }, 50);
 
+    function fetchSchedule() {
+        fetch(sheetURL)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    globalSheFestData = data.sheFest || [];
+                    globalHeFestData = data.heFest || [];
+                    globalResultsData = data.results || [];
+                    
+                    checkLiveAlerts(globalSheFestData);
+                    checkLiveAlerts(globalHeFestData);
+                    
+                    renderLists(globalSheFestData, globalHeFestData, globalResultsData);
+                }
+            })
+            .catch(err => console.error("Error fetching schedule:", err));
+    }
+
     function renderLists(sheData, heData, resultsData) {
         document.getElementById("she-fest-list").innerHTML = "";
         document.getElementById("he-fest-list").innerHTML = "";
@@ -642,13 +665,13 @@
         let finished = 0;
         
         sheData.forEach(item => {
-            let status = (item.Status || '').trim().toLowerCase();
+            let status = (item.Status || item.status || item.STATE || '').trim().toLowerCase();
             if (status === 'completed' || status === 'finished') finished++;
             document.getElementById("she-fest-list").appendChild(createCard(item));
         });
 
         heData.forEach(item => {
-            let status = (item.Status || '').trim().toLowerCase();
+            let status = (item.Status || item.status || item.STATE || '').trim().toLowerCase();
             if (status === 'completed' || status === 'finished') finished++;
             document.getElementById("he-fest-list").appendChild(createCard(item));
         });
@@ -689,123 +712,139 @@
         renderLists(filteredShe, filteredHe, filteredResults);
     }
 
-    function fetchSchedule() {
-        let savedMobile = localStorage.getItem("fest_user");
-        if (!savedMobile) return;
-
-        if (!navigator.onLine) {
-            showToast("⚠️ No internet connection!", "error");
-            return;
-        }
-
-        fetch(sheetURL)
-            .then(r => {
-                if (!r.ok) throw new Error("Server error");
-                return r.json();
-            })
-            .then(response => {
-                globalSheFestData = response.schedule || []; 
-                globalHeFestData = response.boysSchedule || [];
-                globalResultsData = response.results || [];
-                
-                if (globalSheFestData.length === 0 && globalHeFestData.length === 0) {
-                    showToast("⚠️ No schedule data found in sheets!", "warning");
-                }
-
-                checkLiveAlerts([...globalSheFestData, ...globalHeFestData]);
-                renderLists(globalSheFestData, globalHeFestData, globalResultsData);
-            })
-            .catch(err => {
-                console.log("Fetch error:", err);
-                showToast("❌ Failed to load schedule data!", "error");
-            });
-    }
-
-    // --- QUIZ LOGIC ---
+    // --- LIVE QUIZ FUNCTIONS ---
     function openQuizModal() {
         document.getElementById("quizModal").style.display = "flex";
-        fetchQuizData();
-        quizInterval = setInterval(fetchQuizData, 5000);
+        fetchQuizStatus();
+        if (quizInterval) clearInterval(quizInterval);
+        quizInterval = setInterval(fetchQuizStatus, 4000);
     }
 
     function closeQuizModal() {
         document.getElementById("quizModal").style.display = "none";
-        if (quizInterval) clearInterval(quizInterval);
+        if (quizInterval) {
+            clearInterval(quizInterval);
+            quizInterval = null;
+        }
     }
 
-    function fetchQuizData() {
-        let mobile = localStorage.getItem("fest_user") || "";
-        fetch(sheetURL + "?action=getQuiz&mobile=" + encodeURIComponent(mobile))
-            .then(r => r.json())
-            .then(res => {
-                let quizBody = document.getElementById("quizBody");
+    function fetchQuizStatus() {
+        let mobile = localStorage.getItem("fest_user");
+        if (!mobile) return;
+
+        fetch(`${sheetURL}?action=getQuiz&mobile=${mobile}`)
+            .then(res => res.json())
+            .then(data => {
                 let scoreDisplay = document.getElementById("userScoreDisplay");
-                
-                scoreDisplay.innerText = "Score: " + (res.score || 0);
+                if (scoreDisplay) {
+                    scoreDisplay.innerText = "Score: " + (data.score || 0);
+                }
 
-                if (res.status === "STARTED" && res.question) {
-                    let q = res.question;
-                    let html = `<p style="font-size: 15px; font-weight: 600; margin-bottom: 15px;">${q.QuestionText}</p>`;
-                    let options = [q.OptionA, q.OptionB, q.OptionC, q.OptionD];
-                    
-                    options.forEach((opt, idx) => {
-                        if (opt && String(opt).trim() !== "") {
-                            let optNum = idx + 1;
-                            let isAnswered = res.hasAnswered;
-                            let selectedOpt = res.selectedOption;
-                            let btnStyle = "";
-                            
-                            if (isAnswered) {
-                                if (Number(selectedOpt) === optNum) {
-                                    btnStyle = "background: #2563eb; color: white; border-color: #2563eb;";
-                                } else {
-                                    btnStyle = "opacity: 0.6; cursor: not-allowed;";
+                let quizBody = document.getElementById("quizBody");
+                if (!quizBody) return;
+
+                if (data.quizStatus === "WAITING") {
+                    quizBody.innerHTML = `
+                        <div style="padding: 20px 0;">
+                            <p style="font-size: 15px; font-weight: 600; color: var(--text-main);">⏳ Quiz Hasn't Started Yet</p>
+                            <p style="font-size: 13px; color: var(--text-muted); margin-top: 5px;">Please wait for the admin to launch the next question!</p>
+                        </div>
+                    `;
+                } else if (data.quizStatus === "STARTED") {
+                    if (data.hasAnswered) {
+                        quizBody.innerHTML = `
+                            <div style="padding: 20px 0;">
+                                <p style="font-size: 16px; font-weight: 700; color: #10b981;">✅ Answer Submitted!</p>
+                                <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">Waiting for the next question to drop...</p>
+                            </div>
+                        `;
+                    } else {
+                        let optionsHtml = "";
+                        if (data.options && Array.isArray(data.options)) {
+                            data.options.forEach((opt, index) => {
+                                if (opt && String(opt).trim() !== "") {
+                                    optionsHtml += `<button class="quiz-option-btn" onclick="submitQuizAnswer('${escapeQuotes(opt)}')">${opt}</button>`;
                                 }
-                            }
-
-                            html += `<button class="quiz-option-btn" style="${btnStyle}" ${isAnswered ? 'disabled' : `onclick="submitQuizAnswer('${q.QuestionID}', ${optNum}, '${q.CorrectAnswer}')"`}>${opt}</button>`;
+                            });
                         }
-                    });
 
-                    if (res.hasAnswered) {
-                        html += `<p style="font-size: 12px; color: var(--text-muted); margin-top: 15px;">You have already answered this question. Waiting for the next question...</p>`;
+                        quizBody.innerHTML = `
+                            <div style="text-align: left; margin-bottom: 15px;">
+                                <p style="font-size: 14px; font-weight: 700; color: var(--text-main); line-height: 1.4;">${data.question || ''}</p>
+                            </div>
+                            <div id="quizOptionsContainer">
+                                ${optionsHtml}
+                            </div>
+                        `;
                     }
-
-                    quizBody.innerHTML = html;
-                } else {
-                    quizBody.innerHTML = `<p style="color: var(--text-muted); padding: 20px 0;">No active quiz question right now. Please check back later!</p>`;
+                } else if (data.quizStatus === "CLOSED") {
+                    quizBody.innerHTML = `
+                        <div style="padding: 20px 0;">
+                            <p style="font-size: 16px; font-weight: 700; color: var(--primary);">🏁 Quiz Ended</p>
+                            <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">Thank you for participating! Your final score is <b>${data.score || 0}</b>.</p>
+                        </div>
+                    `;
                 }
             })
             .catch(err => {
-                console.log("Quiz fetch error:", err);
+                console.error("Quiz fetch error:", err);
             });
     }
 
-    function submitQuizAnswer(qId, selectedOptionNum, correctAnswer) {
-        let mobile = localStorage.getItem("fest_user") || "";
-        let name = localStorage.getItem("fest_name") || "";
-        let isCorrect = String(selectedOptionNum) === String(correctAnswer);
+    function submitQuizAnswer(selectedOption) {
+        let mobile = localStorage.getItem("fest_user");
+        if (!mobile) return;
+
+        let optionsContainer = document.getElementById("quizOptionsContainer");
+        if (optionsContainer) {
+            optionsContainer.innerHTML = `<p style="font-size: 13px; font-weight: 600; color: var(--text-muted); padding: 15px 0;">Submitting answer...</p>`;
+        }
 
         fetch(sheetURL, {
             method: "POST",
-            body: JSON.stringify({ 
-                action: "submitQuiz", 
-                mobile: mobile, 
-                name: name, 
-                qId: qId, 
-                selectedOption: selectedOptionNum,
-                isCorrect: isCorrect 
+            body: JSON.stringify({
+                action: "submitQuiz",
+                mobile: mobile,
+                answer: selectedOption
             })
         })
-        .then(r => r.json())
-        .then(res => {
-            if (res.status === "success" || res.status === "already_answered") {
-                fetchQuizData();
-            } else {
-                showToast(res.message || "Error submitting answer.", "error");
+        .then(res => res.json())
+        .then(data => {
+            let quizBody = document.getElementById("quizBody");
+            if (!quizBody) return;
+
+            if (data.status === "correct") {
+                quizBody.innerHTML = `
+                    <div style="padding: 20px 0;">
+                        <p style="font-size: 16px; font-weight: 700; color: #10b981;">🎉 Correct Answer! (+10 pts)</p>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">Great job! Waiting for the next question...</p>
+                    </div>
+                `;
+            } else if (data.status === "wrong") {
+                quizBody.innerHTML = `
+                    <div style="padding: 20px 0;">
+                        <p style="font-size: 16px; font-weight: 700; color: #ef4444;">❌ Wrong Answer!</p>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">Better luck on the next question!</p>
+                    </div>
+                `;
+            } else if (data.status === "already_answered") {
+                quizBody.innerHTML = `
+                    <div style="padding: 20px 0;">
+                        <p style="font-size: 16px; font-weight: 700; color: #f59e0b;">⚠️ Already Answered</p>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">You have already submitted an answer for this prompt.</p>
+                    </div>
+                `;
             }
+            setTimeout(fetchQuizStatus, 2000);
         })
-        .catch(err => showToast("❌ Connection error!", "error"));
+        .catch(err => {
+            showToast("❌ Error submitting answer.", "error");
+            fetchQuizStatus();
+        });
+    }
+
+    function escapeQuotes(str) {
+        return String(str).replace(/'/g, "\\'").replace(/"/g, '&quot;');
     }
 </script>
 </body>
