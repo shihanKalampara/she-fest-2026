@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Thiruvasantham 1501 - Noorul Huda Madrasa</title>
+    <title>Thiruvasantham26 - Noorul Huda Madrasa</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f172a">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Fest App">
+    <meta name="apple-mobile-web-app-title" content="Thiruvasantham26">
     <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV">
     <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV">
 
@@ -376,6 +376,32 @@
 </div>
 
 <script>
+    // Dynamically generate and inject manifest.json blob so name is always Thiruvasantham26
+    const manifestData = {
+        "name": "Thiruvasantham26",
+        "short_name": "Thiruvasantham26",
+        "start_url": "./",
+        "display": "standalone",
+        "background_color": "#f8fafc",
+        "theme_color": "#0f172a",
+        "icons": [
+            {
+                "src": "https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV",
+                "sizes": "192x192",
+                "type": "image/png"
+            },
+            {
+                "src": "https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV",
+                "sizes": "512x512",
+                "type": "image/png"
+            }
+        ]
+    };
+    const stringManifest = JSON.stringify(manifestData);
+    const blob = new Blob([stringManifest], {type: 'application/json'});
+    const manifestURL = URL.createObjectURL(blob);
+    document.querySelector('link[rel="manifest"]').setAttribute('href', manifestURL);
+
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('sw.js').catch(err => console.log('SW failed:', err));
@@ -440,7 +466,7 @@
             container.innerHTML = `
                 <div class="install-step"><span>1️⃣</span> ക്രോം (Chrome) ബ്രൗസറിന്റെ മുകളിൽ വലതുവശത്തുള്ള <b>മൂന്ന് കുത്തുകൾ (⋮)</b> അമർത്തുക.</div>
                 <div class="install-step"><span>2️⃣</span> <b>"Install App"</b> അല്ലെങ്കിൽ <b>"Add to Home Screen"</b> എന്ന ഓപ്ഷൻ തിരഞ്ഞെടുക്കുക.</div>
-                <div class="install-step"><span>3️⃣</span> <b>Install</b> കൊടുക്കുക, ആപ്പ് നിങ്ങളുടെ ഹോം സ്ക്രീനിൽ വരും!</div>
+                <div class="install-step"><span>3️⃣</span> <b>Install</b> കൊടുക്കുക, ആപ്പ് നിങ്ങളുടെ ഹോം സ്ക്രീനിൽ <b>Thiruvasantham26</b> എന്ന പേരിൽ വരും!</div>
             `;
         } else {
             tabIos.classList.add("active");
