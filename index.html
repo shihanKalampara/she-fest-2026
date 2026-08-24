@@ -53,14 +53,12 @@
         .dropdown-menu button:hover { background: var(--bg-color); }
         .dropdown-menu button.logout-opt { color: #ef4444; border-bottom: none; justify-content: flex-start; gap: 8px; }
         
-        /* Download / Install Option Special Styling */
         .dropdown-menu button.install-opt { color: #2563eb; background: rgba(37, 99, 235, 0.04); font-weight: 700; border-bottom: 1px solid var(--border-color); }
         [data-theme="dark"] .dropdown-menu button.install-opt { color: #38bdf8; background: rgba(56, 189, 248, 0.08); }
 
         h1 { text-align: center; color: var(--text-main); margin: 10px 0 5px 0; font-size: 24px; font-weight: 700; }
         .sub-heading { text-align: center; color: var(--text-muted); font-weight: 500; margin-bottom: 20px; text-transform: uppercase; font-size: 11px; letter-spacing: 1.5px; }
 
-        /* Auth Screen */
         #auth-screen { text-align: center; padding: 30px 10px; }
         .auth-box { max-width: 320px; margin: auto; background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
         .auth-box input { width: 100%; padding: 10px; margin: 8px 0 15px 0; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-main); border-radius: 8px; box-sizing: border-box; font-size: 13px; outline: none; }
@@ -105,156 +103,50 @@
         
         .feedback-box textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-main); border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; outline: none; }
 
-        /* Floating Quiz Icon */
         .quiz-floating-btn {
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            width: 60px;
-            height: 60px;
-            background: #ffffff;
-            border-radius: 50%;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 999;
-            border: 2px solid var(--primary);
-            animation: bounceQuiz 2s infinite;
+            position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px;
+            background: #ffffff; border-radius: 50%; box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+            display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 999;
+            border: 2px solid var(--primary); animation: bounceQuiz 2s infinite;
         }
-        .quiz-floating-btn img {
-            width: 38px;
-            height: 38px;
-            object-fit: contain;
-        }
+        .quiz-floating-btn img { width: 38px; height: 38px; object-fit: contain; }
         @keyframes bounceQuiz {
             0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
             40% { transform: translateY(-6px); }
             60% { transform: translateY(-3px); }
         }
 
-        /* Quiz Modal */
         #quizModal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            padding: 15px;
-            box-sizing: border-box;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; padding: 15px; box-sizing: border-box;
         }
         .quiz-modal-content {
-            background: var(--card-bg);
-            width: 100%;
-            max-width: 450px;
-            border-radius: 16px;
-            padding: 20px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-            position: relative;
-            max-height: 90vh;
-            overflow-y: auto;
+            background: var(--card-bg); width: 100%; max-width: 450px; border-radius: 16px; padding: 20px;
+            border: 1px solid var(--border-color); box-shadow: 0 15px 35px rgba(0,0,0,0.2); position: relative; max-height: 90vh; overflow-y: auto;
         }
-        .close-quiz {
-            position: absolute;
-            top: 15px;
-            right: 18px;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            color: var(--text-muted);
-        }
+        .close-quiz { position: absolute; top: 15px; right: 18px; font-size: 20px; font-weight: bold; cursor: pointer; color: var(--text-muted); }
         .quiz-option-btn {
-            width: 100%;
-            padding: 12px 14px;
-            margin: 8px 0;
-            background: var(--bg-color);
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            text-align: left;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
+            width: 100%; padding: 12px 14px; margin: 8px 0; background: var(--bg-color); color: var(--text-main);
+            border: 1px solid var(--border-color); border-radius: 10px; text-align: left; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s;
         }
-        .quiz-option-btn:hover {
-            border-color: #2563eb;
-            background: rgba(37, 99, 235, 0.05);
-        }
-        .quiz-score-badge {
-            background: #2563eb;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: bold;
-            display: inline-block;
-            margin-bottom: 10px;
-        }
+        .quiz-option-btn:hover { border-color: #2563eb; background: rgba(37, 99, 235, 0.05); }
+        .quiz-score-badge { background: #2563eb; color: white; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; display: inline-block; margin-bottom: 10px; }
 
-        /* Platform Selection & Instructions Modal */
         #installModal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
-            z-index: 1100;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            box-sizing: border-box;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 1100; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;
         }
         .install-modal-content {
-            background: var(--card-bg);
-            width: 100%;
-            max-width: 400px;
-            border-radius: 16px;
-            padding: 22px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-            text-align: center;
+            background: var(--card-bg); width: 100%; max-width: 400px; border-radius: 16px; padding: 22px;
+            border: 1px solid var(--border-color); box-shadow: 0 15px 35px rgba(0,0,0,0.2); text-align: center;
         }
         .install-step {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: var(--bg-color);
-            padding: 10px 12px;
-            border-radius: 10px;
-            margin: 8px 0;
-            font-size: 13px;
-            text-align: left;
-            border: 1px solid var(--border-color);
+            display: flex; align-items: center; gap: 12px; background: var(--bg-color); padding: 10px 12px;
+            border-radius: 10px; margin: 8px 0; font-size: 13px; text-align: left; border: 1px solid var(--border-color);
         }
-        .platform-tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 15px;
-            background: var(--bg-color);
-            padding: 4px;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-        }
-        .platform-tab {
-            flex: 1;
-            padding: 8px;
-            font-size: 12px;
-            font-weight: 700;
-            border: none;
-            border-radius: 8px;
-            background: transparent;
-            cursor: pointer;
-            color: var(--text-muted);
-        }
-        .platform-tab.active {
-            background: var(--card-bg);
-            color: var(--text-main);
-            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-        }
+        .platform-tabs { display: flex; gap: 8px; margin-bottom: 15px; background: var(--bg-color); padding: 4px; border-radius: 10px; border: 1px solid var(--border-color); }
+        .platform-tab { flex: 1; padding: 8px; font-size: 12px; font-weight: 700; border: none; border-radius: 8px; background: transparent; cursor: pointer; color: var(--text-muted); }
+        .platform-tab.active { background: var(--card-bg); color: var(--text-main); box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
     </style>
 </head>
 <body>
@@ -271,6 +163,7 @@
                 <div class="user-profile-info" id="userProfileName">👤 Loading...</div>
                 <button onclick="toggleAutoScroll()" id="autoScrollToggleBtn">🔁 Auto Scroll: OFF</button>
                 <button onclick="toggleDarkMode()" id="darkModeToggleBtn">🌙 Dark Mode: OFF</button>
+                <button onclick="requestNotificationPermission()" id="notifToggleBtn">🔔 Notifications: OFF</button>
                 <button class="install-opt" id="installAppMenuBtn" onclick="triggerAppInstall()">📥 Download / Install App</button>
                 <button onclick="resetMobile()">🔄 Reset Mobile</button>
                 <button class="logout-opt" onclick="logout()">🚪 Logout</button>
@@ -361,22 +254,18 @@
         <h3 style="margin-top:0; color:var(--primary);">📥 Install App</h3>
         <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">ഫോൺ ഹോം സ്ക്രീനിലേക്ക് ആപ്പ് പെട്ടെന്ന് ആഡ് ചെയ്യാൻ താഴെയുള്ള രീതി പിന്തുടരുക:</p>
         
-        <!-- Platform Switch Tabs -->
         <div class="platform-tabs">
             <button class="platform-tab active" id="tabAndroid" onclick="switchInstallGuide('android')">🤖 Android (Chrome)</button>
             <button class="platform-tab" id="tabIos" onclick="switchInstallGuide('ios')">🍎 iOS (iPhone/Safari)</button>
         </div>
 
-        <div id="installInstructionsContainer">
-            <!-- Dynamic content inserted by JS -->
-        </div>
+        <div id="installInstructionsContainer"></div>
 
         <button class="auth-btn" style="margin-top: 15px;" onclick="closeInstallModal()">Got It</button>
     </div>
 </div>
 
 <script>
-    // Dynamically generate and inject manifest.json blob so name is always Thiruvasantham26
     const manifestData = {
         "name": "Thiruvasantham26",
         "short_name": "Thiruvasantham26",
@@ -385,16 +274,8 @@
         "background_color": "#f8fafc",
         "theme_color": "#0f172a",
         "icons": [
-            {
-                "src": "https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV",
-                "sizes": "192x192",
-                "type": "image/png"
-            },
-            {
-                "src": "https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV",
-                "sizes": "512x512",
-                "type": "image/png"
-            }
+            { "src": "https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV", "sizes": "192x192", "type": "image/png" },
+            { "src": "https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV", "sizes": "512x512", "type": "image/png" }
         ]
     };
     const stringManifest = JSON.stringify(manifestData);
@@ -420,7 +301,6 @@
     let quizInterval = null;
     let deferredPrompt = null;
 
-    // Capture install prompt for Android/Chrome
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
@@ -431,21 +311,15 @@
     });
 
     function triggerAppInstall() {
-        toggleDropdown(); // Close menu
-        
+        toggleDropdown();
         let isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
         if (deferredPrompt) {
-            // Android automatic popup trigger if supported by browser
             deferredPrompt.prompt();
             deferredPrompt.userChoice.then((choiceResult) => {
-                if (choiceResult.outcome === 'accepted') {
-                    console.log('User accepted the install prompt');
-                }
                 deferredPrompt = null;
             });
         } else {
-            // Show manual step-by-step guide modal (defaults to iOS or Android tab based on device)
             showInstallGuideModal(isIOSDevice ? 'ios' : 'android');
         }
     }
@@ -465,16 +339,16 @@
             tabIos.classList.remove("active");
             container.innerHTML = `
                 <div class="install-step"><span>1️⃣</span> ക്രോം (Chrome) ബ്രൗസറിന്റെ മുകളിൽ വലതുവശത്തുള്ള <b>മൂന്ന് കുത്തുകൾ (⋮)</b> അമർത്തുക.</div>
-                <div class="install-step"><span>2️⃣</span> <b>"Install App"</b> അല്ലെങ്കിൽ <b>"Add to Home Screen"</b> എന്ന ഓപ്ഷൻ തിരഞ്ഞെടുക്കുക.</div>
-                <div class="install-step"><span>3️⃣</span> <b>Install</b> കൊടുക്കുക, ആപ്പ് നിങ്ങളുടെ ഹോം സ്ക്രീനിൽ <b>Thiruvasantham26</b> എന്ന പേരിൽ വരും!</div>
+                <div class="install-step"><span>2️⃣</span> <b>"Install App"</b> അല്ലെങ്കിൽ <b>"Add to Home Screen"</b> തിരഞ്ഞെടുക്കുക.</div>
+                <div class="install-step"><span>3️⃣</span> <b>Install</b> കൊടുക്കുക, ആപ്പ് നിങ്ങളുടെ ഹോം സ്ക്രീനിൽ വരുമെന്ന് ഉറപ്പാക്കുക!</div>
             `;
         } else {
             tabIos.classList.add("active");
             tabAndroid.classList.remove("active");
             container.innerHTML = `
-                <div class="install-step"><span>1️⃣</span> ഐഫോൺ <b>Safari</b> ബ്രൗസറിൽ താഴെ കാണുന്ന <b>Share (പങ്കുവെക്കൽ) ബട്ടൺ 📤</b> അമർത്തുക.</div>
-                <div class="install-step"><span>2️⃣</span> താഴേക്ക് സ്ക്രോൾ ചെയ്ത് <b>"Add to Home Screen" (➕)</b> തിരഞ്ഞെടുക്കുക.</div>
-                <div class="install-step"><span>3️⃣</span> മുകളിൽ വലതുവശത്തുള്ള <b>"Add"</b> കൊടുത്ത് ഫിനിഷ് ചെയ്യുക!</div>
+                <div class="install-step"><span>1️⃣</span> ഐഫോൺ <b>Safari</b> ബ്രൗസറിൽ താഴെ കാണുന്ന <b>Share ബട്ടൺ 📤</b> അമർത്തുക.</div>
+                <div class="install-step"><span>2️⃣</span> <b>"Add to Home Screen" (➕)</b> തിരഞ്ഞെടുക്കുക.</div>
+                <div class="install-step"><span>3️⃣</span> മുകളിൽ വലതുവശത്തുള്ള <b>"Add"</b> കൊടുക്കുക!</div>
             `;
         }
     }
@@ -490,29 +364,15 @@
         let toast = document.createElement("div");
         toast.id = "appToastNotification";
         toast.innerText = message;
-        
         let bgColor = type === "error" ? "#ef4444" : (type === "success" ? "#10b981" : "#f59e0b");
 
         toast.style.cssText = `
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: ${bgColor};
-            color: white;
-            padding: 12px 20px;
-            border-radius: 30px;
-            font-size: 13px;
-            font-weight: 600;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            z-index: 9999;
-            text-align: center;
-            max-width: 90%;
-            transition: opacity 0.3s ease;
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: ${bgColor}; color: white; padding: 12px 20px; border-radius: 30px;
+            font-size: 13px; font-weight: 600; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 9999; text-align: center; max-width: 90%; transition: opacity 0.3s ease;
         `;
-
         document.body.appendChild(toast);
-
         setTimeout(() => {
             toast.style.opacity = "0";
             setTimeout(() => toast.remove(), 300);
@@ -525,16 +385,13 @@
         }
         updateDarkModeUI();
         updateAutoScrollUI();
+        updateNotificationUI();
 
         let savedMobile = localStorage.getItem("fest_user");
         let savedName = localStorage.getItem("fest_name");
         if (savedMobile) {
             showMainApp();
-            if (savedName && savedName !== "undefined" && savedName !== "null") {
-                document.getElementById("userProfileName").innerText = "👤 " + savedName;
-            } else {
-                document.getElementById("userProfileName").innerText = "👤 User";
-            }
+            document.getElementById("userProfileName").innerText = "👤 " + (savedName || "User");
         }
     };
 
@@ -560,9 +417,7 @@
 
     function updateAutoScrollUI() {
         let btn = document.getElementById("autoScrollToggleBtn");
-        if (btn) {
-            btn.innerHTML = isAutoScrollEnabled ? "🔁 Auto Scroll: ON" : "⏸️ Auto Scroll: OFF";
-        }
+        if (btn) btn.innerHTML = isAutoScrollEnabled ? "🔁 Auto Scroll: ON" : "⏸️ Auto Scroll: OFF";
     }
 
     function toggleDarkMode() {
@@ -578,14 +433,32 @@
 
     function updateDarkModeUI() {
         let btn = document.getElementById("darkModeToggleBtn");
-        if (btn) {
-            btn.innerHTML = isDarkModeEnabled ? "☀️ Dark Mode: ON" : "🌙 Dark Mode: OFF";
-        }
+        if (btn) btn.innerHTML = isDarkModeEnabled ? "☀️ Dark Mode: ON" : "🌙 Dark Mode: OFF";
     }
 
     function requestNotificationPermission() {
-        if ("Notification" in window && Notification.permission !== "granted") {
-            Notification.requestPermission();
+        if ("Notification" in window) {
+            Notification.requestPermission().then(permission => {
+                updateNotificationUI();
+                if (permission === "granted") {
+                    showToast("✅ Notifications Enabled Successfully!", "success");
+                } else {
+                    showToast("⚠️ Notification permission denied.", "warning");
+                }
+            });
+        } else {
+            showToast("⚠️ Browser doesn't support notifications.", "error");
+        }
+    }
+
+    function updateNotificationUI() {
+        let btn = document.getElementById("notifToggleBtn");
+        if (btn && "Notification" in window) {
+            if (Notification.permission === "granted") {
+                btn.innerHTML = "🔔 Notifications: ON";
+            } else {
+                btn.innerHTML = "🔕 Notifications: OFF";
+            }
         }
     }
 
@@ -594,20 +467,15 @@
 
         dataArray.forEach(item => {
             let status = (item.Status || item.status || item.STATE || '').trim().toLowerCase();
-            let progName = item['Program Type'] || item.programType || '';
+            let progName = item['Program Type'] || item.programType || item['Program Name'] || '';
 
             if (status === 'live' && !previousLivePrograms.includes(progName)) {
                 if (navigator.serviceWorker && navigator.serviceWorker.controller) {
                     navigator.serviceWorker.ready.then(reg => {
                         reg.showNotification("🔴 Live Now: " + progName, {
-                            body: `Stage is live now!`,
+                            body: `Stage is live now! Tap to view details.`,
                             icon: "https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV"
                         });
-                    });
-                } else {
-                    new Notification("🔴 Live Now: " + progName, {
-                        body: `Stage is live now!`,
-                        icon: "https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV"
                     });
                 }
             }
@@ -615,7 +483,7 @@
 
         previousLivePrograms = dataArray
             .filter(item => (item.Status || item.status || item.STATE || '').trim().toLowerCase() === 'live')
-            .map(item => item['Program Type'] || item.programType);
+            .map(item => item['Program Type'] || item.programType || item['Program Name']);
     }
 
     function toggleAuthMode() {
@@ -642,11 +510,6 @@
             return;
         }
 
-        if (!navigator.onLine) {
-            showToast("⚠️ No internet connection!", "error");
-            return;
-        }
-
         let payload = { action: isRegisterMode ? "register" : "login", mobile: mobile };
         if (isRegisterMode) {
             if (!name) { showToast("⚠️ Please enter your name!", "warning"); return; }
@@ -655,26 +518,22 @@
 
         document.getElementById("authSubmitBtn").innerText = "Processing...";
 
-        fetch(sheetURL, {
-            method: "POST",
-            body: JSON.stringify(payload)
-        })
+        fetch(sheetURL, { method: "POST", body: JSON.stringify(payload) })
         .then(res => res.json())
         .then(data => {
             if (data.status === "success") {
                 localStorage.setItem("fest_user", mobile);
-                let finalName = data.name || (isRegisterMode && name ? name : "User");
-                localStorage.setItem("fest_name", finalName);
+                localStorage.setItem("fest_name", data.name || (isRegisterMode ? name : "User"));
                 showMainApp();
             } else if (data.status === "blocked") {
-                showToast("❌ Your account access has been blocked by admin.", "error");
+                showToast("❌ Account blocked by admin.", "error");
             } else {
-                showToast("❌ Mobile number not found. Please register first.", "error");
+                showToast("❌ Number not found. Please register.", "error");
             }
             document.getElementById("authSubmitBtn").innerText = isRegisterMode ? "Register" : "Login";
         })
         .catch(err => {
-            showToast("❌ Connection error! Failed to authenticate.", "error");
+            showToast("❌ Connection error!", "error");
             document.getElementById("authSubmitBtn").innerText = isRegisterMode ? "Register" : "Login";
         });
     }
@@ -686,7 +545,7 @@
         newMobile = newMobile.trim();
 
         if (!/^\d{10}$/.test(newMobile)) {
-            alert("Please enter a valid 10-digit mobile number!");
+            alert("Invalid mobile number!");
             return;
         }
 
@@ -697,13 +556,12 @@
         .then(res => res.json())
         .then(data => {
             if (data.status === "success") {
-                alert("Mobile number updated successfully! Please login again.");
+                alert("Updated successfully! Please login again.");
                 logout();
             } else {
-                alert("Error updating mobile number.");
+                alert("Error updating.");
             }
-        })
-        .catch(err => alert("Error connecting to server!"));
+        });
     }
 
     function sendFeedback() {
@@ -712,7 +570,7 @@
         let name = localStorage.getItem("fest_name");
 
         if (!feedback) {
-            showToast("⚠️ Please write something in feedback!", "warning");
+            showToast("⚠️ Please write feedback!", "warning");
             return;
         }
 
@@ -723,13 +581,12 @@
         .then(res => res.json())
         .then(data => {
             if(data.status === "success") {
-                showToast("✅ Thank you! Feedback sent successfully.", "success");
+                showToast("✅ Feedback sent successfully.", "success");
                 document.getElementById("feedbackText").value = "";
             } else {
                 showToast("❌ Error sending feedback.", "error");
             }
-        })
-        .catch(err => showToast("❌ Connection error!", "error"));
+        });
     }
 
     function showMainApp() {
@@ -741,7 +598,6 @@
         let savedName = localStorage.getItem("fest_name") || "User";
         document.getElementById("userProfileName").innerText = "👤 " + savedName;
 
-        requestNotificationPermission();
         fetchSchedule();
         setInterval(fetchSchedule, 10000);
     }
@@ -761,12 +617,7 @@
 
     function createCard(item) {
         let rawStatus = item.Status || item.status || item.STATE || 'Upcoming';
-        let status = String(rawStatus).trim();
-        
-        if (!status || status === "") {
-            status = "Upcoming";
-        }
-
+        let status = String(rawStatus).trim() || "Upcoming";
         let studentText = item['Student Name'] || item.studentName || item.Name || '';
         let classText = item.Class || item.class || '';
         let displaySubText = classText ? `${studentText} (${classText})` : studentText;
@@ -775,7 +626,6 @@
 
         let card = document.createElement("div");
         card.className = "schedule-card";
-        
         card.innerHTML = `
             <div class="card-content">
                 <span style="font-size:12px; font-weight:600;">${item.Time || item.time || ''}</span><br>
@@ -809,7 +659,6 @@
         return card;
     }
 
-    // Auto-Scroll Interval (Works only if enabled from settings)
     setInterval(() => {
         if (!isAutoScrollEnabled) return;
         const searchVal = document.getElementById("searchInput").value;
@@ -835,7 +684,7 @@
                     renderLists(globalSheFestData, globalHeFestData, globalResultsData);
                 }
             })
-            .catch(err => console.error("Error fetching schedule:", err));
+            .catch(err => console.error("Error:", err));
     }
 
     function renderLists(sheData, heData, resultsData) {
@@ -847,23 +696,18 @@
         
         sheData.forEach(item => {
             let status = (item.Status || item.status || item.STATE || '').trim().toLowerCase();
-            if (status === 'completed' || status === 'finished' || status === 'cancelled') {
-                finishedCount++;
-            }
+            if (['completed', 'finished', 'cancelled'].includes(status)) finishedCount++;
             document.getElementById("she-fest-list").appendChild(createCard(item));
         });
 
         heData.forEach(item => {
             let status = (item.Status || item.status || item.STATE || '').trim().toLowerCase();
-            if (status === 'completed' || status === 'finished' || status === 'cancelled') {
-                finishedCount++;
-            }
+            if (['completed', 'finished', 'cancelled'].includes(status)) finishedCount++;
             document.getElementById("he-fest-list").appendChild(createCard(item));
         });
 
         resultsData.forEach(item => { 
-            let pName = item['Program Name'] || item['Program Type'] || item.programName;
-            if (pName) {
+            if (item['Program Name'] || item['Program Type'] || item.programName) {
                 document.getElementById("results-list").appendChild(createResultCard(item)); 
             }
         });
@@ -877,31 +721,15 @@
 
     function filterData() {
         let query = document.getElementById("searchInput").value.toLowerCase().trim();
-        
         if (!query) {
             renderLists(globalSheFestData, globalHeFestData, globalResultsData);
             return;
         }
 
-        let filteredShe = globalSheFestData.filter(item => {
-            let textToSearch = Object.values(item).join(" ").toLowerCase();
-            return textToSearch.includes(query);
-        });
-
-        let filteredHe = globalHeFestData.filter(item => {
-            let textToSearch = Object.values(item).join(" ").toLowerCase();
-            return textToSearch.includes(query);
-        });
-
-        let filteredResults = globalResultsData.filter(item => {
-            let textToSearch = Object.values(item).join(" ").toLowerCase();
-            return textToSearch.includes(query);
-        });
-
-        renderLists(filteredShe, filteredHe, filteredResults);
+        let filter = (arr) => arr.filter(item => Object.values(item).join(" ").toLowerCase().includes(query));
+        renderLists(filter(globalSheFestData), filter(globalHeFestData), filter(globalResultsData));
     }
 
-    // --- LIVE QUIZ FUNCTIONS ---
     function openQuizModal() {
         document.getElementById("quizModal").style.display = "flex";
         fetchQuizStatus();
@@ -911,10 +739,7 @@
 
     function closeQuizModal() {
         document.getElementById("quizModal").style.display = "none";
-        if (quizInterval) {
-            clearInterval(quizInterval);
-            quizInterval = null;
-        }
+        if (quizInterval) { clearInterval(quizInterval); quizInterval = null; }
     }
 
     function fetchQuizStatus() {
@@ -924,59 +749,29 @@
         fetch(`${sheetURL}?action=getQuiz&mobile=${mobile}`)
             .then(res => res.json())
             .then(data => {
-                let scoreDisplay = document.getElementById("userScoreDisplay");
-                if (scoreDisplay) {
-                    scoreDisplay.innerText = "Score: " + (data.score || 0);
-                }
-
+                document.getElementById("userScoreDisplay").innerText = "Score: " + (data.score || 0);
                 let quizBody = document.getElementById("quizBody");
                 if (!quizBody) return;
 
                 if (data.quizStatus === "WAITING") {
-                    quizBody.innerHTML = `
-                        <div style="padding: 20px 0;">
-                            <p style="font-size: 15px; font-weight: 600; color: var(--text-main);">⏳ Quiz Hasn't Started Yet</p>
-                            <p style="font-size: 13px; color: var(--text-muted); margin-top: 5px;">Please wait for the admin to launch the next question!</p>
-                        </div>
-                    `;
+                    quizBody.innerHTML = `<p style="font-weight: 600; padding: 20px 0;">⏳ Quiz Hasn't Started Yet</p>`;
                 } else if (data.quizStatus === "STARTED") {
                     if (data.hasAnswered) {
-                        quizBody.innerHTML = `
-                            <div style="padding: 20px 0;">
-                                <p style="font-size: 16px; font-weight: 700; color: #10b981;">✅ Answer Submitted!</p>
-                                <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">Waiting for the next question to drop...</p>
-                            </div>
-                        `;
+                        quizBody.innerHTML = `<p style="font-weight: 700; color: #10b981; padding: 20px 0;">✅ Answer Submitted!</p>`;
                     } else {
                         let optionsHtml = "";
                         if (data.options && Array.isArray(data.options)) {
-                            data.options.forEach((opt) => {
+                            data.options.forEach(opt => {
                                 if (opt && String(opt).trim() !== "") {
                                     optionsHtml += `<button class="quiz-option-btn" onclick="submitQuizAnswer('${escapeQuotes(opt)}')">${opt}</button>`;
                                 }
                             });
                         }
-
-                        quizBody.innerHTML = `
-                            <div style="text-align: left; margin-bottom: 15px;">
-                                <p style="font-size: 14px; font-weight: 700; color: var(--text-main); line-height: 1.4;">${data.question || ''}</p>
-                            </div>
-                            <div id="quizOptionsContainer">
-                                ${optionsHtml}
-                            </div>
-                        `;
+                        quizBody.innerHTML = `<p style="font-weight: 700; margin-bottom: 15px;">${data.question || ''}</p><div id="quizOptionsContainer">${optionsHtml}</div>`;
                     }
                 } else if (data.quizStatus === "CLOSED") {
-                    quizBody.innerHTML = `
-                        <div style="padding: 20px 0;">
-                            <p style="font-size: 16px; font-weight: 700; color: var(--primary);">🏁 Quiz Ended</p>
-                            <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">Thank you for participating! Your final score is <b>${data.score || 0}</b>.</p>
-                        </div>
-                    `;
+                    quizBody.innerHTML = `<p style="font-weight: 700; padding: 20px 0;">🏁 Quiz Ended. Final Score: ${data.score || 0}</p>`;
                 }
-            })
-            .catch(err => {
-                console.error("Quiz fetch error:", err);
             });
     }
 
@@ -984,50 +779,19 @@
         let mobile = localStorage.getItem("fest_user");
         if (!mobile) return;
 
-        let optionsContainer = document.getElementById("quizOptionsContainer");
-        if (optionsContainer) {
-            optionsContainer.innerHTML = `<p style="font-size: 13px; font-weight: 600; color: var(--text-muted); padding: 15px 0;">Submitting answer...</p>`;
-        }
-
         fetch(sheetURL, {
             method: "POST",
-            body: JSON.stringify({
-                action: "submitQuiz",
-                mobile: mobile,
-                answer: selectedOption
-            })
+            body: JSON.stringify({ action: "submitQuiz", mobile: mobile, answer: selectedOption })
         })
         .then(res => res.json())
         .then(data => {
             let quizBody = document.getElementById("quizBody");
-            if (!quizBody) return;
-
             if (data.status === "correct") {
-                quizBody.innerHTML = `
-                    <div style="padding: 20px 0;">
-                        <p style="font-size: 16px; font-weight: 700; color: #10b981;">🎉 Correct Answer! (+10 pts)</p>
-                        <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">Great job! Waiting for the next question...</p>
-                    </div>
-                `;
-            } else if (data.status === "wrong") {
-                quizBody.innerHTML = `
-                    <div style="padding: 20px 0;">
-                        <p style="font-size: 16px; font-weight: 700; color: #ef4444;">❌ Wrong Answer!</p>
-                        <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">Better luck on the next question!</p>
-                    </div>
-                `;
-            } else if (data.status === "already_answered") {
-                quizBody.innerHTML = `
-                    <div style="padding: 20px 0;">
-                        <p style="font-size: 16px; font-weight: 700; label: #f59e0b; color: #f59e0b;">⚠️ Already Answered</p>
-                        <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">You have already submitted an answer for this prompt.</p>
-                    </div>
-                `;
+                quizBody.innerHTML = `<p style="font-weight: 700; color: #10b981; padding: 20px 0;">🎉 Correct Answer! (+10 pts)</p>`;
+            } else {
+                quizBody.innerHTML = `<p style="font-weight: 700; color: #ef4444; padding: 20px 0;">❌ Wrong Answer!</p>`;
             }
             setTimeout(fetchQuizStatus, 2000);
-        })
-        .catch(err => {
-            showToast("❌ Error submitting answer.", "error");
         });
     }
 
