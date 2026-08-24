@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Thiruvasantham 1501 - Noorul Huda Madrasa Kombamkallu</title>
+    <title>Thiruvasantham 1501 - Noorul Huda Madrasa</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f172a">
@@ -181,6 +181,16 @@
             border-color: #2563eb;
             background: rgba(37, 99, 235, 0.05);
         }
+        .quiz-score-badge {
+            background: #2563eb;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -204,7 +214,7 @@
     </div>
     
     <h1>Fest Live & Results</h1>
-    <div class="sub-heading">Noorul Huda Madrasa, Kombamkallu</div>
+    <div class="sub-heading">Noorul Huda Madrasa</div>
 
     <!-- AUTHENTICATION SCREEN -->
     <div id="auth-screen">
@@ -250,7 +260,7 @@
         <div id="results-pane" class="tab-pane"><div id="results-list" class="scroll-container"></div></div>
         <div id="feedback-pane" class="tab-pane">
             <div class="scroll-container feedback-box">
-                <h3>Send Feedback / രക്ഷകർത്താക്കളുടെ ഫീഡ്‌ബാക്ക്</h3>
+                <h3>Send Feedback / ഫീഡ്‌ബാക്ക്</h3>
                 <p style="font-size: 12px; color: var(--text-muted);">പ്രോഗ്രാമിനെക്കുറിച്ചുള്ള നിങ്ങളുടെ അഭിപ്രായങ്ങളും നിർദ്ദേശങ്ങളും ഇവിടെ അയക്കാം:</p>
                 <textarea id="feedbackText" placeholder="Write your feedback here..."></textarea>
                 <button class="auth-btn" onclick="sendFeedback()">Submit Feedback</button>
@@ -259,7 +269,7 @@
     </div>
 </div>
 
-<!-- FLOATING QUIZ ICON (Bottom Right) -->
+<!-- FLOATING QUIZ ICON -->
 <div class="quiz-floating-btn" id="quizFloatingBtn" onclick="openQuizModal()" title="Live Quiz">
     <img src="https://lh3.googleusercontent.com/d/1aPSQQlvW1m6RlVSAdeCYlDfDCrcavQe6" alt="Quiz Icon">
 </div>
@@ -269,8 +279,11 @@
     <div class="quiz-modal-content">
         <span class="close-quiz" onclick="closeQuizModal()">&times;</span>
         <div id="quizContainer">
-            <h3 style="margin-top:0; text-align:center; color:var(--primary);">Live Quiz</h3>
-            <div id="quizBody" style="text-align: center; padding: 20px 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h3 style="margin:0; color:var(--primary);">Live Quiz</h3>
+                <div id="userScoreDisplay" class="quiz-score-badge">Score: 0</div>
+            </div>
+            <div id="quizBody" style="text-align: center; padding: 10px 0;">
                 <p style="color: var(--text-muted);">Loading quiz status...</p>
             </div>
         </div>
@@ -293,11 +306,7 @@
     let isAutoScrollEnabled = localStorage.getItem("fest_autoscroll") === "true";
     let isDarkModeEnabled = localStorage.getItem("fest_darkmode") === "true";
     let previousLivePrograms = [];
-    
-    // Quiz Variables
     let quizInterval = null;
-    let currentQuizState = { status: "WAITING", currentQ: 1 };
-    let userScore = 0;
 
     window.onload = function() {
         if (isDarkModeEnabled) {
@@ -650,7 +659,7 @@
                 globalResultsData = response.results || [];
                 
                 checkLiveAlerts([...globalSheFestData, ...globalHeFestData]);
-                filterData();
+                renderLists(globalSheFestData, globalHeFestData, globalResultsData);
             })
             .catch(err => console.log("Fetch error:", err));
     }
@@ -668,10 +677,17 @@
     }
 
     function fetchQuizData() {
-        fetch(sheetURL + "?action=getQuiz")
+        let mobile = localStorage.getItem("fest_user") || "";
+        fetch(sheetURL + "?action=getQuiz&mobile=" + mobile)
             .then(r => r.json())
             .then(res => {
                 let quizBody = document.getElementById("quizBody");
+                let scoreDisplay = document.getElementById("userScoreDisplay");
+                
+                if (res.score !== undefined) {
+                    scoreDisplay.innerText = "Score: " + res.score;
+                }
+
                 if (res.status === "WAITING") {
                     quizBody.innerHTML = `
                         <div style="padding: 20px;">
@@ -680,15 +696,26 @@
                         </div>`;
                 } else if (res.status === "STARTED" && res.question) {
                     let q = res.question;
-                    quizBody.innerHTML = `
-                        <div style="text-align: left;">
-                            <span style="font-size: 11px; font-weight: 700; color: #2563eb; text-transform: uppercase;">Question ID: ${q.QuestionID}</span>
-                          <h4 style="margin: 8px 0 15px 0; font-size: 15px; color: var(--text-main);">${q.QuestionText}</h4>
-                          <button class="quiz-option-btn" onclick="submitQuizAnswer('${q.QuestionID}', 'A', '${q.CorrectAnswer}')">A) ${q.OptionA}</button>
-                          <button class="quiz-option-btn" onclick="submitQuizAnswer('${q.QuestionID}', 'B', '${q.CorrectAnswer}')">B) ${q.OptionB}</button>
-                          <button class="quiz-option-btn" onclick="submitQuizAnswer('${q.QuestionID}', 'C', '${q.CorrectAnswer}')">C) ${q.OptionC}</button>
-                          <button class="quiz-option-btn" onclick="submitQuizAnswer('${q.QuestionID}', 'D', '${q.CorrectAnswer}')">D) ${q.OptionD}</button>
-                      </div>`;
+                    let qId = q.QuestionID;
+                    let answeredQId = localStorage.getItem("answered_q_" + localStorage.getItem("fest_user"));
+
+                    if (answeredQId === String(qId)) {
+                        quizBody.innerHTML = `
+                            <div style="padding: 20px;">
+                                <h4 style="color: #2563eb;">✅ Answer Submitted!</h4>
+                                <p style="font-size: 13px; color: var(--text-muted);">You have already answered this question. Please wait for the next question...</p>
+                            </div>`;
+                    } else {
+                        quizBody.innerHTML = `
+                            <div style="text-align: left;">
+                                <span style="font-size: 11px; font-weight: 700; color: #2563eb; text-transform: uppercase;">Question ID: ${q.QuestionID}</span>
+                              <h4 style="margin: 8px 0 15px 0; font-size: 15px; color: var(--text-main);">${q.QuestionText}</h4>
+                              <button class="quiz-option-btn" onclick="submitQuizAnswer('${q.QuestionID}', 'A', '${q.CorrectAnswer}')">A) ${q.OptionA}</button>
+                              <button class="quiz-option-btn" onclick="submitQuizAnswer('${q.QuestionID}', 'B', '${q.CorrectAnswer}')">B) ${q.OptionB}</button>
+                              <button class="quiz-option-btn" onclick="submitQuizAnswer('${q.QuestionID}', 'C', '${q.CorrectAnswer}')">C) ${q.OptionC}</button>
+                              <button class="quiz-option-btn" onclick="submitQuizAnswer('${q.QuestionID}', 'D', '${q.CorrectAnswer}')">D) ${q.OptionD}</button>
+                          </div>`;
+                    }
                 } else if (res.status === "ENDED") {
                     quizBody.innerHTML = `
                         <div style="padding: 20px;">
@@ -703,6 +730,8 @@
     function submitQuizAnswer(qId, selectedOption, correctOption) {
         let mobile = localStorage.getItem("fest_user");
         let name = localStorage.getItem("fest_name");
+        
+        localStorage.setItem("answered_q_" + mobile, qId);
         let isCorrect = (selectedOption.trim().toUpperCase() === correctOption.trim().toUpperCase());
 
         fetch(sheetURL, {
@@ -718,13 +747,18 @@
         .then(res => res.json())
         .then(data => {
             let quizBody = document.getElementById("quizBody");
+            if (data.score !== undefined) {
+                document.getElementById("userScoreDisplay").innerText = "Score: " + data.score;
+            }
             if (isCorrect) {
                 quizBody.innerHTML = `<div style="padding: 20px;"><h4 style="color: #10b981;">✅ Correct Answer! (+10 Points)</h4><p style="font-size:13px; color:var(--text-muted);">Please wait for the next question...</p></div>`;
             } else {
                 quizBody.innerHTML = `<div style="padding: 20px;"><h4 style="color: #ef4444;">❌ Wrong Answer!</h4><p style="font-size:13px; color:var(--text-muted);">Better luck next time. Wait for the next question...</p></div>`;
             }
         })
-        .catch(err => alert("Error submitting answer!"));
+        .catch(err => {
+            alert("Error submitting answer!");
+        });
     }
 </script>
 </body>
