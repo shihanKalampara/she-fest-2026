@@ -125,11 +125,6 @@
             border: 1px solid var(--border-color); box-shadow: 0 15px 35px rgba(0,0,0,0.2); position: relative; max-height: 90vh; overflow-y: auto;
         }
         .close-quiz { position: absolute; top: 15px; right: 18px; font-size: 20px; font-weight: bold; cursor: pointer; color: var(--text-muted); }
-        .quiz-option-btn {
-            width: 100%; padding: 12px 14px; margin: 8px 0; background: var(--bg-color); color: var(--text-main);
-            border: 1px solid var(--border-color); border-radius: 10px; text-align: left; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s;
-        }
-        .quiz-option-btn:hover { border-color: #2563eb; background: rgba(37, 99, 235, 0.05); }
         .quiz-score-badge { background: #2563eb; color: white; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; display: inline-block; margin-bottom: 10px; }
 
         #installModal {
@@ -298,8 +293,12 @@
     let isAutoScrollEnabled = localStorage.getItem("fest_autoscroll") === "true";
     let isDarkModeEnabled = localStorage.getItem("fest_darkmode") === "true";
     let previousLivePrograms = [];
-    let quizInterval = null;
     let deferredPrompt = null;
+
+    let quizInterval = null;
+    let quizTimerInterval = null;
+    let quizTimeLeft = 600; // 10 Minutes
+    let activeQuizQuestions = [];
 
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
@@ -730,17 +729,28 @@
         renderLists(filter(globalSheFestData), filter(globalHeFestData), filter(globalResultsData));
     }
 
+    // --- QUIZ LOGIC ---
     function openQuizModal() {
         document.getElementById("quizModal").style.display = "flex";
         fetchQuizStatus();
         if (quizInterval) clearInterval(quizInterval);
-        quizInterval = setInterval(fetchQuizStatus, 4000);
+        quizInterval = setInterval(fetchQuizStatus, 6000);
     }
 
     function closeQuizModal() {
         document.getElementById("quizModal").style.display = "none";
         if (quizInterval) { clearInterval(quizInterval); quizInterval = null; }
+        if (quizTimerInterval) { clearInterval(quizTimerInterval); quizTimerInterval = null; }
     }
+
+    document.addEventListener("visibilitychange", function() {
+        if (document.hidden && document.getElementById("quizModal").style.display === "flex") {
+            let submitBtn = document.getElementById("submitQuizBtn");
+            if (submitBtn) {
+                submitQuizAnswers(true); // Auto submit on minimize
+            }
+        }
+    });
 
     function fetchQuizStatus() {
         let mobile = localStorage.getItem("fest_user");
@@ -754,44 +764,134 @@
                 if (!quizBody) return;
 
                 if (data.quizStatus === "WAITING") {
-                    quizBody.innerHTML = `<p style="font-weight: 600; padding: 20px 0;">⏳ Quiz Hasn't Started Yet</p>`;
+                    quizBody.innerHTML = `
+                        <p style="font-weight: 600; padding: 15px 0;">⏳ ക്വിസ് ഇതുവരെ ആരംഭിച്ചിട്ടില്ല!</p>
+                        <p style="font-size: 12px; color: var(--text-muted);">തുടങ്ങിക്കഴിഞ്ഞാൽ ഇവിടെ ചോദ്യങ്ങൾ കാണാം.</p>
+                    `;
                 } else if (data.quizStatus === "STARTED") {
                     if (data.hasAnswered) {
-                        quizBody.innerHTML = `<p style="font-weight: 700; color: #10b981; padding: 20px 0;">✅ Answer Submitted!</p>`;
+                        if (quizTimerInterval) clearInterval(quizTimerInterval);
+                        quizBody.innerHTML = `
+                            <p style="font-weight: 700; color: #10b981; padding: 15px 0;">✅ നിങ്ങളുടെ ഉത്തരങ്ങൾ സബ്മിറ്റ് ചെയ്തു!</p>
+                            <div class="quiz-score-badge">സ്കോർ: ${data.score || 0}</div>
+                        `;
                     } else {
-                        let optionsHtml = "";
-                        if (data.options && Array.isArray(data.options)) {
-                            data.options.forEach(opt => {
-                                if (opt && String(opt).trim() !== "") {
-                                    optionsHtml += `<button class="quiz-option-btn" onclick="submitQuizAnswer('${escapeQuotes(opt)}')">${opt}</button>`;
-                                }
-                            });
+                        if (data.questions && data.questions.length > 0) {
+                            activeQuizQuestions = data.questions;
+                            renderQuizQuestions(data.questions);
+                        } else {
+                            quizBody.innerHTML = `<p style="font-weight: 600; padding: 15px 0;">ക്വിസ് ആരംഭിക്കാൻ തയ്യാറാണ്</p>
+                            <button class="auth-btn" onclick="startQuizAction()">Start Quiz</button>`;
                         }
-                        quizBody.innerHTML = `<p style="font-weight: 700; margin-bottom: 15px;">${data.question || ''}</p><div id="quizOptionsContainer">${optionsHtml}</div>`;
                     }
                 } else if (data.quizStatus === "CLOSED") {
-                    quizBody.innerHTML = `<p style="font-weight: 700; padding: 20px 0;">🏁 Quiz Ended. Final Score: ${data.score || 0}</p>`;
+                    if (quizTimerInterval) clearInterval(quizTimerInterval);
+                    let rankHTML = `<h4 style="margin-bottom:10px;">🏆 റാങ്ക് ലിസ്റ്റ് (Rank List)</h4><div style="max-height:250px; overflow-y:auto; text-align:left;">`;
+                    if (data.rankList && data.rankList.length > 0) {
+                        data.rankList.forEach((r, idx) => {
+                            rankHTML += `<div class="winner-row"><b>#${idx+1} ${r.name}</b> <span style="margin-left:auto; color:#2563eb;">സ്കോർ: ${r.score}</span></div>`;
+                        });
+                    } else {
+                        rankHTML += `<p style="text-align:center; color:var(--text-muted);">ഡാറ്റ ലഭ്യമല്ല</p>`;
+                    }
+                    rankHTML += `</div>`;
+                    quizBody.innerHTML = rankHTML;
                 }
             });
     }
 
-    function submitQuizAnswer(selectedOption) {
+    function startQuizAction() {
         let mobile = localStorage.getItem("fest_user");
-        if (!mobile) return;
+        let name = localStorage.getItem("fest_name");
 
         fetch(sheetURL, {
             method: "POST",
-            body: JSON.stringify({ action: "submitQuiz", mobile: mobile, answer: selectedOption })
+            body: JSON.stringify({ action: "startQuiz", mobile: mobile, name: name })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                quizTimeLeft = 600; // 10 Minutes
+                startQuizCountdown();
+                fetchQuizStatus();
+            }
+        });
+    }
+
+    function startQuizCountdown() {
+        if (quizTimerInterval) clearInterval(quizTimerInterval);
+        quizTimerInterval = setInterval(() => {
+            quizTimeLeft--;
+            let mins = Math.floor(quizTimeLeft / 60);
+            let secs = quizTimeLeft % 60;
+            let timerDisplay = document.getElementById("quizTimerDisplay");
+            if (timerDisplay) {
+                timerDisplay.innerText = `⏱️ സമയം ബാക്കി: ${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            }
+            if (quizTimeLeft <= 0) {
+                clearInterval(quizTimerInterval);
+                submitQuizAnswers(true);
+            }
+        }, 1000);
+    }
+
+    function renderQuizQuestions(questions) {
+        let quizBody = document.getElementById("quizBody");
+        if (!quizBody.dataset.rendered) {
+            quizBody.dataset.rendered = "true";
+            startQuizCountdown();
+        }
+
+        let html = `<div id="quizTimerDisplay" style="font-weight:bold; color:#ef4444; margin-bottom:10px;">⏱️ സമയം ബാക്കി: 10:00</div>`;
+        html += `<div style="max-height: 350px; overflow-y: auto; text-align: left; padding-right: 5px;" id="questionsScrollBox">`;
+        
+        questions.forEach((q, idx) => {
+            html += `<div style="margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">`;
+            html += `<p style="font-size: 13px; font-weight: bold; margin-bottom: 8px;">${idx+1}. ${q.question} <span style="font-size:10px; color:#2563eb;">(5 Marks)</span></p>`;
+            
+            q.options.forEach(opt => {
+                if (opt && String(opt).trim() !== "") {
+                    html += `<label style="display: block; font-size: 12px; margin: 4px 0; cursor: pointer;">
+                        <input type="radio" name="question_${q.id}" value="${escapeQuotes(opt)}" style="margin-right: 6px;"> ${opt}
+                    </label>`;
+                }
+            });
+            html += `</div>`;
+        });
+
+        html += `</div><button id="submitQuizBtn" class="auth-btn" style="margin-top: 15px;" onclick="submitQuizAnswers(false)">Submit Quiz</button>`;
+        quizBody.innerHTML = html;
+    }
+
+    function submitQuizAnswers(isAuto) {
+        if (quizTimerInterval) clearInterval(quizTimerInterval);
+        let mobile = localStorage.getItem("fest_user");
+        
+        let answers = {};
+        activeQuizQuestions.forEach(q => {
+            let selected = document.querySelector(`input[name="question_${q.id}"]:checked`);
+            if (selected) {
+                answers[q.id] = selected.value;
+            }
+        });
+
+        if (isAuto) {
+            showToast("⚠️ സമയം കഴിഞ്ഞതുകൊണ്ട് അല്ലെങ്കിൽ ആപ്പ് മിനിമൈസ് ചെയ്തതുകൊണ്ട് ക്വിസ് ഓട്ടോ-സബ്മിറ്റ് ചെയ്തു!", "warning");
+        }
+
+        fetch(sheetURL, {
+            method: "POST",
+            body: JSON.stringify({ action: "submitQuiz", mobile: mobile, answers: answers })
         })
         .then(res => res.json())
         .then(data => {
             let quizBody = document.getElementById("quizBody");
-            if (data.status === "correct") {
-                quizBody.innerHTML = `<p style="font-weight: 700; color: #10b981; padding: 20px 0;">🎉 Correct Answer! (+10 pts)</p>`;
-            } else {
-                quizBody.innerHTML = `<p style="font-weight: 700; color: #ef4444; padding: 20px 0;">❌ Wrong Answer!</p>`;
-            }
-            setTimeout(fetchQuizStatus, 2000);
+            quizBody.removeAttribute("dataset-rendered");
+            quizBody.innerHTML = `
+                <p style="font-weight: 700; color: #10b981; padding: 15px 0;">🎉 ക്വിസ് വിജയകരമായി സബ്മിറ്റ് ചെയ്തു!</p>
+                <div class="quiz-score-badge">ലഭിച്ച സ്കോർ: ${data.score || 0}</div>
+            `;
+            setTimeout(fetchQuizStatus, 3000);
         });
     }
 
