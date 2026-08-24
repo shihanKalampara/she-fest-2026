@@ -116,7 +116,6 @@
             60% { transform: translateY(-3px); }
         }
 
-        /* QUIZ FULLSCREEN & BEAUTIFUL DESIGN */
         #quizModal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px); z-index: 1000;
@@ -275,7 +274,7 @@
     </div>
 </div>
 
-<!-- INSTALL APP / STEP-BY-STEP GUIDE MODAL -->
+<!-- INSTALL APP MODAL -->
 <div id="installModal">
     <div class="install-modal-content">
         <h3 style="margin-top:0; color:var(--primary);">📥 Install App</h3>
@@ -324,12 +323,12 @@
     
     let isAutoScrollEnabled = localStorage.getItem("fest_autoscroll") === "true";
     let isDarkModeEnabled = localStorage.getItem("fest_darkmode") === "true";
-    let previousLivePrograms = [];
+    let notifiedLivePrograms = []; // Tracks already notified live programs to prevent duplicates
     let deferredPrompt = null;
 
     let quizInterval = null;
     let quizTimerInterval = null;
-    let quizTimeLeft = 600; // 10 Minutes
+    let quizTimeLeft = 600;
     let activeQuizQuestions = [];
 
     window.addEventListener('beforeinstallprompt', (e) => {
@@ -493,6 +492,7 @@
         }
     }
 
+    // --- UNIQUE LIVE NOTIFICATION LOGIC ---
     function checkLiveAlerts(dataArray) {
         if (!("Notification" in window) || Notification.permission !== "granted") return;
 
@@ -500,7 +500,10 @@
             let status = (item.Status || item.status || item.STATE || '').trim().toLowerCase();
             let progName = item['Program Type'] || item.programType || item['Program Name'] || '';
 
-            if (status === 'live' && !previousLivePrograms.includes(progName)) {
+            // If program is live and has NOT been notified yet, send notification and store its name
+            if (status === 'live' && progName && !notifiedLivePrograms.includes(progName)) {
+                notifiedLivePrograms.push(progName);
+
                 if (navigator.serviceWorker && navigator.serviceWorker.controller) {
                     navigator.serviceWorker.ready.then(reg => {
                         reg.showNotification("🔴 Live Now: " + progName, {
@@ -511,10 +514,6 @@
                 }
             }
         });
-
-        previousLivePrograms = dataArray
-            .filter(item => (item.Status || item.status || item.STATE || '').trim().toLowerCase() === 'live')
-            .map(item => item['Program Type'] || item.programType || item['Program Name']);
     }
 
     function toggleAuthMode() {
@@ -630,7 +629,7 @@
         document.getElementById("userProfileName").innerText = "👤 " + savedName;
 
         fetchSchedule();
-        setInterval(fetchSchedule, 10000);
+        setInterval(fetchSchedule, 10000); // Fetches data every 10 seconds
     }
 
     function logout() {
@@ -761,7 +760,7 @@
         renderLists(filter(globalSheFestData), filter(globalHeFestData), filter(globalResultsData));
     }
 
-    // --- QUIZ LOGIC (UPGRADED UI & FULLSCREEN) ---
+    // --- QUIZ LOGIC ---
     function openQuizModal() {
         document.getElementById("quizModal").style.display = "flex";
         fetchQuizStatus();
@@ -779,7 +778,7 @@
         if (document.hidden && document.getElementById("quizModal").style.display === "flex") {
             let submitBtn = document.getElementById("submitQuizBtn");
             if (submitBtn) {
-                submitQuizAnswers(true); // Auto submit on minimize
+                submitQuizAnswers(true);
             }
         }
     });
@@ -854,7 +853,7 @@
         .then(res => res.json())
         .then(data => {
             if (data.status === "success") {
-                quizTimeLeft = 600; // 10 Minutes
+                quizTimeLeft = 600;
                 startQuizCountdown();
                 fetchQuizStatus();
             }
