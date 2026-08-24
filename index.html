@@ -242,8 +242,8 @@
         <div id="results-pane" class="tab-pane"><div id="results-list" class="scroll-container"></div></div>
         <div id="feedback-pane" class="tab-pane">
             <div class="scroll-container feedback-box">
-                <h3>Send Feedback / ഫീഡ്‌ബാക്ക്</h3>
-                <p style="font-size: 12px; color: var(--text-muted);">പ്രോഗ്രാമിനെക്കുറിച്ചുള്ള നിങ്ങളുടെ അഭിപ്രായങ്ങളും നിർദ്ദേശങ്ങളും ഇവിടെ അയക്കാം:</p>
+                <h3>Send Feedback</h3>
+                <p style="font-size: 12px; color: var(--text-muted);">Send your opinions and suggestions about the program here:</p>
                 <textarea id="feedbackText" placeholder="Write your feedback here..."></textarea>
                 <button class="auth-btn" onclick="sendFeedback()">Submit Feedback</button>
             </div>
@@ -268,7 +268,7 @@
                 </div>
             </div>
             <div id="quizBody" style="flex: 1; overflow-y: auto; padding-right: 5px; text-align: center;">
-                <p style="color: var(--text-muted); margin-top: 40px;">ക്വിസ് സ്റ്റാറ്റസ് പരിശോധിക്കുന്നു...</p>
+                <p style="color: var(--text-muted); margin-top: 40px;">Checking quiz status...</p>
             </div>
         </div>
     </div>
@@ -278,7 +278,7 @@
 <div id="installModal">
     <div class="install-modal-content">
         <h3 style="margin-top:0; color:var(--primary);">📥 Install App</h3>
-        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">ഫോൺ ഹോം സ്ക്രീനിലേക്ക് ആപ്പ് പെട്ടെന്ന് ആഡ് ചെയ്യാൻ താഴെയുള്ള രീതി പിന്തുടരുക:</p>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Follow the steps below to quickly add the app to your phone's home screen:</p>
         
         <div class="platform-tabs">
             <button class="platform-tab active" id="tabAndroid" onclick="switchInstallGuide('android')">🤖 Android (Chrome)</button>
@@ -377,17 +377,17 @@
             tabAndroid.classList.add("active");
             tabIos.classList.remove("active");
             container.innerHTML = `
-                <div class="install-step"><span>1️⃣</span> ക്രോം (Chrome) ബ്രൗസറിന്റെ മുകളിൽ വലതുവശത്തുള്ള <b>മൂന്ന് കുത്തുകൾ (⋮)</b> അമർത്തുക.</div>
-                <div class="install-step"><span>2️⃣</span> <b>"Install App"</b> അല്ലെങ്കിൽ <b>"Add to Home Screen"</b> തിരഞ്ഞെടുക്കുക.</div>
-                <div class="install-step"><span>3️⃣</span> <b>Install</b> കൊടുക്കുക, ആപ്പ് നിങ്ങളുടെ ഹോം സ്ക്രീനിൽ വരുമെന്ന് ഉറപ്പാക്കുക!</div>
+                <div class="install-step"><span>1️⃣</span> Tap the <b>three dots (⋮)</b> at the top right of the Chrome browser.</div>
+                <div class="install-step"><span>2️⃣</span> Select <b>"Install App"</b> or <b>"Add to Home Screen"</b>.</div>
+                <div class="install-step"><span>3️⃣</span> Tap <b>Install</b> and make sure the app appears on your home screen!</div>
             `;
         } else {
             tabIos.classList.add("active");
             tabAndroid.classList.remove("active");
             container.innerHTML = `
-                <div class="install-step"><span>1️⃣</span> ഐഫോൺ <b>Safari</b> ബ്രൗസറിൽ താഴെ കാണുന്ന <b>Share ബട്ടൺ 📤</b> അമർത്തുക.</div>
-                <div class="install-step"><span>2️⃣</span> <b>"Add to Home Screen" (➕)</b> തിരഞ്ഞെടുക്കുക.</div>
-                <div class="install-step"><span>3️⃣</span> മുകളിൽ വലതുവശത്തുള്ള <b>"Add"</b> കൊടുക്കുക!</div>
+                <div class="install-step"><span>1️⃣</span> Tap the <b>Share button 📤</b> at the bottom of the iPhone Safari browser.</div>
+                <div class="install-step"><span>2️⃣</span> Select <b>"Add to Home Screen" (➕)</b>.</div>
+                <div class="install-step"><span>3️⃣</span> Tap <b>"Add"</b> at the top right!</div>
             `;
         }
     }
@@ -817,8 +817,8 @@
                 scoreBadge.innerText = "Status: Waiting";
                 body.innerHTML = `
                     <div style="padding: 40px 20px; text-align: center;">
-                        <h3 style="color: var(--text-main);">⏳ ക്വിസ് ഉടൻ ആരംഭിക്കും!</h3>
-                        <p style="color: var(--text-muted); font-size: 13px;">അഡ്മിൻ ക്വിസ് സ്റ്റാർട്ട് ചെയ്യുന്നതുവരെ കാത്തിരിക്കുക.</p>
+                        <h3 style="color: var(--text-main);">⏳ Quiz will start soon!</h3>
+                        <p style="color: var(--text-muted); font-size: 13px;">Please wait until the admin starts the quiz.</p>
                     </div>
                 `;
             } else if (data.quizStatus === "STARTED") {
@@ -826,8 +826,8 @@
                     scoreBadge.innerText = "Score: " + (data.score || 0);
                     body.innerHTML = `
                         <div style="padding: 40px 20px; text-align: center;">
-                            <h3 style="color: #10b981;">🎉 നിങ്ങൾ ഇതിനകം ക്വിസ് സബ്മിറ്റ് ചെയ്തു കഴിഞ്ഞു!</h3>
-                            <p style="color: var(--text-muted); font-size: 14px; margin-top: 10px;">നിങ്ങളുടെ ടോട്ടൽ സ്കോർ: <b>${data.score || 0}</b></p>
+                            <h3 style="color: #10b981;">🎉 You have already submitted the quiz!</h3>
+                            <p style="color: var(--text-muted); font-size: 14px; margin-top: 10px;">Your Total Score: <b>${data.score || 0}</b></p>
                         </div>
                     `;
                 } else {
@@ -842,16 +842,16 @@
                 let rankList = data.rankList || [];
                 let rankHtml = `
                     <div style="padding: 10px 0; text-align: left;">
-                        <h3 style="text-align: center; color: var(--text-main); margin-bottom: 15px;">🏆 ക്വിസ് റാങ്ക് ലിസ്റ്റ്</h3>
+                        <h3 style="text-align: center; color: var(--text-main); margin-bottom: 15px;">🏆 Quiz Rank List</h3>
                 `;
                 if (rankList.length === 0) {
-                    rankHtml += `<p style="text-align:center; color:var(--text-muted);">റാങ്ക് ലിസ്റ്റുകൾ ലഭ്യമല്ല.</p>`;
+                    rankHtml += `<p style="text-align:center; color:var(--text-muted);">Rank list not available.</p>`;
                 } else {
                     rankList.forEach((r, idx) => {
                         rankHtml += `
                             <div class="winner-row" style="justify-content: space-between;">
                                 <div><b>#${idx + 1}</b> ${r.name}</div>
-                                <div><b>സ്കോർ:</b> ${r.score}</div>
+                                <div><b>Score:</b> ${r.score}</div>
                             </div>
                         `;
                     });
