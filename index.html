@@ -47,11 +47,15 @@
         .settings-btn { background: transparent; color: var(--text-main); border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 22px; font-weight: bold; }
         .settings-btn:hover { background: rgba(0,0,0,0.05); }
         
-        .dropdown-menu { display: none; position: absolute; right: 0; top: 48px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); width: 220px; z-index: 100; overflow: hidden; }
+        .dropdown-menu { display: none; position: absolute; right: 0; top: 48px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 12px 30px rgba(0,0,0,0.15); width: 235px; z-index: 100; overflow: hidden; }
         .user-profile-info { padding: 12px 14px; background: var(--bg-color); border-bottom: 1px solid var(--border-color); font-size: 13px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
-        .dropdown-menu button { width: 100%; padding: 12px 14px; background: transparent; color: var(--text-main); border: none; text-align: left; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); }
+        .dropdown-menu button { width: 100%; padding: 12px 14px; background: transparent; color: var(--text-main); border: none; text-align: left; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); transition: background 0.2s; }
         .dropdown-menu button:hover { background: var(--bg-color); }
         .dropdown-menu button.logout-opt { color: #ef4444; border-bottom: none; justify-content: flex-start; gap: 8px; }
+        
+        /* Download / Install Option Special Styling */
+        .dropdown-menu button.install-opt { color: #2563eb; background: rgba(37, 99, 235, 0.04); font-weight: 700; border-bottom: 1px solid var(--border-color); }
+        [data-theme="dark"] .dropdown-menu button.install-opt { color: #38bdf8; background: rgba(56, 189, 248, 0.08); }
 
         h1 { text-align: center; color: var(--text-main); margin: 10px 0 5px 0; font-size: 24px; font-weight: 700; }
         .sub-heading { text-align: center; color: var(--text-muted); font-weight: 500; margin-bottom: 20px; text-transform: uppercase; font-size: 11px; letter-spacing: 1.5px; }
@@ -191,6 +195,41 @@
             display: inline-block;
             margin-bottom: 10px;
         }
+
+        /* iOS / Manual Install Instructions Modal */
+        #installModal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1100;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .install-modal-content {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 380px;
+            border-radius: 16px;
+            padding: 22px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        .install-step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--bg-color);
+            padding: 10px 12px;
+            border-radius: 10px;
+            margin: 8px 0;
+            font-size: 13px;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
     </style>
 </head>
 <body>
@@ -207,6 +246,7 @@
                 <div class="user-profile-info" id="userProfileName">👤 Loading...</div>
                 <button onclick="toggleAutoScroll()" id="autoScrollToggleBtn">🔁 Auto Scroll: OFF</button>
                 <button onclick="toggleDarkMode()" id="darkModeToggleBtn">🌙 Dark Mode: OFF</button>
+                <button class="install-opt" id="installAppMenuBtn" style="display:none;" onclick="triggerAppInstall()">📥 Download / Install App</button>
                 <button onclick="resetMobile()">🔄 Reset Mobile</button>
                 <button class="logout-opt" onclick="logout()">🚪 Logout</button>
             </div>
@@ -290,6 +330,20 @@
     </div>
 </div>
 
+<!-- INSTALL APP / IOS GUIDE MODAL -->
+<div id="installModal">
+    <div class="install-modal-content">
+        <h3 style="margin-top:0; color:var(--primary);">Install App</h3>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Add this app to your home screen for quick and easy access like a native app!</p>
+        
+        <div id="installInstructionsContainer">
+            <!-- Dynamic content based on Android/iOS -->
+        </div>
+
+        <button class="auth-btn" style="margin-top: 15px;" onclick="closeInstallModal()">Got It</button>
+    </div>
+</div>
+
 <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -307,6 +361,77 @@
     let isDarkModeEnabled = localStorage.getItem("fest_darkmode") === "true";
     let previousLivePrograms = [];
     let quizInterval = null;
+    let deferredPrompt = null;
+
+    // Capture install prompt for Android/Chrome
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        checkInstallState();
+    });
+
+    window.addEventListener('appinstalled', () => {
+        deferredPrompt = null;
+        checkInstallState();
+    });
+
+    function checkInstallState() {
+        let isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+        let installBtn = document.getElementById("installAppMenuBtn");
+        
+        if (!installBtn) return;
+
+        // Show install button if not installed as PWA and either android prompt exists or it's iOS/Safari
+        if (!isStandalone) {
+            installBtn.style.display = "flex";
+        } else {
+            installBtn.style.display = "none";
+        }
+    }
+
+    function triggerAppInstall() {
+        toggleDropdown(); // Close menu
+        
+        if (deferredPrompt) {
+            // Android / Chrome automatic prompt
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('User accepted the install prompt');
+                }
+                deferredPrompt = null;
+                checkInstallState();
+            });
+        } else {
+            // iOS or Browser where prompt isn't directly available -> Show manual guide modal
+            showInstallGuideModal();
+        }
+    }
+
+    function showInstallGuideModal() {
+        let isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        let container = document.getElementById("installInstructionsContainer");
+        
+        if (isIOS) {
+            container.innerHTML = `
+                <div class="install-step"><span>1️⃣</span> Tap the <b>Share</b> button <span style="font-size:16px;">📤</span> at the bottom of Safari.</div>
+                <div class="install-step"><span>2️⃣</span> Scroll down and tap <b>"Add to Home Screen"</b> <span style="font-size:16px;">➕</span>.</div>
+                <div class="install-step"><span>3️⃣</span> Tap <b>Add</b> at the top right corner to finish!</div>
+            `;
+        } else {
+            container.innerHTML = `
+                <div class="install-step"><span>1️⃣</span> Tap the browser menu options <span style="font-size:16px;">⋮</span> at the top right.</div>
+                <div class="install-step"><span>2️⃣</span> Select <b>"Install App"</b> or <b>"Add to Home screen"</b>.</div>
+                <div class="install-step"><span>3️⃣</span> Confirm to install the app on your phone!</div>
+            `;
+        }
+
+        document.getElementById("installModal").style.display = "flex";
+    }
+
+    function closeInstallModal() {
+        document.getElementById("installModal").style.display = "none";
+    }
 
     function showToast(message, type = "error") {
         let oldToast = document.getElementById("appToastNotification");
@@ -350,6 +475,7 @@
         }
         updateDarkModeUI();
         updateAutoScrollUI();
+        checkInstallState();
 
         let savedMobile = localStorage.getItem("fest_user");
         let savedName = localStorage.getItem("fest_name");
