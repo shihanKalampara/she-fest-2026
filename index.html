@@ -297,7 +297,7 @@
         });
     }
 
-    const sheetURL = "https://script.google.com/macros/s/AKfycbzDFg2zsvFTWVH5DaGnc1zSVQmoXRzVrPtSEgebtaUQIIvT4hDptHXMHxrh9NYqniSjhA/exec"; // നിങ്ങളുടെ ഗൂഗിൾ ആപ്പ് സ്ക്രിപ്റ്റ് വെബ് ആപ്പ് URL ഇവിടെ നൽകുക
+    const sheetURL = "https://script.google.com/macros/s/AKfycbx8Wiu7hg7wIg2c2t5HqTtHoYd5VP0aQNIWsc49nTu4Cd2kK7BjnvrV9wAhhybHWsbgdQ/exec"; 
     let globalSheFestData = [];
     let globalHeFestData = [];
     let globalResultsData = [];
@@ -307,6 +307,43 @@
     let isDarkModeEnabled = localStorage.getItem("fest_darkmode") === "true";
     let previousLivePrograms = [];
     let quizInterval = null;
+
+    // Toast Notification Function
+    function showToast(message, type = "error") {
+        let oldToast = document.getElementById("appToastNotification");
+        if (oldToast) oldToast.remove();
+
+        let toast = document.createElement("div");
+        toast.id = "appToastNotification";
+        toast.innerText = message;
+        
+        let bgColor = type === "error" ? "#ef4444" : (type === "success" ? "#10b981" : "#f59e0b");
+
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: ${bgColor};
+            color: white;
+            padding: 12px 20px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 9999;
+            text-align: center;
+            max-width: 90%;
+            transition: opacity 0.3s ease;
+        `;
+
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.opacity = "0";
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    }
 
     window.onload = function() {
         if (isDarkModeEnabled) {
@@ -428,13 +465,18 @@
         let name = document.getElementById("regName").value.trim();
 
         if (!mobile || !/^\d{10}$/.test(mobile)) {
-            alert("Please enter a valid 10-digit mobile number!");
+            showToast("⚠️ Please enter a valid 10-digit mobile number!", "warning");
+            return;
+        }
+
+        if (!navigator.onLine) {
+            showToast("⚠️ No internet connection!", "error");
             return;
         }
 
         let payload = { action: isRegisterMode ? "register" : "login", mobile: mobile };
         if (isRegisterMode) {
-            if (!name) { alert("Please enter your name!"); return; }
+            if (!name) { showToast("⚠️ Please enter your name!", "warning"); return; }
             payload.name = name;
         }
 
@@ -452,14 +494,14 @@
                 localStorage.setItem("fest_name", finalName);
                 showMainApp();
             } else if (data.status === "blocked") {
-                alert("Your account access has been blocked by admin.");
+                showToast("❌ Your account access has been blocked by admin.", "error");
             } else {
-                alert("Mobile number not found or not registered. Please register first.");
+                showToast("❌ Mobile number not found. Please register first.", "error");
             }
             document.getElementById("authSubmitBtn").innerText = isRegisterMode ? "Register" : "Login";
         })
         .catch(err => {
-            alert("Error connecting to server!");
+            showToast("❌ Connection error! Failed to authenticate.", "error");
             document.getElementById("authSubmitBtn").innerText = isRegisterMode ? "Register" : "Login";
         });
     }
@@ -497,7 +539,7 @@
         let name = localStorage.getItem("fest_name");
 
         if (!feedback) {
-            alert("Please write something in feedback!");
+            showToast("⚠️ Please write something in feedback!", "warning");
             return;
         }
 
@@ -508,13 +550,13 @@
         .then(res => res.json())
         .then(data => {
             if(data.status === "success") {
-                alert("Thank you! Your feedback has been sent successfully.");
+                showToast("✅ Thank you! Feedback sent successfully.", "success");
                 document.getElementById("feedbackText").value = "";
             } else {
-                alert("Error sending feedback.");
+                showToast("❌ Error sending feedback.", "error");
             }
         })
-        .catch(err => alert("Connection error!"));
+        .catch(err => showToast("❌ Connection error!", "error"));
     }
 
     function showMainApp() {
@@ -651,17 +693,32 @@
         let savedMobile = localStorage.getItem("fest_user");
         if (!savedMobile) return;
 
+        if (!navigator.onLine) {
+            showToast("⚠️ No internet connection!", "error");
+            return;
+        }
+
         fetch(sheetURL)
-            .then(r => r.json())
+            .then(r => {
+                if (!r.ok) throw new Error("Server error");
+                return r.json();
+            })
             .then(response => {
                 globalSheFestData = response.schedule || []; 
                 globalHeFestData = response.boysSchedule || [];
                 globalResultsData = response.results || [];
                 
+                if (globalSheFestData.length === 0 && globalHeFestData.length === 0) {
+                    showToast("⚠️ No schedule data found in sheets!", "warning");
+                }
+
                 checkLiveAlerts([...globalSheFestData, ...globalHeFestData]);
                 renderLists(globalSheFestData, globalHeFestData, globalResultsData);
             })
-            .catch(err => console.log("Fetch error:", err));
+            .catch(err => {
+                console.log("Fetch error:", err);
+                showToast("❌ Failed to load schedule data!", "error");
+            });
     }
 
     // --- QUIZ LOGIC ---
@@ -678,87 +735,77 @@
 
     function fetchQuizData() {
         let mobile = localStorage.getItem("fest_user") || "";
-        fetch(sheetURL + "?action=getQuiz&mobile=" + mobile)
+        fetch(sheetURL + "?action=getQuiz&mobile=" + encodeURIComponent(mobile))
             .then(r => r.json())
             .then(res => {
                 let quizBody = document.getElementById("quizBody");
                 let scoreDisplay = document.getElementById("userScoreDisplay");
                 
-                if (res.score !== undefined) {
-                    scoreDisplay.innerText = "Score: " + res.score;
-                }
+                scoreDisplay.innerText = "Score: " + (res.score || 0);
 
-                if (res.status === "WAITING") {
-                    quizBody.innerHTML = `
-                        <div style="padding: 20px;">
-                            <h4 style="color: var(--accent-upcoming);">⏳ Quiz has not started yet!</h4>
-                            <p style="font-size: 13px; color: var(--text-muted);">Please wait. The admin will start the quiz shortly.</p>
-                        </div>`;
-                } else if (res.status === "STARTED" && res.question) {
+                if (res.status === "STARTED" && res.question) {
                     let q = res.question;
-                    let qId = q.QuestionID;
-                    let answeredQId = localStorage.getItem("answered_q_" + localStorage.getItem("fest_user"));
+                    let html = `<p style="font-size: 15px; font-weight: 600; margin-bottom: 15px;">${q.QuestionText}</p>`;
+                    let options = [q.OptionA, q.OptionB, q.OptionC, q.OptionD];
+                    
+                    options.forEach((opt, idx) => {
+                        if (opt && String(opt).trim() !== "") {
+                            let optNum = idx + 1;
+                            let isAnswered = res.hasAnswered;
+                            let selectedOpt = res.selectedOption;
+                            let btnStyle = "";
+                            
+                            if (isAnswered) {
+                                if (Number(selectedOpt) === optNum) {
+                                    btnStyle = "background: #2563eb; color: white; border-color: #2563eb;";
+                                } else {
+                                    btnStyle = "opacity: 0.6; cursor: not-allowed;";
+                                }
+                            }
 
-                    if (answeredQId === String(qId)) {
-                        quizBody.innerHTML = `
-                            <div style="padding: 20px;">
-                                <h4 style="color: #2563eb;">✅ Answer Submitted!</h4>
-                                <p style="font-size: 13px; color: var(--text-muted);">You have already answered this question. Please wait for the next question...</p>
-                            </div>`;
-                    } else {
-                        quizBody.innerHTML = `
-                            <div style="text-align: left;">
-                                <span style="font-size: 11px; font-weight: 700; color: #2563eb; text-transform: uppercase;">Question ID: ${q.QuestionID}</span>
-                              <h4 style="margin: 8px 0 15px 0; font-size: 15px; color: var(--text-main);">${q.QuestionText}</h4>
-                              <button class="quiz-option-btn" onclick="submitQuizAnswer('${q.QuestionID}', 'A', '${q.CorrectAnswer}')">A) ${q.OptionA}</button>
-                              <button class="quiz-option-btn" onclick="submitQuizAnswer('${q.QuestionID}', 'B', '${q.CorrectAnswer}')">B) ${q.OptionB}</button>
-                              <button class="quiz-option-btn" onclick="submitQuizAnswer('${q.QuestionID}', 'C', '${q.CorrectAnswer}')">C) ${q.OptionC}</button>
-                              <button class="query-option-btn quiz-option-btn" onclick="submitQuizAnswer('${q.QuestionID}', 'D', '${q.CorrectAnswer}')">D) ${q.OptionD}</button>
-                          </div>`;
+                            html += `<button class="quiz-option-btn" style="${btnStyle}" ${isAnswered ? 'disabled' : `onclick="submitQuizAnswer('${q.QuestionID}', ${optNum}, '${q.CorrectAnswer}')"`}>${opt}</button>`;
+                        }
+                    });
+
+                    if (res.hasAnswered) {
+                        html += `<p style="font-size: 12px; color: var(--text-muted); margin-top: 15px;">You have already answered this question. Waiting for the next question...</p>`;
                     }
-                } else if (res.status === "ENDED") {
-                    quizBody.innerHTML = `
-                        <div style="padding: 20px;">
-                            <h4 style="color: var(--accent-completed);">🎉 Quiz has ended!</h4>
-                            <p style="font-size: 13px; color: var(--text-muted);">Thank you for participating.</p>
-                        </div>`;
+
+                    quizBody.innerHTML = html;
+                } else {
+                    quizBody.innerHTML = `<p style="color: var(--text-muted); padding: 20px 0;">No active quiz question right now. Please check back later!</p>`;
                 }
             })
-            .catch(err => console.log("Quiz fetch error:", err));
+            .catch(err => {
+                console.log("Quiz fetch error:", err);
+            });
     }
 
-    function submitQuizAnswer(qId, selectedOption, correctOption) {
-        let mobile = localStorage.getItem("fest_user");
-        let name = localStorage.getItem("fest_name");
-        
-        localStorage.setItem("answered_q_" + mobile, qId);
-        let isCorrect = (selectedOption.trim().toUpperCase() === correctOption.trim().toUpperCase());
+    function submitQuizAnswer(qId, selectedOptionNum, correctAnswer) {
+        let mobile = localStorage.getItem("fest_user") || "";
+        let name = localStorage.getItem("fest_name") || "";
+        let isCorrect = String(selectedOptionNum) === String(correctAnswer);
 
         fetch(sheetURL, {
             method: "POST",
-            body: JSON.stringify({
-                action: "submitQuiz",
-                mobile: mobile,
-                name: name,
-                qId: qId,
-                isCorrect: isCorrect
+            body: JSON.stringify({ 
+                action: "submitQuiz", 
+                mobile: mobile, 
+                name: name, 
+                qId: qId, 
+                selectedOption: selectedOptionNum,
+                isCorrect: isCorrect 
             })
         })
-        .then(res => res.json())
-        .then(data => {
-            let quizBody = document.getElementById("quizBody");
-            if (data.score !== undefined) {
-                document.getElementById("userScoreDisplay").innerText = "Score: " + data.score;
-            }
-            if (isCorrect) {
-                quizBody.innerHTML = `<div style="padding: 20px;"><h4 style="color: #10b981;">✅ Correct Answer! (+10 Points)</h4><p style="font-size:13px; color:var(--text-muted);">Please wait for the next question...</p></div>`;
+        .then(r => r.json())
+        .then(res => {
+            if (res.status === "success" || res.status === "already_answered") {
+                fetchQuizData();
             } else {
-                quizBody.innerHTML = `<div style="padding: 20px;"><h4 style="color: #ef4444;">❌ Wrong Answer!</h4><p style="font-size:13px; color:var(--text-muted);">Better luck next time. Wait for the next question...</p></div>`;
+                showToast(res.message || "Error submitting answer.", "error");
             }
         })
-        .catch(err => {
-            alert("Error submitting answer!");
-        });
+        .catch(err => showToast("❌ Connection error!", "error"));
     }
 </script>
 </body>
