@@ -196,7 +196,7 @@
             margin-bottom: 10px;
         }
 
-        /* iOS / Manual Install Instructions Modal */
+        /* Platform Selection & Instructions Modal */
         #installModal {
             display: none;
             position: fixed;
@@ -211,7 +211,7 @@
         .install-modal-content {
             background: var(--card-bg);
             width: 100%;
-            max-width: 380px;
+            max-width: 400px;
             border-radius: 16px;
             padding: 22px;
             border: 1px solid var(--border-color);
@@ -230,6 +230,31 @@
             text-align: left;
             border: 1px solid var(--border-color);
         }
+        .platform-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            background: var(--bg-color);
+            padding: 4px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+        .platform-tab {
+            flex: 1;
+            padding: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+        .platform-tab.active {
+            background: var(--card-bg);
+            color: var(--text-main);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        }
     </style>
 </head>
 <body>
@@ -246,7 +271,7 @@
                 <div class="user-profile-info" id="userProfileName">👤 Loading...</div>
                 <button onclick="toggleAutoScroll()" id="autoScrollToggleBtn">🔁 Auto Scroll: OFF</button>
                 <button onclick="toggleDarkMode()" id="darkModeToggleBtn">🌙 Dark Mode: OFF</button>
-                <button class="install-opt" id="installAppMenuBtn" style="display:none;" onclick="triggerAppInstall()">📥 Download / Install App</button>
+                <button class="install-opt" id="installAppMenuBtn" onclick="triggerAppInstall()">📥 Download / Install App</button>
                 <button onclick="resetMobile()">🔄 Reset Mobile</button>
                 <button class="logout-opt" onclick="logout()">🚪 Logout</button>
             </div>
@@ -330,14 +355,20 @@
     </div>
 </div>
 
-<!-- INSTALL APP / IOS GUIDE MODAL -->
+<!-- INSTALL APP / STEP-BY-STEP GUIDE MODAL -->
 <div id="installModal">
     <div class="install-modal-content">
-        <h3 style="margin-top:0; color:var(--primary);">Install App</h3>
-        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Add this app to your home screen for quick and easy access like a native app!</p>
+        <h3 style="margin-top:0; color:var(--primary);">📥 Install App</h3>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">ഫോൺ ഹോം സ്ക്രീനിലേക്ക് ആപ്പ് പെട്ടെന്ന് ആഡ് ചെയ്യാൻ താഴെയുള്ള രീതി പിന്തുടരുക:</p>
         
+        <!-- Platform Switch Tabs -->
+        <div class="platform-tabs">
+            <button class="platform-tab active" id="tabAndroid" onclick="switchInstallGuide('android')">🤖 Android (Chrome)</button>
+            <button class="platform-tab" id="tabIos" onclick="switchInstallGuide('ios')">🍎 iOS (iPhone/Safari)</button>
+        </div>
+
         <div id="installInstructionsContainer">
-            <!-- Dynamic content based on Android/iOS -->
+            <!-- Dynamic content inserted by JS -->
         </div>
 
         <button class="auth-btn" style="margin-top: 15px;" onclick="closeInstallModal()">Got It</button>
@@ -367,66 +398,59 @@
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
-        checkInstallState();
     });
 
     window.addEventListener('appinstalled', () => {
         deferredPrompt = null;
-        checkInstallState();
     });
-
-    function checkInstallState() {
-        let isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-        let installBtn = document.getElementById("installAppMenuBtn");
-        
-        if (!installBtn) return;
-
-        // Show install button if not installed as PWA and either android prompt exists or it's iOS/Safari
-        if (!isStandalone) {
-            installBtn.style.display = "flex";
-        } else {
-            installBtn.style.display = "none";
-        }
-    }
 
     function triggerAppInstall() {
         toggleDropdown(); // Close menu
         
+        let isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
         if (deferredPrompt) {
-            // Android / Chrome automatic prompt
+            // Android automatic popup trigger if supported by browser
             deferredPrompt.prompt();
             deferredPrompt.userChoice.then((choiceResult) => {
                 if (choiceResult.outcome === 'accepted') {
                     console.log('User accepted the install prompt');
                 }
                 deferredPrompt = null;
-                checkInstallState();
             });
         } else {
-            // iOS or Browser where prompt isn't directly available -> Show manual guide modal
-            showInstallGuideModal();
+            // Show manual step-by-step guide modal (defaults to iOS or Android tab based on device)
+            showInstallGuideModal(isIOSDevice ? 'ios' : 'android');
         }
     }
 
-    function showInstallGuideModal() {
-        let isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    function showInstallGuideModal(platform) {
+        switchInstallGuide(platform);
+        document.getElementById("installModal").style.display = "flex";
+    }
+
+    function switchInstallGuide(platform) {
+        let tabAndroid = document.getElementById("tabAndroid");
+        let tabIos = document.getElementById("tabIos");
         let container = document.getElementById("installInstructionsContainer");
-        
-        if (isIOS) {
+
+        if (platform === 'android') {
+            tabAndroid.classList.add("active");
+            tabIos.classList.remove("active");
             container.innerHTML = `
-                <div class="install-step"><span>1️⃣</span> Tap the <b>Share</b> button <span style="font-size:16px;">📤</span> at the bottom of Safari.</div>
-                <div class="install-step"><span>2️⃣</span> Scroll down and tap <b>"Add to Home Screen"</b> <span style="font-size:16px;">➕</span>.</div>
-                <div class="install-step"><span>3️⃣</span> Tap <b>Add</b> at the top right corner to finish!</div>
+                <div class="install-step"><span>1️⃣</span> ക്രോം (Chrome) ബ്രൗസറിന്റെ മുകളിൽ വലതുവശത്തുള്ള <b>മൂന്ന് കുത്തുകൾ (⋮)</b> അമർത്തുക.</div>
+                <div class="install-step"><span>2️⃣</span> <b>"Install App"</b> അല്ലെങ്കിൽ <b>"Add to Home Screen"</b> എന്ന ഓപ്ഷൻ തിരഞ്ഞെടുക്കുക.</div>
+                <div class="install-step"><span>3️⃣</span> <b>Install</b> കൊടുക്കുക, ആപ്പ് നിങ്ങളുടെ ഹോം സ്ക്രീനിൽ വരും!</div>
             `;
         } else {
+            tabIos.classList.add("active");
+            tabAndroid.classList.remove("active");
             container.innerHTML = `
-                <div class="install-step"><span>1️⃣</span> Tap the browser menu options <span style="font-size:16px;">⋮</span> at the top right.</div>
-                <div class="install-step"><span>2️⃣</span> Select <b>"Install App"</b> or <b>"Add to Home screen"</b>.</div>
-                <div class="install-step"><span>3️⃣</span> Confirm to install the app on your phone!</div>
+                <div class="install-step"><span>1️⃣</span> ഐഫോൺ <b>Safari</b> ബ്രൗസറിൽ താഴെ കാണുന്ന <b>Share (പങ്കുവെക്കൽ) ബട്ടൺ 📤</b> അമർത്തുക.</div>
+                <div class="install-step"><span>2️⃣</span> താഴേക്ക് സ്ക്രോൾ ചെയ്ത് <b>"Add to Home Screen" (➕)</b> തിരഞ്ഞെടുക്കുക.</div>
+                <div class="install-step"><span>3️⃣</span> മുകളിൽ വലതുവശത്തുള്ള <b>"Add"</b> കൊടുത്ത് ഫിനിഷ് ചെയ്യുക!</div>
             `;
         }
-
-        document.getElementById("installModal").style.display = "flex";
     }
 
     function closeInstallModal() {
@@ -475,7 +499,6 @@
         }
         updateDarkModeUI();
         updateAutoScrollUI();
-        checkInstallState();
 
         let savedMobile = localStorage.getItem("fest_user");
         let savedName = localStorage.getItem("fest_name");
@@ -974,7 +997,7 @@
         })
         .catch(err => {
             showToast("❌ Error submitting answer.", "error");
-            fetchQuizStatus();
+            fetchQuizSource();
         });
     }
 
