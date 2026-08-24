@@ -1,38 +1,803 @@
-// Service Worker for Push Notifications
-self.addEventListener('push', function(event) {
-    let data = { title: 'Thiruvasantham26', body: 'New update available!' };
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Thiruvasantham26 - Noorul Huda Madrasa</title>
     
-    if (event.data) {
-        try {
-            data = event.data.json();
-        } catch (e) {
-            data.body = event.data.text();
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Thiruvasantham26">
+    <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV">
+    <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV">
+
+    <style>
+        :root {
+            --primary: #0f172a;
+            --accent-live: #ef4444;
+            --accent-upcoming: #f59e0b;
+            --accent-completed: #10b981;
+            --accent-cancelled: #64748b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #334155;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+        }
+
+        [data-theme="dark"] {
+            --primary: #38bdf8;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+        }
+
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg-color); color: var(--text-main); margin: 0; padding: 15px; transition: background 0.3s, color 0.3s; }
+        .container { max-width: 750px; margin: auto; background: var(--card-bg); padding: 20px; border-radius: 16px; box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05); border: 1px solid var(--border-color); position: relative; }
+        
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; position: relative; min-height: 50px; }
+        .logo-container { flex: 1; display: flex; justify-content: center; }
+        .app-logo { width: 75px; height: 75px; object-fit: contain; border-radius: 50%; display: block; }
+        
+        .settings-container { position: absolute; right: 0; display: none; }
+        .settings-btn { background: transparent; color: var(--text-main); border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 22px; font-weight: bold; }
+        .settings-btn:hover { background: rgba(0,0,0,0.05); }
+        
+        .dropdown-menu { display: none; position: absolute; right: 0; top: 48px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 12px 30px rgba(0,0,0,0.15); width: 235px; z-index: 100; overflow: hidden; }
+        .user-profile-info { padding: 12px 14px; background: var(--bg-color); border-bottom: 1px solid var(--border-color); font-size: 13px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+        .dropdown-menu button { width: 100%; padding: 12px 14px; background: transparent; color: var(--text-main); border: none; text-align: left; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); transition: background 0.2s; }
+        .dropdown-menu button:hover { background: var(--bg-color); }
+        .dropdown-menu button.logout-opt { color: #ef4444; border-bottom: none; justify-content: flex-start; gap: 8px; }
+        
+        .dropdown-menu button.install-opt { color: #2563eb; background: rgba(37, 99, 235, 0.04); font-weight: 700; border-bottom: 1px solid var(--border-color); }
+        [data-theme="dark"] .dropdown-menu button.install-opt { color: #38bdf8; background: rgba(56, 189, 248, 0.08); }
+
+        h1 { text-align: center; color: var(--text-main); margin: 10px 0 5px 0; font-size: 24px; font-weight: 700; }
+        .sub-heading { text-align: center; color: var(--text-muted); font-weight: 500; margin-bottom: 20px; text-transform: uppercase; font-size: 11px; letter-spacing: 1.5px; }
+
+        #auth-screen { text-align: center; padding: 30px 10px; }
+        .auth-box { max-width: 320px; margin: auto; background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .auth-box input { width: 100%; padding: 10px; margin: 8px 0 15px 0; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-main); border-radius: 8px; box-sizing: border-box; font-size: 13px; outline: none; }
+        .auth-btn { width: 100%; padding: 10px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .toggle-text { font-size: 12px; text-align: center; margin-top: 15px; color: #2563eb; cursor: pointer; }
+
+        #main-app { display: none; }
+        .search-box { margin-bottom: 15px; }
+        .search-input { width: 100%; padding: 10px 14px; font-size: 13px; border: 1px solid var(--border-color); border-radius: 10px; outline: none; box-sizing: border-box; background: var(--bg-color); color: var(--text-main); }
+
+        .progress-box { background: var(--bg-color); border: 1px solid var(--border-color); padding: 12px 16px; border-radius: 12px; margin-bottom: 20px; }
+        .progress-header { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 600; }
+        .progress-bar-fill { background: linear-gradient(90deg, #10b981, #059669); height: 8px; width: 0%; transition: width 0.6s ease; border-radius: 4px; }
+
+        .tab-buttons { display: flex; gap: 4px; margin-bottom: 15px; background: var(--bg-color); border: 1px solid var(--border-color); padding: 4px; border-radius: 10px; overflow-x: auto; }
+        .tab-btn { flex: 1; padding: 8px 10px; font-size: 11px; font-weight: 600; border: none; border-radius: 8px; background: transparent; cursor: pointer; color: var(--text-muted); white-space: nowrap; }
+        .tab-btn.active { background: var(--card-bg); color: var(--text-main); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+
+        .tab-pane { display: none; height: 400px; overflow-y: hidden; }
+        .tab-pane.active-pane { display: block; }
+        .scroll-container { height: 100%; overflow-y: auto; padding-bottom: 50px; }
+
+        .schedule-card { background: var(--card-bg); border: 1px solid var(--border-color); border-left: 4px solid #cbd5e1; padding: 14px; margin-bottom: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .card-content { flex: 1; padding-right: 10px; }
+        .card-right { display: flex; align-items: center; gap: 10px; }
+        
+        .result-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+        .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
+        .category-pill { font-size: 12px; font-weight: 700; color: #7c3aed; background: #f3e8ff; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; }
+        
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; color: white; text-transform: uppercase; }
+        .badge.Upcoming { background: var(--accent-upcoming); }
+        .badge.Completed, .badge.Finished { background: var(--accent-completed); }
+        .badge.Cancelled { background: var(--accent-cancelled); }
+        .badge.Live { background: var(--accent-live); animation: pulseLive 1.2s infinite; }
+
+        .live-dot { width: 8px; height: 8px; background-color: #ef4444; border-radius: 50%; display: inline-block; margin-right: 5px; animation: pulseLive 1.2s infinite; }
+        @keyframes pulseLive { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(0.85); } 100% { opacity: 1; transform: scale(1); } }
+        
+        .medal { font-size: 20px; margin-right: 10px; }
+        .winner-row { background: var(--bg-color); padding: 10px; border-radius: 8px; font-size: 13px; border: 1px solid var(--border-color); margin-bottom: 5px; display: flex; align-items: center; }
+        
+        .feedback-box textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-main); border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; outline: none; }
+
+        .quiz-floating-btn {
+            position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px;
+            background: #ffffff; border-radius: 50%; box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+            display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 999;
+            border: 2px solid var(--primary); animation: bounceQuiz 2s infinite;
+        }
+        .quiz-floating-btn img { width: 38px; height: 38px; object-fit: contain; }
+        @keyframes bounceQuiz {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-6px); }
+            60% { transform: translateY(-3px); }
+        }
+
+        #quizModal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; padding: 15px; box-sizing: border-box;
+        }
+        .quiz-modal-content {
+            background: var(--card-bg); width: 100%; max-width: 450px; border-radius: 16px; padding: 20px;
+            border: 1px solid var(--border-color); box-shadow: 0 15px 35px rgba(0,0,0,0.2); position: relative; max-height: 90vh; overflow-y: auto;
+        }
+        .close-quiz { position: absolute; top: 15px; right: 18px; font-size: 20px; font-weight: bold; cursor: pointer; color: var(--text-muted); }
+        .quiz-option-btn {
+            width: 100%; padding: 12px 14px; margin: 8px 0; background: var(--bg-color); color: var(--text-main);
+            border: 1px solid var(--border-color); border-radius: 10px; text-align: left; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s;
+        }
+        .quiz-option-btn:hover { border-color: #2563eb; background: rgba(37, 99, 235, 0.05); }
+        .quiz-score-badge { background: #2563eb; color: white; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; display: inline-block; margin-bottom: 10px; }
+
+        #installModal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 1100; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;
+        }
+        .install-modal-content {
+            background: var(--card-bg); width: 100%; max-width: 400px; border-radius: 16px; padding: 22px;
+            border: 1px solid var(--border-color); box-shadow: 0 15px 35px rgba(0,0,0,0.2); text-align: center;
+        }
+        .install-step {
+            display: flex; align-items: center; gap: 12px; background: var(--bg-color); padding: 10px 12px;
+            border-radius: 10px; margin: 8px 0; font-size: 13px; text-align: left; border: 1px solid var(--border-color);
+        }
+        .platform-tabs { display: flex; gap: 8px; margin-bottom: 15px; background: var(--bg-color); padding: 4px; border-radius: 10px; border: 1px solid var(--border-color); }
+        .platform-tab { flex: 1; padding: 8px; font-size: 12px; font-weight: 700; border: none; border-radius: 8px; background: transparent; cursor: pointer; color: var(--text-muted); }
+        .platform-tab.active { background: var(--card-bg); color: var(--text-main); box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-top">
+        <div class="logo-container">
+            <img src="https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV" alt="Logo" class="app-logo">
+        </div>
+        
+        <div class="settings-container" id="settingsContainer">
+            <button class="settings-btn" onclick="toggleDropdown()">⋮</button>
+            <div class="dropdown-menu" id="dropdownMenu">
+                <div class="user-profile-info" id="userProfileName">👤 Loading...</div>
+                <button onclick="toggleAutoScroll()" id="autoScrollToggleBtn">🔁 Auto Scroll: OFF</button>
+                <button onclick="toggleDarkMode()" id="darkModeToggleBtn">🌙 Dark Mode: OFF</button>
+                <button onclick="requestNotificationPermission()" id="notifToggleBtn">🔔 Notifications: OFF</button>
+                <button class="install-opt" id="installAppMenuBtn" onclick="triggerAppInstall()">📥 Download / Install App</button>
+                <button onclick="resetMobile()">🔄 Reset Mobile</button>
+                <button class="logout-opt" onclick="logout()">🚪 Logout</button>
+            </div>
+        </div>
+    </div>
+    
+    <h1>Fest Live & Results</h1>
+    <div class="sub-heading">Noorul Huda Madrasa</div>
+
+    <!-- AUTHENTICATION SCREEN -->
+    <div id="auth-screen">
+        <div class="auth-box">
+            <h3 id="form-title" style="margin-top:0; color:var(--text-main);">Login</h3>
+            <div id="nameFieldContainer" style="display:none;">
+                <label style="font-size: 11px; font-weight:600;">Your Name</label>
+                <input type="text" id="regName" placeholder="Enter your full name">
+            </div>
+            <label style="font-size: 11px; font-weight:600;">Mobile Number (10 Digits)</label>
+            <input type="text" id="authMobile" maxlength="10" placeholder="Enter 10-digit mobile number">
+            
+            <button class="auth-btn" id="authSubmitBtn" onclick="handleAuthAction()">Login</button>
+            <div class="toggle-text" id="toggleAuthText" onclick="toggleAuthMode()">Don't have an account? Register</div>
+        </div>
+    </div>
+
+    <!-- MAIN APP SCREEN -->
+    <div id="main-app">
+        <div class="search-box">
+            <input type="text" id="searchInput" class="search-input" placeholder="Search name, class, program..." onkeyup="filterData()">
+        </div>
+
+        <div class="progress-box">
+            <div class="progress-header">
+                <span id="progress-pct-text">0%</span>
+                <span id="progress-count-text">0/0</span>
+            </div>
+            <div style="background: var(--border-color); height: 8px; border-radius: 4px; margin-top: 8px;">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+        </div>
+
+        <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab('she-fest', this)">She Fest</button>
+            <button class="tab-btn" onclick="switchTab('he-fest', this)">He Fest</button>
+            <button class="tab-btn" onclick="switchTab('results', this)">Results</button>
+            <button class="tab-btn" onclick="switchTab('feedback', this)">Feedback</button>
+        </div>
+
+        <div id="she-fest-pane" class="tab-pane active-pane"><div id="she-fest-list" class="scroll-container"></div></div>
+        <div id="he-fest-pane" class="tab-pane"><div id="he-fest-list" class="scroll-container"></div></div>
+        <div id="results-pane" class="tab-pane"><div id="results-list" class="scroll-container"></div></div>
+        <div id="feedback-pane" class="tab-pane">
+            <div class="scroll-container feedback-box">
+                <h3>Send Feedback / ഫീഡ്‌ബാക്ക്</h3>
+                <p style="font-size: 12px; color: var(--text-muted);">പ്രോഗ്രാമിനെക്കുറിച്ചുള്ള നിങ്ങളുടെ അഭിപ്രായങ്ങളും നിർദ്ദേശങ്ങളും ഇവിടെ അയക്കാം:</p>
+                <textarea id="feedbackText" placeholder="Write your feedback here..."></textarea>
+                <button class="auth-btn" onclick="sendFeedback()">Submit Feedback</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FLOATING QUIZ ICON -->
+<div class="quiz-floating-btn" id="quizFloatingBtn" onclick="openQuizModal()" title="Live Quiz">
+    <img src="https://lh3.googleusercontent.com/d/1aPSQQlvW1m6RlVSAdeCYlDfDCrcavQe6" alt="Quiz Icon">
+</div>
+
+<!-- QUIZ MODAL -->
+<div id="quizModal">
+    <div class="quiz-modal-content">
+        <span class="close-quiz" onclick="closeQuizModal()">&times;</span>
+        <div id="quizContainer">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h3 style="margin:0; color:var(--primary);">Live Quiz</h3>
+                <div id="userScoreDisplay" class="quiz-score-badge">Score: 0</div>
+            </div>
+            <div id="quizBody" style="text-align: center; padding: 10px 0;">
+                <p style="color: var(--text-muted);">Loading quiz status...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- INSTALL APP / STEP-BY-STEP GUIDE MODAL -->
+<div id="installModal">
+    <div class="install-modal-content">
+        <h3 style="margin-top:0; color:var(--primary);">📥 Install App</h3>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">ഫോൺ ഹോം സ്ക്രീനിലേക്ക് ആപ്പ് പെട്ടെന്ന് ആഡ് ചെയ്യാൻ താഴെയുള്ള രീതി പിന്തുടരുക:</p>
+        
+        <div class="platform-tabs">
+            <button class="platform-tab active" id="tabAndroid" onclick="switchInstallGuide('android')">🤖 Android (Chrome)</button>
+            <button class="platform-tab" id="tabIos" onclick="switchInstallGuide('ios')">🍎 iOS (iPhone/Safari)</button>
+        </div>
+
+        <div id="installInstructionsContainer"></div>
+
+        <button class="auth-btn" style="margin-top: 15px;" onclick="closeInstallModal()">Got It</button>
+    </div>
+</div>
+
+<script>
+    const manifestData = {
+        "name": "Thiruvasantham26",
+        "short_name": "Thiruvasantham26",
+        "start_url": "./",
+        "display": "standalone",
+        "background_color": "#f8fafc",
+        "theme_color": "#0f172a",
+        "icons": [
+            { "src": "https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV", "sizes": "192x192", "type": "image/png" },
+            { "src": "https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV", "sizes": "512x512", "type": "image/png" }
+        ]
+    };
+    const stringManifest = JSON.stringify(manifestData);
+    const blob = new Blob([stringManifest], {type: 'application/json'});
+    const manifestURL = URL.createObjectURL(blob);
+    document.querySelector('link[rel="manifest"]').setAttribute('href', manifestURL);
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').catch(err => console.log('SW failed:', err));
+        });
+    }
+
+    const sheetURL = "https://script.google.com/macros/s/AKfycby6xUnSOFxU5BjUw77m3fibHWPIef8UNn2Sgypuxy7x_Og_By8bNYcgPwckJLzISspMZw/exec"; 
+    let globalSheFestData = [];
+    let globalHeFestData = [];
+    let globalResultsData = [];
+    let isRegisterMode = false;
+    
+    let isAutoScrollEnabled = localStorage.getItem("fest_autoscroll") === "true";
+    let isDarkModeEnabled = localStorage.getItem("fest_darkmode") === "true";
+    let previousLivePrograms = [];
+    let quizInterval = null;
+    let deferredPrompt = null;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+    });
+
+    window.addEventListener('appinstalled', () => {
+        deferredPrompt = null;
+    });
+
+    function triggerAppInstall() {
+        toggleDropdown();
+        let isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+                deferredPrompt = null;
+            });
+        } else {
+            showInstallGuideModal(isIOSDevice ? 'ios' : 'android');
         }
     }
 
-    const options = {
-        body: data.body,
-        icon: 'https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV',
-        badge: 'https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV',
-        vibrate: [200, 100, 200]
+    function showInstallGuideModal(platform) {
+        switchInstallGuide(platform);
+        document.getElementById("installModal").style.display = "flex";
+    }
+
+    function switchInstallGuide(platform) {
+        let tabAndroid = document.getElementById("tabAndroid");
+        let tabIos = document.getElementById("tabIos");
+        let container = document.getElementById("installInstructionsContainer");
+
+        if (platform === 'android') {
+            tabAndroid.classList.add("active");
+            tabIos.classList.remove("active");
+            container.innerHTML = `
+                <div class="install-step"><span>1️⃣</span> ക്രോം (Chrome) ബ്രൗസറിന്റെ മുകളിൽ വലതുവശത്തുള്ള <b>മൂന്ന് കുത്തുകൾ (⋮)</b> അമർത്തുക.</div>
+                <div class="install-step"><span>2️⃣</span> <b>"Install App"</b> അല്ലെങ്കിൽ <b>"Add to Home Screen"</b> തിരഞ്ഞെടുക്കുക.</div>
+                <div class="install-step"><span>3️⃣</span> <b>Install</b> കൊടുക്കുക, ആപ്പ് നിങ്ങളുടെ ഹോം സ്ക്രീനിൽ വരുമെന്ന് ഉറപ്പാക്കുക!</div>
+            `;
+        } else {
+            tabIos.classList.add("active");
+            tabAndroid.classList.remove("active");
+            container.innerHTML = `
+                <div class="install-step"><span>1️⃣</span> ഐഫോൺ <b>Safari</b> ബ്രൗസറിൽ താഴെ കാണുന്ന <b>Share ബട്ടൺ 📤</b> അമർത്തുക.</div>
+                <div class="install-step"><span>2️⃣</span> <b>"Add to Home Screen" (➕)</b> തിരഞ്ഞെടുക്കുക.</div>
+                <div class="install-step"><span>3️⃣</span> മുകളിൽ വലതുവശത്തുള്ള <b>"Add"</b> കൊടുക്കുക!</div>
+            `;
+        }
+    }
+
+    function closeInstallModal() {
+        document.getElementById("installModal").style.display = "none";
+    }
+
+    function showToast(message, type = "error") {
+        let oldToast = document.getElementById("appToastNotification");
+        if (oldToast) oldToast.remove();
+
+        let toast = document.createElement("div");
+        toast.id = "appToastNotification";
+        toast.innerText = message;
+        let bgColor = type === "error" ? "#ef4444" : (type === "success" ? "#10b981" : "#f59e0b");
+
+        toast.style.cssText = `
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: ${bgColor}; color: white; padding: 12px 20px; border-radius: 30px;
+            font-size: 13px; font-weight: 600; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 9999; text-align: center; max-width: 90%; transition: opacity 0.3s ease;
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = "0";
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    }
+
+    window.onload = function() {
+        if (isDarkModeEnabled) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+        updateDarkModeUI();
+        updateAutoScrollUI();
+        updateNotificationUI();
+
+        let savedMobile = localStorage.getItem("fest_user");
+        let savedName = localStorage.getItem("fest_name");
+        if (savedMobile) {
+            showMainApp();
+            document.getElementById("userProfileName").innerText = "👤 " + (savedName || "User");
+        }
     };
 
-    event.waitUntil(
-        self.registration.showNotification(data.title, options)
-    );
-});
+    function toggleDropdown() {
+        let menu = document.getElementById("dropdownMenu");
+        menu.style.display = menu.style.display === "block" ? "none" : "block";
+    }
 
-self.addEventListener('notificationclick', function(event) {
-    event.notification.close();
-    event.waitUntil(
-        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
-            for (let i = 0; i < clientList.length; i++) {
-                let client = clientList[i];
-                if ('focus' in client) return client.focus();
+    window.onclick = function(event) {
+        if (!event.target.matches('.settings-btn') && !event.target.closest('.settings-btn')) {
+            let menu = document.getElementById("dropdownMenu");
+            if (menu && menu.style.display === "block") {
+                menu.style.display = "none";
             }
-            if (clients.openWindow) {
-                return clients.openWindow('./');
+        }
+    }
+
+    function toggleAutoScroll() {
+        isAutoScrollEnabled = !isAutoScrollEnabled;
+        localStorage.setItem("fest_autoscroll", isAutoScrollEnabled);
+        updateAutoScrollUI();
+    }
+
+    function updateAutoScrollUI() {
+        let btn = document.getElementById("autoScrollToggleBtn");
+        if (btn) btn.innerHTML = isAutoScrollEnabled ? "🔁 Auto Scroll: ON" : "⏸️ Auto Scroll: OFF";
+    }
+
+    function toggleDarkMode() {
+        isDarkModeEnabled = !isDarkModeEnabled;
+        localStorage.setItem("fest_darkmode", isDarkModeEnabled);
+        if (isDarkModeEnabled) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+            document.documentElement.removeAttribute('data-theme');
+        }
+        updateDarkModeUI();
+    }
+
+    function updateDarkModeUI() {
+        let btn = document.getElementById("darkModeToggleBtn");
+        if (btn) btn.innerHTML = isDarkModeEnabled ? "☀️ Dark Mode: ON" : "🌙 Dark Mode: OFF";
+    }
+
+    function requestNotificationPermission() {
+        if ("Notification" in window) {
+            Notification.requestPermission().then(permission => {
+                updateNotificationUI();
+                if (permission === "granted") {
+                    showToast("✅ Notifications Enabled Successfully!", "success");
+                } else {
+                    showToast("⚠️ Notification permission denied.", "warning");
+                }
+            });
+        } else {
+            showToast("⚠️ Browser doesn't support notifications.", "error");
+        }
+    }
+
+    function updateNotificationUI() {
+        let btn = document.getElementById("notifToggleBtn");
+        if (btn && "Notification" in window) {
+            if (Notification.permission === "granted") {
+                btn.innerHTML = "🔔 Notifications: ON";
+            } else {
+                btn.innerHTML = "🔕 Notifications: OFF";
             }
+        }
+    }
+
+    function checkLiveAlerts(dataArray) {
+        if (!("Notification" in window) || Notification.permission !== "granted") return;
+
+        dataArray.forEach(item => {
+            let status = (item.Status || item.status || item.STATE || '').trim().toLowerCase();
+            let progName = item['Program Type'] || item.programType || item['Program Name'] || '';
+
+            if (status === 'live' && !previousLivePrograms.includes(progName)) {
+                if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.ready.then(reg => {
+                        reg.showNotification("🔴 Live Now: " + progName, {
+                            body: `Stage is live now! Tap to view details.`,
+                            icon: "https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV"
+                        });
+                    });
+                }
+            }
+        });
+
+        previousLivePrograms = dataArray
+            .filter(item => (item.Status || item.status || item.STATE || '').trim().toLowerCase() === 'live')
+            .map(item => item['Program Type'] || item.programType || item['Program Name']);
+    }
+
+    function toggleAuthMode() {
+        isRegisterMode = !isRegisterMode;
+        if (isRegisterMode) {
+            document.getElementById("form-title").innerText = "Register Account";
+            document.getElementById("nameFieldContainer").style.display = "block";
+            document.getElementById("authSubmitBtn").innerText = "Register";
+            document.getElementById("toggleAuthText").innerText = "Already have an account? Login";
+        } else {
+            document.getElementById("form-title").innerText = "Login";
+            document.getElementById("nameFieldContainer").style.display = "none";
+            document.getElementById("authSubmitBtn").innerText = "Login";
+            document.getElementById("toggleAuthText").innerText = "Don't have an account? Register";
+        }
+    }
+
+    function handleAuthAction() {
+        let mobile = document.getElementById("authMobile").value.trim();
+        let name = document.getElementById("regName").value.trim();
+
+        if (!mobile || !/^\d{10}$/.test(mobile)) {
+            showToast("⚠️ Please enter a valid 10-digit mobile number!", "warning");
+            return;
+        }
+
+        let payload = { action: isRegisterMode ? "register" : "login", mobile: mobile };
+        if (isRegisterMode) {
+            if (!name) { showToast("⚠️ Please enter your name!", "warning"); return; }
+            payload.name = name;
+        }
+
+        document.getElementById("authSubmitBtn").innerText = "Processing...";
+
+        fetch(sheetURL, { method: "POST", body: JSON.stringify(payload) })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                localStorage.setItem("fest_user", mobile);
+                localStorage.setItem("fest_name", data.name || (isRegisterMode ? name : "User"));
+                showMainApp();
+            } else if (data.status === "blocked") {
+                showToast("❌ Account blocked by admin.", "error");
+            } else {
+                showToast("❌ Number not found. Please register.", "error");
+            }
+            document.getElementById("authSubmitBtn").innerText = isRegisterMode ? "Register" : "Login";
         })
-    );
-});
+        .catch(err => {
+            showToast("❌ Connection error!", "error");
+            document.getElementById("authSubmitBtn").innerText = isRegisterMode ? "Register" : "Login";
+        });
+    }
+
+    function resetMobile() {
+        let currentMobile = localStorage.getItem("fest_user");
+        let newMobile = prompt("Enter your new 10-digit mobile number:");
+        if (!newMobile) return;
+        newMobile = newMobile.trim();
+
+        if (!/^\d{10}$/.test(newMobile)) {
+            alert("Invalid mobile number!");
+            return;
+        }
+
+        fetch(sheetURL, {
+            method: "POST",
+            body: JSON.stringify({ action: "reset", mobile: currentMobile, newMobile: newMobile })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                alert("Updated successfully! Please login again.");
+                logout();
+            } else {
+                alert("Error updating.");
+            }
+        });
+    }
+
+    function sendFeedback() {
+        let feedback = document.getElementById("feedbackText").value.trim();
+        let mobile = localStorage.getItem("fest_user");
+        let name = localStorage.getItem("fest_name");
+
+        if (!feedback) {
+            showToast("⚠️ Please write feedback!", "warning");
+            return;
+        }
+
+        fetch(sheetURL, {
+            method: "POST",
+            body: JSON.stringify({ action: "feedback", mobile: mobile, name: name, feedback: feedback })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === "success") {
+                showToast("✅ Feedback sent successfully.", "success");
+                document.getElementById("feedbackText").value = "";
+            } else {
+                showToast("❌ Error sending feedback.", "error");
+            }
+        });
+    }
+
+    function showMainApp() {
+        document.getElementById("auth-screen").style.display = "none";
+        document.getElementById("main-app").style.display = "block";
+        document.getElementById("settingsContainer").style.display = "block";
+        document.getElementById("quizFloatingBtn").style.display = "flex";
+        
+        let savedName = localStorage.getItem("fest_name") || "User";
+        document.getElementById("userProfileName").innerText = "👤 " + savedName;
+
+        fetchSchedule();
+        setInterval(fetchSchedule, 10000);
+    }
+
+    function logout() {
+        localStorage.removeItem("fest_user");
+        localStorage.removeItem("fest_name");
+        location.reload();
+    }
+
+    function switchTab(t, b) {
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active-pane'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(t + '-pane').classList.add('active-pane');
+        b.classList.add('active');
+    }
+
+    function createCard(item) {
+        let rawStatus = item.Status || item.status || item.STATE || 'Upcoming';
+        let status = String(rawStatus).trim() || "Upcoming";
+        let studentText = item['Student Name'] || item.studentName || item.Name || '';
+        let classText = item.Class || item.class || '';
+        let displaySubText = classText ? `${studentText} (${classText})` : studentText;
+        let progType = item['Program Type'] || item.programType || item['Program Name'] || '';
+        let isLive = status.toLowerCase() === 'live';
+
+        let card = document.createElement("div");
+        card.className = "schedule-card";
+        card.innerHTML = `
+            <div class="card-content">
+                <span style="font-size:12px; font-weight:600;">${item.Time || item.time || ''}</span><br>
+                <b>${isLive ? '<span class="live-dot"></span>' : ''}${progType}</b><br>
+                <small>${displaySubText}</small>
+            </div>
+            <div class="card-right">
+                <span class="badge ${status}">${status}</span>
+            </div>`;
+        return card;
+    }
+
+    function createResultCard(item) {
+        let progName = item['Program Name'] || item['Program Type'] || item.programName || 'Program';
+        let category = item.Category || item.category || 'General';
+        let first = item['1st Place'] || item['First'] || '';
+        let second = item['2nd Place'] || item['Second'] || '';
+        let third = item['3rd Place'] || item['Third'] || '';
+
+        let card = document.createElement("div");
+        card.className = "result-card";
+        card.innerHTML = `
+            <div class="result-header">
+                <b>${progName}</b>
+                <span class="category-pill">${category}</span>
+            </div>
+            ${first ? `<div class="winner-row"><span class="medal">🥇</span> ${first}</div>` : ''}
+            ${second ? `<div class="winner-row"><span class="medal">🥈</span> ${second}</div>` : ''}
+            ${third ? `<div class="winner-row"><span class="medal">🥉</span> ${third}</div>` : ''}
+        `;
+        return card;
+    }
+
+    setInterval(() => {
+        if (!isAutoScrollEnabled) return;
+        const searchVal = document.getElementById("searchInput").value;
+        if (searchVal) return;
+        const activeList = document.querySelector('.active-pane .scroll-container');
+        if (activeList && activeList.scrollHeight > activeList.clientHeight) {
+            activeList.scrollTop = (activeList.scrollTop + 1 >= activeList.scrollHeight - activeList.clientHeight) ? 0 : activeList.scrollTop + 1;
+        }
+    }, 50);
+
+    function fetchSchedule() {
+        fetch(sheetURL)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    globalSheFestData = data.sheFest || [];
+                    globalHeFestData = data.heFest || [];
+                    globalResultsData = data.results || [];
+                    
+                    checkLiveAlerts(globalSheFestData);
+                    checkLiveAlerts(globalHeFestData);
+                    
+                    renderLists(globalSheFestData, globalHeFestData, globalResultsData);
+                }
+            })
+            .catch(err => console.error("Error:", err));
+    }
+
+    function renderLists(sheData, heData, resultsData) {
+        document.getElementById("she-fest-list").innerHTML = "";
+        document.getElementById("he-fest-list").innerHTML = "";
+        document.getElementById("results-list").innerHTML = "";
+        
+        let finishedCount = 0;
+        
+        sheData.forEach(item => {
+            let status = (item.Status || item.status || item.STATE || '').trim().toLowerCase();
+            if (['completed', 'finished', 'cancelled'].includes(status)) finishedCount++;
+            document.getElementById("she-fest-list").appendChild(createCard(item));
+        });
+
+        heData.forEach(item => {
+            let status = (item.Status || item.status || item.STATE || '').trim().toLowerCase();
+            if (['completed', 'finished', 'cancelled'].includes(status)) finishedCount++;
+            document.getElementById("he-fest-list").appendChild(createCard(item));
+        });
+
+        resultsData.forEach(item => { 
+            if (item['Program Name'] || item['Program Type'] || item.programName) {
+                document.getElementById("results-list").appendChild(createResultCard(item)); 
+            }
+        });
+
+        let total = sheData.length + heData.length;
+        let pct = total > 0 ? Math.round((finishedCount / total) * 100) : 0;
+        document.getElementById("progressBar").style.width = pct + "%";
+        document.getElementById("progress-pct-text").innerText = pct + "%";
+        document.getElementById("progress-count-text").innerText = `${finishedCount}/${total}`;
+    }
+
+    function filterData() {
+        let query = document.getElementById("searchInput").value.toLowerCase().trim();
+        if (!query) {
+            renderLists(globalSheFestData, globalHeFestData, globalResultsData);
+            return;
+        }
+
+        let filter = (arr) => arr.filter(item => Object.values(item).join(" ").toLowerCase().includes(query));
+        renderLists(filter(globalSheFestData), filter(globalHeFestData), filter(globalResultsData));
+    }
+
+    function openQuizModal() {
+        document.getElementById("quizModal").style.display = "flex";
+        fetchQuizStatus();
+        if (quizInterval) clearInterval(quizInterval);
+        quizInterval = setInterval(fetchQuizStatus, 4000);
+    }
+
+    function closeQuizModal() {
+        document.getElementById("quizModal").style.display = "none";
+        if (quizInterval) { clearInterval(quizInterval); quizInterval = null; }
+    }
+
+    function fetchQuizStatus() {
+        let mobile = localStorage.getItem("fest_user");
+        if (!mobile) return;
+
+        fetch(`${sheetURL}?action=getQuiz&mobile=${mobile}`)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("userScoreDisplay").innerText = "Score: " + (data.score || 0);
+                let quizBody = document.getElementById("quizBody");
+                if (!quizBody) return;
+
+                if (data.quizStatus === "WAITING") {
+                    quizBody.innerHTML = `<p style="font-weight: 600; padding: 20px 0;">⏳ Quiz Hasn't Started Yet</p>`;
+                } else if (data.quizStatus === "STARTED") {
+                    if (data.hasAnswered) {
+                        quizBody.innerHTML = `<p style="font-weight: 700; color: #10b981; padding: 20px 0;">✅ Answer Submitted!</p>`;
+                    } else {
+                        let optionsHtml = "";
+                        if (data.options && Array.isArray(data.options)) {
+                            data.options.forEach(opt => {
+                                if (opt && String(opt).trim() !== "") {
+                                    optionsHtml += `<button class="quiz-option-btn" onclick="submitQuizAnswer('${escapeQuotes(opt)}')">${opt}</button>`;
+                                }
+                            });
+                        }
+                        quizBody.innerHTML = `<p style="font-weight: 700; margin-bottom: 15px;">${data.question || ''}</p><div id="quizOptionsContainer">${optionsHtml}</div>`;
+                    }
+                } else if (data.quizStatus === "CLOSED") {
+                    quizBody.innerHTML = `<p style="font-weight: 700; padding: 20px 0;">🏁 Quiz Ended. Final Score: ${data.score || 0}</p>`;
+                }
+            });
+    }
+
+    function submitQuizAnswer(selectedOption) {
+        let mobile = localStorage.getItem("fest_user");
+        if (!mobile) return;
+
+        fetch(sheetURL, {
+            method: "POST",
+            body: JSON.stringify({ action: "submitQuiz", mobile: mobile, answer: selectedOption })
+        })
+        .then(res => res.json())
+        .then(data => {
+            let quizBody = document.getElementById("quizBody");
+            if (data.status === "correct") {
+                quizBody.innerHTML = `<p style="font-weight: 700; color: #10b981; padding: 20px 0;">🎉 Correct Answer! (+10 pts)</p>`;
+            } else {
+                quizBody.innerHTML = `<p style="font-weight: 700; color: #ef4444; padding: 20px 0;">❌ Wrong Answer!</p>`;
+            }
+            setTimeout(fetchQuizStatus, 2000);
+        });
+    }
+
+    function escapeQuotes(str) {
+        return String(str).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+</script>
+</body>
+</html>
