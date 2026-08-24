@@ -707,9 +707,15 @@
         list.forEach(item => {
             let category = item['Category'] || item.category || 'General';
             let progName = item['Program Name'] || item.programName || 'Program';
-            let first = capitalizeWords(item['First'] || item.first || item['1st'] || item.First_Place || '');
-            let second = capitalizeWords(item['Second'] || item.second || item['2nd'] || item.Second_Place || '');
-            let third = capitalizeWords(item['Third'] || item.third || item['3rd'] || item.Third_Place || '');
+            
+            // Support both '1st Place' / 'First' style column keys
+            let firstVal = item['1st Place'] || item['First'] || item.first || item['1st'] || item.First_Place || 'Results Awaited';
+            let secondVal = item['2nd Place'] || item['Second'] || item.second || item['2nd'] || item.Second_Place || 'Results Awaited';
+            let thirdVal = item['3rd Place'] || item['Third'] || item.third || item['3rd'] || item.Third_Place || 'Results Awaited';
+
+            let first = firstVal.toLowerCase().includes('awaited') ? firstVal : capitalizeWords(firstVal);
+            let second = secondVal.toLowerCase().includes('awaited') ? secondVal : capitalizeWords(secondVal);
+            let third = thirdVal.toLowerCase().includes('awaited') ? thirdVal : capitalizeWords(thirdVal);
 
             html += `
                 <div class="result-card">
@@ -717,9 +723,9 @@
                         <span class="category-pill">${category}</span>
                         <span style="font-weight: 700; font-size: 13px;">${progName}</span>
                     </div>
-                    ${first ? `<div class="winner-row"><span class="medal">🥇</span> <div><b>1st:</b> ${first}</div></div>` : ''}
-                    ${second ? `<div class="winner-row"><span class="medal">🥈</span> <div><b>2nd:</b> ${second}</div></div>` : ''}
-                    ${third ? `<div class="winner-row"><span class="medal">🥉</span> <div><b>3rd:</b> ${third}</div></div>` : ''}
+                    <div class="winner-row"><span class="medal">🥇</span> <div><b>1st:</b> ${first}</div></div>
+                    <div class="winner-row"><span class="medal">🥈</span> <div><b>2nd:</b> ${second}</div></div>
+                    <div class="winner-row"><span class="medal">🥉</span> <div><b>3rd:</b> ${third}</div></div>
                 </div>
             `;
         });
