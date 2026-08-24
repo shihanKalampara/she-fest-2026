@@ -816,17 +816,21 @@
         document.getElementById("he-fest-list").innerHTML = "";
         document.getElementById("results-list").innerHTML = "";
         
-        let finished = 0;
+        let finishedCount = 0;
         
         sheData.forEach(item => {
             let status = (item.Status || item.status || item.STATE || '').trim().toLowerCase();
-            if (status === 'completed' || status === 'finished') finished++;
+            if (status === 'completed' || status === 'finished' || status === 'cancelled') {
+                finishedCount++;
+            }
             document.getElementById("she-fest-list").appendChild(createCard(item));
         });
 
         heData.forEach(item => {
             let status = (item.Status || item.status || item.STATE || '').trim().toLowerCase();
-            if (status === 'completed' || status === 'finished') finished++;
+            if (status === 'completed' || status === 'finished' || status === 'cancelled') {
+                finishedCount++;
+            }
             document.getElementById("he-fest-list").appendChild(createCard(item));
         });
 
@@ -838,10 +842,10 @@
         });
 
         let total = sheData.length + heData.length;
-        let pct = total > 0 ? Math.round((finished / total) * 100) : 0;
+        let pct = total > 0 ? Math.round((finishedCount / total) * 100) : 0;
         document.getElementById("progressBar").style.width = pct + "%";
         document.getElementById("progress-pct-text").innerText = pct + "%";
-        document.getElementById("progress-count-text").innerText = `${finished}/${total}`;
+        document.getElementById("progress-count-text").innerText = `${finishedCount}/${total}`;
     }
 
     function filterData() {
