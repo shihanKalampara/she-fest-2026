@@ -326,7 +326,6 @@
     let deferredPrompt = null;
 
     let quizInterval = null;
-    let quizTimerInterval = null;
     let activeQuizQuestions = [];
 
     function capitalizeWords(str) {
@@ -708,7 +707,6 @@
             let category = item['Category'] || item.category || 'General';
             let progName = item['Program Name'] || item.programName || 'Program';
             
-            // Support both '1st Place' / 'First' style column keys
             let firstVal = item['1st Place'] || item['First'] || item.first || item['1st'] || item.First_Place || 'Results Awaited';
             let secondVal = item['2nd Place'] || item['Second'] || item.second || item['2nd'] || item.Second_Place || 'Results Awaited';
             let thirdVal = item['3rd Place'] || item['Third'] || item.third || item['3rd'] || item.Third_Place || 'Results Awaited';
@@ -843,9 +841,18 @@
             } else if (data.quizStatus === "CLOSED") {
                 scoreBadge.innerText = "Score: " + (data.score || 0);
                 let rankList = data.rankList || [];
+                
+                // Tie-breaker: Sort by Score (Descending) then by Timestamp (Ascending / Fastest first)
+                rankList.sort((a, b) => {
+                    if (b.score !== a.score) {
+                        return b.score - a.score; // Higher score first
+                    }
+                    return (a.timestamp || 0) - (b.timestamp || 0); // Earlier timestamp (faster) first
+                });
+
                 let rankHtml = `
                     <div style="padding: 10px 0; text-align: left;">
-                        <h3 style="text-align: center; color: var(--text-main); margin-bottom: 15px;">🏆 Quiz Rank List</h3>
+                        <h3 style="text-align: center; color: var(--text-main); margin-bottom: 15px;">🏆 Quiz Rank List (Speed Tie-Breaker)</h3>
                 `;
                 if (rankList.length === 0) {
                     rankHtml += `<p style="text-align:center; color:var(--text-muted);">Rank list not available.</p>`;
@@ -909,7 +916,13 @@
 
         fetch(sheetURL, {
             method: "POST",
-            body: JSON.stringify({ action: "submitQuiz", mobile: mobile, name: name, answers: answers })
+            body: JSON.stringify({ 
+                action: "submitQuiz", 
+                mobile: mobile, 
+                name: name, 
+                answers: answers,
+                timestamp: Date.now() // Capturing exact speed/time for tie-breaker
+            })
         })
         .then(res => res.json())
         .then(data => {
