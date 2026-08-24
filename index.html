@@ -61,7 +61,7 @@
 
         #auth-screen { text-align: center; padding: 30px 10px; }
         .auth-box { max-width: 320px; margin: auto; background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-        .auth-box input { width: 100%; padding: 10px; margin: 8px 0 15px 0; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-main); border-radius: 8px; box-sizing: border-box; font-size: 13px; outline: none; }
+        .auth-box input { width: 100%; padding: 10px; margin: 8px 0 15px 0; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-main); border-radius: 8px; box-sizing: border-box; font-size: 13px; outline: none; text-transform: capitalize; }
         .auth-btn { width: 100%; padding: 10px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
         .toggle-text { font-size: 12px; text-align: center; margin-top: 15px; color: #2563eb; cursor: pointer; }
 
@@ -323,13 +323,23 @@
     
     let isAutoScrollEnabled = localStorage.getItem("fest_autoscroll") === "true";
     let isDarkModeEnabled = localStorage.getItem("fest_darkmode") === "true";
-    let notifiedLivePrograms = []; // Tracks already notified live programs to prevent duplicates
+    let notifiedLivePrograms = [];
     let deferredPrompt = null;
 
     let quizInterval = null;
     let quizTimerInterval = null;
     let quizTimeLeft = 600;
     let activeQuizQuestions = [];
+
+    // Utility function to capitalize the first letter of each word
+    function capitalizeWords(str) {
+        if (!str) return "";
+        return String(str)
+            .toLowerCase()
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+    }
 
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
@@ -421,7 +431,7 @@
         let savedName = localStorage.getItem("fest_name");
         if (savedMobile) {
             showMainApp();
-            document.getElementById("userProfileName").innerText = "👤 " + (savedName || "User");
+            document.getElementById("userProfileName").innerText = "👤 " + capitalizeWords(savedName || "User");
         }
     };
 
@@ -492,7 +502,6 @@
         }
     }
 
-    // --- UNIQUE LIVE NOTIFICATION LOGIC ---
     function checkLiveAlerts(dataArray) {
         if (!("Notification" in window) || Notification.permission !== "granted") return;
 
@@ -500,7 +509,6 @@
             let status = (item.Status || item.status || item.STATE || '').trim().toLowerCase();
             let progName = item['Program Type'] || item.programType || item['Program Name'] || '';
 
-            // If program is live and has NOT been notified yet, send notification and store its name
             if (status === 'live' && progName && !notifiedLivePrograms.includes(progName)) {
                 notifiedLivePrograms.push(progName);
 
@@ -533,7 +541,7 @@
 
     function handleAuthAction() {
         let mobile = document.getElementById("authMobile").value.trim();
-        let name = document.getElementById("regName").value.trim();
+        let name = capitalizeWords(document.getElementById("regName").value.trim());
 
         if (!mobile || !/^\d{10}$/.test(mobile)) {
             showToast("⚠️ Please enter a valid 10-digit mobile number!", "warning");
@@ -552,8 +560,9 @@
         .then(res => res.json())
         .then(data => {
             if (data.status === "success") {
+                let formattedName = capitalizeWords(data.name || (isRegisterMode ? name : "User"));
                 localStorage.setItem("fest_user", mobile);
-                localStorage.setItem("fest_name", data.name || (isRegisterMode ? name : "User"));
+                localStorage.setItem("fest_name", formattedName);
                 showMainApp();
             } else if (data.status === "blocked") {
                 showToast("❌ Account blocked by admin.", "error");
@@ -597,7 +606,7 @@
     function sendFeedback() {
         let feedback = document.getElementById("feedbackText").value.trim();
         let mobile = localStorage.getItem("fest_user");
-        let name = localStorage.getItem("fest_name");
+        let name = capitalizeWords(localStorage.getItem("fest_name"));
 
         if (!feedback) {
             showToast("⚠️ Please write feedback!", "warning");
@@ -625,11 +634,11 @@
         document.getElementById("settingsContainer").style.display = "block";
         document.getElementById("quizFloatingBtn").style.display = "flex";
         
-        let savedName = localStorage.getItem("fest_name") || "User";
+        let savedName = capitalizeWords(localStorage.getItem("fest_name") || "User");
         document.getElementById("userProfileName").innerText = "👤 " + savedName;
 
         fetchSchedule();
-        setInterval(fetchSchedule, 10000); // Fetches data every 10 seconds
+        setInterval(fetchSchedule, 10000);
     }
 
     function logout() {
@@ -648,7 +657,7 @@
     function createCard(item) {
         let rawStatus = item.Status || item.status || item.STATE || 'Upcoming';
         let status = String(rawStatus).trim() || "Upcoming";
-        let studentText = item['Student Name'] || item.studentName || item.Name || '';
+        let studentText = capitalizeWords(item['Student Name'] || item.studentName || item.Name || '');
         let classText = item.Class || item.class || '';
         let displaySubText = classText ? `${studentText} (${classText})` : studentText;
         let progType = item['Program Type'] || item.programType || item['Program Name'] || '';
@@ -671,9 +680,9 @@
     function createResultCard(item) {
         let progName = item['Program Name'] || item['Program Type'] || item.programName || 'Program';
         let category = item.Category || item.category || 'General';
-        let first = item['1st Place'] || item['First'] || '';
-        let second = item['2nd Place'] || item['Second'] || '';
-        let third = item['3rd Place'] || item['Third'] || '';
+        let first = capitalizeWords(item['1st Place'] || item['First'] || '');
+        let second = capitalizeWords(item['2nd Place'] || item['Second'] || '');
+        let third = capitalizeWords(item['3rd Place'] || item['Third'] || '');
 
         let card = document.createElement("div");
         card.className = "result-card";
@@ -760,7 +769,6 @@
         renderLists(filter(globalSheFestData), filter(globalHeFestData), filter(globalResultsData));
     }
 
-    // --- QUIZ LOGIC ---
     function openQuizModal() {
         document.getElementById("quizModal").style.display = "flex";
         fetchQuizStatus();
@@ -831,7 +839,7 @@
                     if (data.rankList && data.rankList.length > 0) {
                         data.rankList.forEach((r, idx) => {
                             let medal = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `#${idx+1}`));
-                            rankHTML += `<div class="winner-row" style="padding: 12px 15px; margin-bottom: 8px;"><span style="font-size: 16px; margin-right: 10px;">${medal}</span> <b>${r.name}</b> <span style="margin-left:auto; color:#2563eb; font-weight: bold;">സ്കോർ: ${r.score}</span></div>`;
+                            rankHTML += `<div class="winner-row" style="padding: 12px 15px; margin-bottom: 8px;"><span style="font-size: 16px; margin-right: 10px;">${medal}</span> <b>${capitalizeWords(r.name)}</b> <span style="margin-left:auto; color:#2563eb; font-weight: bold;">സ്കോർ: ${r.score}</span></div>`;
                         });
                     } else {
                         rankHTML += `<p style="text-align:center; color:var(--text-muted); padding: 40px;">റാങ്ക് ഡാറ്റ ലഭ്യമല്ല</p>`;
@@ -844,7 +852,7 @@
 
     function startQuizAction() {
         let mobile = localStorage.getItem("fest_user");
-        let name = localStorage.getItem("fest_name");
+        let name = capitalizeWords(localStorage.getItem("fest_name"));
 
         fetch(sheetURL, {
             method: "POST",
