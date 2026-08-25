@@ -503,7 +503,7 @@
 
         dataArray.forEach(item => {
             let status = (item.Status || item.status || item.STATE || '').trim().toLowerCase();
-            let progName = item['Program Type'] || item.programType || item['Program Name'] || '';
+            let progName = item['Program Type'] || item.programType || item['Program Name'] || item['Program'] || '';
 
             if (status === 'live' && progName && !notifiedLivePrograms.includes(progName)) {
                 notifiedLivePrograms.push(progName);
@@ -654,6 +654,10 @@
         let html = "";
         dataArray.forEach(item => {
             let status = item.Status || item.status || item.STATE || "Upcoming";
+            let timeVal = item.Time || item.time || item.TIME || '';
+            let progName = item['Program Type'] || item.programType || item['Program Name'] || item['Program'] || item.program || '';
+            let participantsVal = item.Participants || item.participants || item.Name || item.name || item.Student || item.student || item.Class || item.class || '';
+
             let borderColor = "#cbd5e1";
             if (status.toLowerCase() === "live") borderColor = "var(--accent-live)";
             else if (status.toLowerCase() === "completed" || status.toLowerCase() === "finished") borderColor = "var(--accent-completed)";
@@ -662,9 +666,9 @@
             html += `
                 <div class="schedule-card" style="border-left-color: ${borderColor};">
                     <div class="card-content">
-                        <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 2px;">${item.Time || item.time || ''}</div>
-                        <div style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">${item['Program Type'] || item.programType || item['Program Name'] || ''}</div>
-                        <div style="font-size: 12px; color: var(--text-muted);">${item.Participants || item.participants || item.Class || ''}</div>
+                        <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 2px;">${timeVal}</div>
+                        <div style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">${progName}</div>
+                        <div style="font-size: 12px; color: var(--text-muted); font-weight: 600;">${participantsVal}</div>
                     </div>
                     <div class="card-right">
                         <span class="badge ${status}">${status.toLowerCase() === 'live' ? '<span class="live-dot"></span>' : ''} ${status}</span>
@@ -686,16 +690,22 @@
 
         let html = "";
         dataArray.forEach(item => {
+            let categoryVal = item.Category || item.category || 'General';
+            let progName = item['Program Name'] || item.programName || item['Program'] || item.program || '';
+            let firstVal = item.First || item.first || 'N/A';
+            let secondVal = item.Second || item.second || 'N/A';
+            let thirdVal = item.Third || item.third || 'N/A';
+
             html += `
                 <div class="result-card">
                     <div class="result-header">
-                        <span class="category-pill">${item.Category || item.category || 'General'}</span>
-                        <span style="font-size: 12px; font-weight: 600; color: var(--text-muted);">${item['Program Name'] || item.programName || ''}</span>
+                        <span class="category-pill">${categoryVal}</span>
+                        <span style="font-size: 12px; font-weight: 600; color: var(--text-muted);">${progName}</span>
                     </div>
                     <div>
-                        <div class="winner-row"><span class="medal">🥇</span> <b>1st:</b> &nbsp; ${item.First || item.first || 'N/A'}</div>
-                        <div class="winner-row"><span class="medal">🥈</span> <b>2nd:</b> &nbsp; ${item.Second || item.second || 'N/A'}</div>
-                        <div class="winner-row"><span class="medal">🥉</span> <b>3rd:</b> &nbsp; ${item.Third || item.third || 'N/A'}</div>
+                        <div class="winner-row"><span class="medal">🥇</span> <b>1st:</b> &nbsp; ${firstVal}</div>
+                        <div class="winner-row"><span class="medal">🥈</span> <b>2nd:</b> &nbsp; ${secondVal}</div>
+                        <div class="winner-row"><span class="medal">🥉</span> <b>3rd:</b> &nbsp; ${thirdVal}</div>
                     </div>
                 </div>
             `;
@@ -775,7 +785,6 @@
 
     function checkQuizStatus() {
         let mobile = localStorage.getItem("fest_user");
-        let name = localStorage.getItem("fest_name");
 
         fetch(sheetURL + "?action=getQuiz&mobile=" + mobile)
         .then(res => res.json())
