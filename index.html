@@ -656,7 +656,9 @@
             let status = item.Status || item.status || item.STATE || "Upcoming";
             let timeVal = item.Time || item.time || item.TIME || '';
             let progName = item['Program Type'] || item.programType || item['Program Name'] || item['Program'] || item.program || '';
-            let participantsVal = item.Participants || item.participants || item.Name || item.name || item.Student || item.student || item.Class || item.class || '';
+            
+            // Checking multiple possible keys for Participant/Name/Class columns to prevent missing names
+            let participantsVal = item.Participants || item.participants || item.Name || item.name || item.Student || item.student || item.Class || item.class || item.Participant || item.participant || '';
 
             let borderColor = "#cbd5e1";
             if (status.toLowerCase() === "live") borderColor = "var(--accent-live)";
