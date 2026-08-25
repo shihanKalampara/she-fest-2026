@@ -597,7 +597,7 @@
                 showToast("❌ Error updating mobile number.", "error");
             }
         })
-        .catch(() => showToast("❌ Connection error!", "error"));
+        .catch(err => alert("Connection error!"));
     }
 
     function logout() {
@@ -612,14 +612,17 @@
         document.getElementById("settingsContainer").style.display = "block";
         document.getElementById("quizFloatingBtn").style.display = "flex";
         
-        fetchData();
-        setInterval(fetchData, 10000);
-        checkQuizStatus();
-        quizInterval = setInterval(checkQuizStatus, 8000);
+        let savedName = localStorage.getItem("fest_name");
+        if (savedName) {
+            document.getElementById("userProfileName").innerText = "👤 " + capitalizeWords(savedName);
+        }
+
+        fetchAllData();
+        setInterval(fetchAllData, 10000);
     }
 
-    function fetchData() {
-        fetch(sheetURL)
+    function fetchAllData() {
+        fetch(sheetURL + "?action=all")
         .then(res => res.json())
         .then(data => {
             if (data.status === "success") {
@@ -627,146 +630,145 @@
                 globalHeFestData = data.heFest || [];
                 globalResultsData = data.results || [];
 
-                checkLiveAlerts(globalSheFestData);
-                checkLiveAlerts(globalHeFestData);
+                checkLiveAlerts([...globalSheFestData, ...globalHeFestData]);
 
-                renderData();
+                renderScheduleData(globalSheFestData, "she-fest-list");
+                renderScheduleData(globalHeFestData, "he-fest-list");
+                renderResultsData(globalResultsData, "results-list");
+
+                updateOverallProgress([...globalSheFestData, ...globalHeFestData]);
+                filterData();
             }
         })
         .catch(err => console.log("Fetch error:", err));
     }
 
-    function renderData() {
-        renderScheduleList("she-fest-list", globalSheFestData);
-        renderScheduleList("he-fest-list", globalHeFestData);
-        renderResultsList("results-list", globalResultsData);
-        updateProgress();
-    }
-
-    function renderScheduleList(containerId, list) {
+    function renderScheduleData(dataArray, containerId) {
         let container = document.getElementById(containerId);
         if (!container) return;
         
-        let existingScroll = container.scrollTop;
-        let html = "";
-
-        if (list.length === 0) {
+        if (dataArray.length === 0) {
             container.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:30px;">No programs found.</p>`;
             return;
         }
 
-        list.forEach(item => {
-            let progName = item['Program Type'] || item.programType || item['Program Name'] || 'Program';
-            let student = capitalizeWords(item['Student Name'] || item.studentName || item.Name || '');
-            let gradeClass = item['Class'] || item.class || '';
-            let status = (item.Status || item.status || item.STATE || 'Upcoming').trim();
+        let html = "";
+        dataArray.forEach(item => {
+            let status = (item.Status || item.status || item.STATE || '').trim();
+            let statusLower = status.toLowerCase();
+            let badgeClass = "Upcoming";
+            let borderColor = "#cbd5e1";
 
-            let badgeClass = status;
-            let borderCol = "#cbd5e1";
-            if (status.toLowerCase() === 'live') {
-                borderCol = "#ef4444";
+            if (statusLower === 'live') {
                 badgeClass = "Live";
-            } else if (status.toLowerCase() === 'completed' || status.toLowerCase() === 'finished') {
-                borderCol = "#10b981";
+                borderColor = "#ef4444";
+            } else if (statusLower === 'completed' || statusLower === 'finished') {
                 badgeClass = "Completed";
-            } else if (status.toLowerCase() === 'upcoming') {
-                borderCol = "#f59e0b";
-                badgeClass = "Upcoming";
+                borderColor = "#10b981";
+            } else if (statusLower === 'cancelled') {
+                badgeClass = "Cancelled";
+                borderColor = "#64748b";
             }
 
+            let progName = capitalizeWords(item['Program Name'] || item.programName || item['Program Type'] || '');
+            let subName = capitalizeWords(item['Sub Name'] || item.subName || '');
+            let category = capitalizeWords(item.Category || item.category || '');
+            let participants = capitalizeWords(item.Participants || item.participants || '');
+            let chestNo = item['Chest No'] || item.chestNo || '';
+            let mark = item.Mark || item.mark || '';
+            let timeVal = item.Time || item.time || '';
+
             html += `
-                <div class="schedule-card" style="border-left-color: ${borderCol};">
+                <div class="schedule-card" style="border-left: 4px solid ${borderColor};" data-search="${progName} ${subName} ${category} ${participants} ${chestNo} ${timeVal}">
                     <div class="card-content">
-                        <div style="font-size: 14px; font-weight: 700; color: var(--text-main);">${progName}</div>
-                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 3px;">👤 ${student} ${gradeClass ? '(' + gradeClass + ')' : ''}</div>
+                        <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 3px;">${category}</div>
+                        <div style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 2px;">${progName}</div>
+                        ${timeVal ? `<div style="font-size: 12px; font-weight: 600; color: #f59e0b; margin-bottom: 4px;">⏰ Time: ${timeVal}</div>` : ''}
+                        ${subName ? `<div style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px;">${subName}</div>` : ''}
+                        ${participants ? `<div style="font-size: 12px; font-weight: 600; color: #2563eb;">👤 ${participants} ${chestNo ? '(' + chestNo + ')' : ''}</div>` : ''}
+                        ${mark ? `<div style="font-size: 12px; font-weight: 600; color: #10b981; margin-top: 3px;">⭐ Mark: ${mark}</div>` : ''}
                     </div>
                     <div class="card-right">
-                        <span class="badge ${badgeClass}">${status.toLowerCase() === 'live' ? '<span class="live-dot"></span>Live' : status}</span>
+                        <span class="badge ${badgeClass}">${statusLower === 'live' ? '<span class="live-dot"></span>' : ''}${status}</span>
                     </div>
                 </div>
             `;
         });
-
         container.innerHTML = html;
-        if (isAutoScrollEnabled) {
-            container.scrollTop = existingScroll + 0.5;
-        }
     }
 
-    function renderResultsList(containerId, list) {
+    function renderResultsData(dataArray, containerId) {
         let container = document.getElementById(containerId);
         if (!container) return;
-        
-        let html = "";
-        if (list.length === 0) {
-            container.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:30px;">No results declared yet.</p>`;
+
+        if (dataArray.length === 0) {
+            container.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:30px;">No results announced yet.</p>`;
             return;
         }
 
-        list.forEach(item => {
-            let category = item['Category'] || item.category || 'General';
-            let progName = item['Program Name'] || item.programName || 'Program';
-            
-            let firstVal = item['1st Place'] || item['First'] || item.first || item['1st'] || item.First_Place || 'Results Awaited';
-            let secondVal = item['2nd Place'] || item['Second'] || item.second || item['2nd'] || item.Second_Place || 'Results Awaited';
-            let thirdVal = item['3rd Place'] || item['Third'] || item.third || item['3rd'] || item.Third_Place || 'Results Awaited';
-
-            let first = firstVal.toLowerCase().includes('awaited') ? firstVal : capitalizeWords(firstVal);
-            let second = secondVal.toLowerCase().includes('awaited') ? secondVal : capitalizeWords(secondVal);
-            let third = thirdVal.toLowerCase().includes('awaited') ? thirdVal : capitalizeWords(thirdVal);
+        let html = "";
+        dataArray.forEach(item => {
+            let progName = capitalizeWords(item['Program Name'] || item.programName || '');
+            let category = capitalizeWords(item.Category || item.category || '');
+            let first = capitalizeWords(item.First || item.first || '');
+            let second = capitalizeWords(item.Second || item.second || '');
+            let third = capitalizeWords(item.Third || item.third || '');
 
             html += `
-                <div class="result-card">
+                <div class="result-card" data-search="${progName} ${category} ${first} ${second} ${third}">
                     <div class="result-header">
                         <span class="category-pill">${category}</span>
-                        <span style="font-weight: 700; font-size: 13px;">${progName}</span>
+                        <span style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Result Published</span>
                     </div>
-                    <div class="winner-row"><span class="medal">🥇</span> <div><b>1st:</b> ${first}</div></div>
-                    <div class="winner-row"><span class="medal">🥈</span> <div><b>2nd:</b> ${second}</div></div>
-                    <div class="winner-row"><span class="medal">🥉</span> <div><b>3rd:</b> ${third}</div></div>
+                    <div style="font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 12px;">${progName}</div>
+                    
+                    ${first ? `<div class="winner-row"><span class="medal">🥇</span><div style="flex:1;"><b>1st Place:</b> ${first}</div></div>` : ''}
+                    ${second ? `<div class="winner-row"><span class="medal">🥈</span><div style="flex:1;"><b>2nd Place:</b> ${second}</div></div>` : ''}
+                    ${third ? `<div class="winner-row"><span class="medal">🥉</span><div style="flex:1;"><b>3rd Place:</b> ${third}</div></div>` : ''}
                 </div>
             `;
         });
         container.innerHTML = html;
     }
 
-    function updateProgress() {
-        let total = globalSheFestData.length + globalHeFestData.length;
-        let completed = 0;
+    function updateOverallProgress(allData) {
+        if (!allData || allData.length === 0) return;
+        let total = allData.length;
+        let completed = allData.filter(item => {
+            let s = (item.Status || item.status || item.STATE || '').trim().toLowerCase();
+            return s === 'completed' || s === 'finished';
+        }).length;
 
-        [...globalSheFestData, ...globalHeFestData].forEach(item => {
-            let status = (item.Status || item.status || item.STATE || '').trim().toLowerCase();
-            if (status === 'completed' || status === 'finished') {
-                completed++;
-            }
-        });
-
-        let pct = total > 0 ? Math.round((completed / total) * 100) : 0;
-        document.getElementById("progressBar").style.width = pct + "%";
+        let pct = Math.round((completed / total) * 100);
         document.getElementById("progress-pct-text").innerText = pct + "% Completed";
         document.getElementById("progress-count-text").innerText = `${completed}/${total} Programs`;
+        document.getElementById("progressBar").style.width = pct + "%";
     }
 
-    function switchTab(tabId, btn) {
-        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active-pane'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    function switchTab(tabName, btnElement) {
+        document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active-pane'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
 
-        document.getElementById(tabId + '-pane').classList.add('active-pane');
-        btn.classList.add('active');
+        document.getElementById(tabName + "-pane").classList.add('active-pane');
+        if (btnElement) btnElement.classList.add('active');
     }
 
     function filterData() {
-        let query = document.getElementById("searchInput").value.toLowerCase();
+        let query = document.getElementById("searchInput").value.toLowerCase().trim();
         
-        let filterList = (list) => list.filter(item => {
-            let pName = String(item['Program Type'] || item.programType || item['Program Name'] || '').toLowerCase();
-            let sName = String(item['Student Name'] || item.studentName || item.Name || '').toLowerCase();
-            let cName = String(item['Class'] || item.class || '').toLowerCase();
-            return pName.includes(query) || sName.includes(query) || cName.includes(query);
+        ['she-fest-list', 'he-fest-list', 'results-list'].forEach(containerId => {
+            let container = document.getElementById(containerId);
+            if (!container) return;
+            let cards = container.children;
+            for (let card of cards) {
+                let searchData = (card.getAttribute('data-search') || '').toLowerCase();
+                if (query === '' || searchData.includes(query)) {
+                    card.style.display = "";
+                } else {
+                    card.style.display = "none";
+                }
+            }
         });
-
-        renderScheduleList("she-fest-list", filterList(globalSheFestData));
-        renderScheduleList("he-fest-list", filterList(globalHeFestData));
     }
 
     function sendFeedback() {
@@ -775,7 +777,7 @@
         let name = localStorage.getItem("fest_name");
 
         if (!text) {
-            showToast("⚠️ Please write something before submitting!", "warning");
+            showToast("⚠️ Please write some feedback before submitting!", "warning");
             return;
         }
 
@@ -786,156 +788,91 @@
         .then(res => res.json())
         .then(data => {
             if (data.status === "success") {
-                showToast("✅ Feedback sent successfully!", "success");
+                showToast("✅ Thank you! Feedback submitted successfully.", "success");
                 document.getElementById("feedbackText").value = "";
             } else {
-                showToast("❌ Error sending feedback.", "error");
+                showToast("❌ Error submitting feedback.", "error");
             }
         })
-        .catch(() => showToast("❌ Connection error!", "error"));
+        .catch(err => showToast("❌ Connection error!", "error"));
     }
 
     function openQuizModal() {
         document.getElementById("quizModal").style.display = "flex";
-        checkQuizStatus();
+        fetchQuizQuestions();
+        quizInterval = setInterval(fetchQuizQuestions, 5000);
     }
 
     function closeQuizModal() {
         document.getElementById("quizModal").style.display = "none";
+        if (quizInterval) clearInterval(quizInterval);
     }
 
-    function checkQuizStatus() {
+    function fetchQuizQuestions() {
         let mobile = localStorage.getItem("fest_user");
-        if (!mobile) return;
-
-        fetch(`${sheetURL}?action=getQuiz&mobile=${mobile}`)
+        fetch(sheetURL + "?action=getQuiz&mobile=" + mobile)
         .then(res => res.json())
         .then(data => {
-            let body = document.getElementById("quizBody");
-            let scoreBadge = document.getElementById("userScoreDisplay");
-
-            if (data.quizStatus === "WAITING") {
-                scoreBadge.innerText = "Status: Waiting";
-                body.innerHTML = `
-                    <div style="padding: 40px 20px; text-align: center;">
-                        <h3 style="color: var(--text-main);">⏳ Quiz will start soon!</h3>
-                        <p style="color: var(--text-muted); font-size: 13px;">Please wait until the admin starts the quiz.</p>
-                    </div>
-                `;
-            } else if (data.quizStatus === "STARTED") {
-                if (data.hasAnswered) {
-                    scoreBadge.innerText = "Score: " + (data.score || 0);
-                    body.innerHTML = `
-                        <div style="padding: 40px 20px; text-align: center;">
-                            <h3 style="color: #10b981;">🎉 You have already submitted the quiz!</h3>
-                            <p style="color: var(--text-muted); font-size: 14px; margin-top: 10px;">Your Total Score: <b>${data.score || 0}</b></p>
-                        </div>
-                    `;
-                } else {
-                    scoreBadge.innerText = "Live Quiz Active";
-                    if (!activeQuizQuestions.length && data.questions) {
-                        activeQuizQuestions = data.questions;
-                        renderQuizQuestions(data.questions);
-                    }
-                }
-            } else if (data.quizStatus === "CLOSED") {
-                scoreBadge.innerText = "Score: " + (data.score || 0);
-                let rankList = data.rankList || [];
-                
-                // Tie-breaker: Score descending, Timestamp ascending (faster first)
-                rankList.sort((a, b) => {
-                    if (b.score !== a.score) {
-                        return b.score - a.score;
-                    }
-                    return (a.timestamp || 0) - (b.timestamp || 0);
-                });
-
-                let rankHtml = `
-                    <div style="padding: 10px 0; text-align: left;">
-                        <h3 style="text-align: center; color: var(--text-main); margin-bottom: 15px;">🏆 Quiz Rank List</h3>
-                `;
-                if (rankList.length === 0) {
-                    rankHtml += `<p style="text-align:center; color:var(--text-muted);">Rank list not available.</p>`;
-                } else {
-                    rankList.forEach((r, idx) => {
-                        rankHtml += `
-                            <div class="winner-row" style="justify-content: space-between;">
-                                <div><b>#${idx + 1}</b> ${capitalizeWords(r.name)}</div>
-                                <div><b>Score:</b> ${r.score}</div>
-                            </div>
-                        `;
-                    });
-                }
-                rankHtml += `</div>`;
-                body.innerHTML = rankHtml;
+            if (data.status === "success") {
+                activeQuizQuestions = data.questions || [];
+                let userScore = data.score || 0;
+                document.getElementById("userScoreDisplay").innerText = "Score: " + userScore;
+                renderQuizContent(activeQuizQuestions);
             }
         })
-        .catch(err => console.log("Quiz check error:", err));
+        .catch(err => console.log("Quiz fetch error:", err));
     }
 
-    function renderQuizQuestions(questions) {
+    function renderQuizContent(questions) {
         let body = document.getElementById("quizBody");
-        let html = `<div style="text-align: left; padding: 10px;">`;
-        
+        if (!questions || questions.length === 0) {
+            body.innerHTML = `<p style="color: var(--text-muted); margin-top: 40px;">No active live quiz right now. Stay tuned!</p>`;
+            return;
+        }
+
+        let html = "";
         questions.forEach((q, index) => {
+            let qId = q.id || index;
+            let questionText = capitalizeWords(q.question || '');
+            let options = [q.opt1, q.opt2, q.opt3, q.opt4].filter(Boolean);
+            let selectedOption = q.selected || '';
+
             html += `
                 <div class="question-card-item">
-                    <div class="question-title"><span>Q${index + 1}. ${q.question}</span></div>
+                    <div class="question-title"><span>Q${index + 1}. ${questionText}</span></div>
+                    <div style="text-align: left;">
             `;
-            q.options.forEach((opt, optIdx) => {
-                if (opt) {
-                    html += `
-                        <label class="option-label">
-                            <input type="radio" name="question_${q.id}" value="${opt}">
-                            <span>${opt}</span>
-                        </label>
-                    `;
-                }
-            });
-            html += `</div>`;
-        });
 
-        html += `
-            <button class="auth-btn" style="margin: 20px 0;" onclick="submitQuizAnswers()">Submit Answers</button>
-          </div>
-        `;
+            options.forEach(opt => {
+                let formattedOpt = capitalizeWords(opt);
+                let isChecked = selectedOption === opt ? "checked" : "";
+                html += `
+                    <label class="option-label">
+                        <input type="radio" name="question_${qId}" value="${opt}" ${isChecked} onclick="submitQuizAnswer('${qId}', '${opt}')">
+                        ${formattedOpt}
+                    </label>
+                `;
+            });
+
+            html += `</div></div>`;
+        });
         body.innerHTML = html;
     }
 
-    function submitQuizAnswers() {
+    function submitQuizAnswer(questionId, selectedOpt) {
         let mobile = localStorage.getItem("fest_user");
-        let name = localStorage.getItem("fest_name");
-        let answers = {};
-
-        activeQuizQuestions.forEach(q => {
-            let selected = document.querySelector(`input[name="question_${q.id}"]:checked`);
-            if (selected) {
-                answers[q.id] = selected.value;
-            }
-        });
-
         fetch(sheetURL, {
             method: "POST",
-            body: JSON.stringify({ 
-                action: "submitQuiz", 
-                mobile: mobile, 
-                name: name, 
-                answers: answers,
-                timestamp: Date.now() // Speed tie-breaker timestamp
-            })
+            body: JSON.stringify({ action: "submitQuiz", mobile: mobile, questionId: questionId, answer: selectedOpt })
         })
         .then(res => res.json())
         .then(data => {
             if (data.status === "success") {
-                showToast("✅ Quiz submitted successfully!", "success");
-                checkQuizStatus();
-            } else {
-                showToast("❌ Error submitting quiz.", "error");
+                document.getElementById("userScoreDisplay").innerText = "Score: " + (data.score || 0);
             }
         })
-        .catch(() => showToast("❌ Connection error!", "error"));
+        .catch(err => console.log("Quiz submit error:", err));
     }
 </script>
-
 </body>
 </html>
