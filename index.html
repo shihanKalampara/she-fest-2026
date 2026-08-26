@@ -230,8 +230,8 @@
         </div>
 
         <div class="tab-buttons">
-            <button class="tab-btn active" onclick="switchTab('she-fest', this)">She Fest</button>
-            <button class="tab-btn" onclick="switchTab('he-fest', this)">He Fest</button>
+            <button class="tab-btn active" onclick="switchTab('he-fest', this)">He Fest</button>
+            <button class="tab-btn" onclick="switchTab('she-fest', this)">She Fest</button>
             <button class="tab-btn" onclick="switchTab('results', this)">Results</button>
             <button class="tab-btn" onclick="switchTab('feedback', this)">Feedback</button>
         </div>
@@ -725,9 +725,9 @@
                     </div>
                     <div style="font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 12px;">${progName}</div>
                     
-                    ${first ? `<div class="winner-row"><span class="medal">🥇</span><div style="flex:1;"><b>1st Place:</b> ${first}</div></div>` : ''}
-                    ${second ? `<div class="winner-row"><span class="medal">🥈</span><div style="flex:1;"><b>2nd Place:</b> ${second}</div></div>` : ''}
-                    ${third ? `<div class="winner-row"><span class="medal">🥉</span><div style="flex:1;"><b>3rd Place:</b> ${third}</div></div>` : ''}
+                    ${first ? `<div class="winner-row"><span class="medal">🥇</span><div style="flex:1;"><b></b> ${first}</div></div>` : ''}
+                    ${second ? `<div class="winner-row"><span class="medal">🥈</span><div style="flex:1;"><b></b> ${second}</div></div>` : ''}
+                    ${third ? `<div class="winner-row"><span class="medal">🥉</span><div style="flex:1;"><b></b> ${third}</div></div>` : ''}
                 </div>
             `;
         });
