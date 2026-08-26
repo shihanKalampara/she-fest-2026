@@ -503,7 +503,7 @@
 
         dataArray.forEach(item => {
             let status = (item.Status || item.status || item.STATE || '').trim().toLowerCase();
-            let progName = item['Program Type'] || item.programType || item['Program Name'] || '';
+            let progName = item['Program Name'] || item.programName || item['Program Type'] || '';
 
             if (status === 'live' && progName && !notifiedLivePrograms.includes(progName)) {
                 notifiedLivePrograms.push(progName);
@@ -673,19 +673,25 @@
             let progName = capitalizeWords(item['Program Name'] || item.programName || item['Program Type'] || '');
             let subName = capitalizeWords(item['Sub Name'] || item.subName || '');
             let category = capitalizeWords(item.Category || item.category || '');
-            let participants = capitalizeWords(item.Participants || item.participants || '');
+            let participants = capitalizeWords(item.Participants || item.participants || item['Student Name'] || item.studentName || '');
+            let className = capitalizeWords(item.Class || item.class || item['Class Name'] || '');
             let chestNo = item['Chest No'] || item.chestNo || '';
             let mark = item.Mark || item.mark || '';
             let timeVal = item.Time || item.time || '';
 
+            let studentDetails = [];
+            if (participants) studentDetails.push(participants);
+            if (className) studentDetails.push(`Class: ${className}`);
+            if (chestNo) studentDetails.push(`Chest No: ${chestNo}`);
+
             html += `
-                <div class="schedule-card" style="border-left: 4px solid ${borderColor};" data-search="${progName} ${subName} ${category} ${participants} ${chestNo} ${timeVal}">
+                <div class="schedule-card" style="border-left: 4px solid ${borderColor};" data-search="${progName} ${subName} ${category} ${participants} ${className} ${chestNo} ${timeVal}">
                     <div class="card-content">
                         <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 3px;">${category}</div>
                         <div style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 2px;">${progName}</div>
                         ${timeVal ? `<div style="font-size: 12px; font-weight: 600; color: #f59e0b; margin-bottom: 4px;">⏰ Time: ${timeVal}</div>` : ''}
                         ${subName ? `<div style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px;">${subName}</div>` : ''}
-                        ${participants ? `<div style="font-size: 12px; font-weight: 600; color: #2563eb;">👤 ${participants} ${chestNo ? '(' + chestNo + ')' : ''}</div>` : ''}
+                        ${studentDetails.length > 0 ? `<div style="font-size: 12px; font-weight: 600; color: #2563eb;">👤 ${studentDetails.join(' | ')}</div>` : ''}
                         ${mark ? `<div style="font-size: 12px; font-weight: 600; color: #10b981; margin-top: 3px;">⭐ Mark: ${mark}</div>` : ''}
                     </div>
                     <div class="card-right">
@@ -710,9 +716,9 @@
         dataArray.forEach(item => {
             let progName = capitalizeWords(item['Program Name'] || item.programName || '');
             let category = capitalizeWords(item.Category || item.category || '');
-            let first = capitalizeWords(item.First || item.first || '');
-            let second = capitalizeWords(item.Second || item.second || '');
-            let third = capitalizeWords(item.Third || item.third || '');
+            let first = capitalizeWords(item.First || item.first || item['1st Place'] || item['1st'] || '');
+            let second = capitalizeWords(item.Second || item.second || item['2nd Place'] || item['2nd'] || '');
+            let third = capitalizeWords(item.Third || item.third || item['3rd Place'] || item['3rd'] || '');
 
             html += `
                 <div class="result-card" data-search="${progName} ${category} ${first} ${second} ${third}">
