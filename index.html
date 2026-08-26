@@ -43,7 +43,7 @@
         .logo-container { flex: 1; display: flex; justify-content: center; }
         .app-logo { width: 75px; height: 75px; object-fit: contain; border-radius: 50%; display: block; }
         
-        .settings-container { position: absolute; right: 0; display: none; }
+        .settings-container { position: absolute; right: 0; display: block; }
         .settings-btn { background: transparent; color: var(--text-main); border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 22px; font-weight: bold; }
         .settings-btn:hover { background: rgba(0,0,0,0.05); }
         
@@ -291,29 +291,6 @@
 </div>
 
 <script>
-    const manifestData = {
-        "name": "Thiruvasantham26",
-        "short_name": "Thiruvasantham26",
-        "start_url": "./",
-        "display": "standalone",
-        "background_color": "#f8fafc",
-        "theme_color": "#0f172a",
-        "icons": [
-            { "src": "https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV", "sizes": "192x192", "type": "image/png" },
-            { "src": "https://lh3.googleusercontent.com/d/1stXTU5DgHYSh0LHpNzCSUF53Ck7Qj_vV", "sizes": "512x512", "type": "image/png" }
-        ]
-    };
-    const stringManifest = JSON.stringify(manifestData);
-    const blob = new Blob([stringManifest], {type: 'application/json'});
-    const manifestURL = URL.createObjectURL(blob);
-    document.querySelector('link[rel="manifest"]').setAttribute('href', manifestURL);
-
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js').catch(err => console.log('SW failed:', err));
-        });
-    }
-
     const sheetURL = "https://script.google.com/macros/s/AKfycbyaoA5rhfRU1bGeuiGC0bDhh7otuQvVq9rwkWvTXNcxlIhMYSH_imiMeYpdVPKJb28XGA/exec"; 
     let globalSheFestData = [];
     let globalHeFestData = [];
@@ -597,7 +574,7 @@
                 showToast("❌ Error updating mobile number.", "error");
             }
         })
-        .catch(err => alert("Connection error!"));
+        .catch(() => showToast("❌ Connection error.", "error"));
     }
 
     function logout() {
@@ -610,179 +587,122 @@
         document.getElementById("auth-screen").style.display = "none";
         document.getElementById("main-app").style.display = "block";
         document.getElementById("settingsContainer").style.display = "block";
-        document.getElementById("quizFloatingBtn").style.display = "flex";
-        
-        let savedName = localStorage.getItem("fest_name");
-        if (savedName) {
-            document.getElementById("userProfileName").innerText = "👤 " + capitalizeWords(savedName);
-        }
-
-        fetchAllData();
-        setInterval(fetchAllData, 10000);
+        fetchAppData();
+        setInterval(fetchAppData, 10000);
     }
 
-    function fetchAllData() {
-        fetch(sheetURL + "?action=all")
+    function switchTab(tabId, btn) {
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active-pane'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId + '-pane').classList.add('active-pane');
+        if (btn) btn.classList.add('active');
+    }
+
+    function fetchAppData() {
+        fetch(sheetURL)
         .then(res => res.json())
         .then(data => {
-            if (data.status === "success") {
-                globalSheFestData = data.sheFest || [];
-                globalHeFestData = data.heFest || [];
-                globalResultsData = data.results || [];
+            globalSheFestData = data.sheFest || [];
+            globalHeFestData = data.heFest || [];
+            globalResultsData = data.results || [];
 
-                checkLiveAlerts([...globalSheFestData, ...globalHeFestData]);
-
-                renderScheduleData(globalSheFestData, "she-fest-list");
-                renderScheduleData(globalHeFestData, "he-fest-list");
-                renderResultsData(globalResultsData, "results-list");
-
-                updateOverallProgress([...globalSheFestData, ...globalHeFestData]);
-                filterData();
-            }
+            checkLiveAlerts([...globalSheFestData, ...globalHeFestData]);
+            renderAllData();
         })
-        .catch(err => console.log("Fetch error:", err));
+        .catch(err => console.error("Error fetching data:", err));
     }
 
-    function renderScheduleData(dataArray, containerId) {
+    function renderAllData() {
+        renderList('she-fest-list', globalSheFestData);
+        renderList('he-fest-list', globalHeFestData);
+        renderResults(globalResultsData);
+        updateProgress();
+    }
+
+    function renderList(containerId, data) {
         let container = document.getElementById(containerId);
         if (!container) return;
-        
-        if (dataArray.length === 0) {
-            container.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:30px;">No programs found.</p>`;
-            return;
-        }
+        let query = document.getElementById("searchInput").value.toLowerCase();
 
         let html = "";
-        dataArray.forEach(item => {
-            let status = (item.Status || item.status || item.STATE || '').trim();
-            let statusLower = status.toLowerCase();
-            let badgeClass = "Upcoming";
-            let borderColor = "#cbd5e1";
+        data.forEach(item => {
+            let name = item['Program Name'] || item.programName || '';
+            let cat = item['Category'] || item.category || '';
+            let status = item['Status'] || item.status || 'Upcoming';
 
-            if (statusLower === 'live') {
-                badgeClass = "Live";
-                borderColor = "#ef4444";
-            } else if (statusLower === 'completed' || statusLower === 'finished') {
-                badgeClass = "Completed";
-                borderColor = "#10b981";
-            } else if (statusLower === 'cancelled') {
-                badgeClass = "Cancelled";
-                borderColor = "#64748b";
-            }
+            if (query && !name.toLowerCase().includes(query) && !cat.toLowerCase().includes(query)) return;
 
-            let progName = capitalizeWords(item['Program Name'] || item.programName || item['Program Type'] || '');
-            let subName = capitalizeWords(item['Sub Name'] || item.subName || '');
-            let category = capitalizeWords(item.Category || item.category || '');
-            let participants = capitalizeWords(item.Participants || item.participants || item['Student Name'] || item.studentName || '');
-            let className = capitalizeWords(item.Class || item.class || item['Class Name'] || '');
-            let chestNo = item['Chest No'] || item.chestNo || '';
-            let mark = item.Mark || item.mark || '';
-            let timeVal = item.Time || item.time || '';
-
+            let badgeClass = status;
             html += `
-                <div class="schedule-card" style="border-left: 4px solid ${borderColor};" data-search="${timeVal} ${progName} ${subName} ${category} ${participants} ${className} ${chestNo}">
+                <div class="schedule-card">
                     <div class="card-content">
-                        <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 3px;">${category}</div>
-                        ${timeVal ? `<div style="font-size: 12px; font-weight: 700; color: #f59e0b; margin-bottom: 4px;">⏰ ${timeVal}</div>` : ''}
-                        <div style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">${progName}</div>
-                        ${subName ? `<div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">${subName}</div>` : ''}
-                        ${participants ? `<div style="font-size: 12px; font-weight: 600; color: #2563eb; margin-bottom: 2px;"> ${participants}</div>` : ''}
-                        ${className ? `<div style="font-size: 12px; font-weight: 600; color: #10b981; margin-bottom: 2px;">Class: ${className}</div>` : ''}
-                        ${chestNo ? `<div style="font-size: 11px; color: var(--text-muted);">Chest No: ${chestNo}</div>` : ''}
-                        ${mark ? `<div style="font-size: 12px; font-weight: 600; color: #10b981; margin-top: 3px;">⭐ Mark: ${mark}</div>` : ''}
+                        <div style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">${cat}</div>
+                        <div style="font-size:14px; font-weight:700; margin-top:3px;">${name}</div>
                     </div>
                     <div class="card-right">
-                        <span class="badge ${badgeClass}">${statusLower === 'live' ? '<span class="live-dot"></span>' : ''}${status}</span>
+                        <span class="badge ${badgeClass}">${status}</span>
                     </div>
                 </div>
             `;
         });
-        container.innerHTML = html;
+        container.innerHTML = html || '<p style="text-align:center; color:var(--text-muted); padding:20px;">No programs found.</p>';
     }
 
-    function renderResultsData(dataArray, containerId) {
-        let container = document.getElementById(containerId);
+    function renderResults(data) {
+        let container = document.getElementById('results-list');
         if (!container) return;
-
-        if (dataArray.length === 0) {
-            container.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:30px;">No results announced yet.</p>`;
-            return;
-        }
+        let query = document.getElementById("searchInput").value.toLowerCase();
 
         let html = "";
-        dataArray.forEach(item => {
-            let progName = capitalizeWords(item['Program Name'] || item.programName || '');
-            let category = capitalizeWords(item.Category || item.category || '');
-            let first = capitalizeWords(item.First || item.first || item['1st Place'] || item['1st'] || '');
-            let second = capitalizeWords(item.Second || item.second || item['2nd Place'] || item['2nd'] || '');
-            let third = capitalizeWords(item.Third || item.third || item['3rd Place'] || item['3rd'] || '');
+        data.forEach(item => {
+            let title = item['Program Name'] || item.programName || '';
+            let cat = item['Category'] || item.category || '';
+            
+            if (query && !title.toLowerCase().includes(query)) return;
 
             html += `
-                <div class="result-card" data-search="${progName} ${category} ${first} ${second} ${third}">
+                <div class="result-card">
                     <div class="result-header">
-                        <span class="category-pill">${category}</span>
-                        <span style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Result Published</span>
+                        <span class="category-pill">${cat}</span>
+                        <span style="font-size:13px; font-weight:700;">${title}</span>
                     </div>
-                    <div style="font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 12px;">${progName}</div>
-                    
-                    ${first ? `<div class="winner-row"><span class="medal">🥇</span><div style="flex:1;"><b></b> ${first}</div></div>` : ''}
-                    ${second ? `<div class="winner-row"><span class="medal">🥈</span><div style="flex:1;"><b></b> ${second}</div></div>` : ''}
-                    ${third ? `<div class="winner-row"><span class="medal">🥉</span><div style="flex:1;"><b></b> ${third}</div></div>` : ''}
+                    <div style="font-size:13px; color:var(--text-main);">
+                        <div><b>Winner:</b> ${item.winner || 'Pending'}</div>
+                    </div>
                 </div>
             `;
         });
-        container.innerHTML = html;
+        container.innerHTML = html || '<p style="text-align:center; color:var(--text-muted); padding:20px;">No results published yet.</p>';
     }
 
-    function updateOverallProgress(allData) {
-        if (!allData || allData.length === 0) return;
-        let total = allData.length;
-        let completed = allData.filter(item => {
-            let s = (item.Status || item.status || item.STATE || '').trim().toLowerCase();
+    function updateProgress() {
+        let total = globalSheFestData.length + globalHeFestData.length;
+        if (total === 0) return;
+
+        let completed = [...globalSheFestData, ...globalHeFestData].filter(i => {
+            let s = (i.Status || i.status || '').toLowerCase();
             return s === 'completed' || s === 'finished';
         }).length;
 
         let pct = Math.round((completed / total) * 100);
-        document.getElementById("progress-pct-text").innerText = pct + "% Completed";
-        document.getElementById("progress-count-text").innerText = `${completed}/${total} Programs`;
-        document.getElementById("progressBar").style.width = pct + "%";
-    }
-
-    function switchTab(tabName, btnElement) {
-        document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active-pane'));
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-
-        document.getElementById(tabName + "-pane").classList.add('active-pane');
-        if (btnElement) btnElement.classList.add('active');
+        document.getElementById('progress-pct-text').innerText = pct + '%';
+        document.getElementById('progress-count-text').innerText = `${completed}/${total}`;
+        document.getElementById('progressBar').style.width = pct + '%';
     }
 
     function filterData() {
-        let query = document.getElementById("searchInput").value.toLowerCase().trim();
-        
-        ['she-fest-list', 'he-fest-list', 'results-list'].forEach(containerId => {
-            let container = document.getElementById(containerId);
-            if (!container) return;
-            let cards = container.children;
-            for (let card of cards) {
-                let searchData = (card.getAttribute('data-search') || '').toLowerCase();
-                if (query === '' || searchData.includes(query)) {
-                    card.style.display = "";
-                } else {
-                    card.style.display = "none";
-                }
-            }
-        });
+        renderAllData();
     }
 
     function sendFeedback() {
-        let text = document.getElementById("feedbackText").value.trim();
-        let mobile = localStorage.getItem("fest_user");
-        let name = localStorage.getItem("fest_name");
-
+        let text = document.getElementById('feedbackText').value.trim();
         if (!text) {
-            showToast("⚠️ Please write some feedback before submitting!", "warning");
+            showToast("⚠️ Feedback cannot be empty!", "warning");
             return;
         }
+
+        let mobile = localStorage.getItem("fest_user");
+        let name = localStorage.getItem("fest_name");
 
         fetch(sheetURL, {
             method: "POST",
@@ -791,90 +711,21 @@
         .then(res => res.json())
         .then(data => {
             if (data.status === "success") {
-                showToast("✅ Thank you! Feedback submitted successfully.", "success");
-                document.getElementById("feedbackText").value = "";
+                showToast("✅ Feedback submitted successfully!", "success");
+                document.getElementById('feedbackText').value = "";
             } else {
                 showToast("❌ Error submitting feedback.", "error");
             }
         })
-        .catch(err => showToast("❌ Connection error!", "error"));
+        .catch(() => showToast("❌ Connection error.", "error"));
     }
 
     function openQuizModal() {
         document.getElementById("quizModal").style.display = "flex";
-        fetchQuizQuestions();
-        quizInterval = setInterval(fetchQuizQuestions, 5000);
     }
 
     function closeQuizModal() {
         document.getElementById("quizModal").style.display = "none";
-        if (quizInterval) clearInterval(quizInterval);
-    }
-
-    function fetchQuizQuestions() {
-        let mobile = localStorage.getItem("fest_user");
-        fetch(sheetURL + "?action=getQuiz&mobile=" + mobile)
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === "success") {
-                activeQuizQuestions = data.questions || [];
-                let userScore = data.score || 0;
-                document.getElementById("userScoreDisplay").innerText = "Score: " + userScore;
-                renderQuizContent(activeQuizQuestions);
-            }
-        })
-        .catch(err => console.log("Quiz fetch error:", err));
-    }
-
-    function renderQuizContent(questions) {
-        let body = document.getElementById("quizBody");
-        if (!questions || questions.length === 0) {
-            body.innerHTML = `<p style="color: var(--text-muted); margin-top: 40px;">No active live quiz right now. Stay tuned!</p>`;
-            return;
-        }
-
-        let html = "";
-        questions.forEach((q, index) => {
-            let qId = q.id || index;
-            let questionText = capitalizeWords(q.question || '');
-            let options = [q.opt1, q.opt2, q.opt3, q.opt4].filter(Boolean);
-            let selectedOption = q.selected || '';
-
-            html += `
-                <div class="question-card-item">
-                    <div class="question-title"><span>Q${index + 1}. ${questionText}</span></div>
-                    <div style="text-align: left;">
-            `;
-
-            options.forEach(opt => {
-                let formattedOpt = capitalizeWords(opt);
-                let isChecked = selectedOption === opt ? "checked" : "";
-                html += `
-                    <label class="option-label">
-                        <input type="radio" name="question_${qId}" value="${opt}" ${isChecked} onclick="submitQuizAnswer('${qId}', '${opt}')">
-                        ${formattedOpt}
-                    </label>
-                `;
-            });
-
-            html += `</div></div>`;
-        });
-        body.innerHTML = html;
-    }
-
-    function submitQuizAnswer(questionId, selectedOpt) {
-        let mobile = localStorage.getItem("fest_user");
-        fetch(sheetURL, {
-            method: "POST",
-            body: JSON.stringify({ action: "submitQuiz", mobile: mobile, questionId: questionId, answer: selectedOpt })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === "success") {
-                document.getElementById("userScoreDisplay").innerText = "Score: " + (data.score || 0);
-            }
-        })
-        .catch(err => console.log("Quiz submit error:", err));
     }
 </script>
 </body>
